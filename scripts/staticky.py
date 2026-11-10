@@ -908,10 +908,7 @@ def cutover(db, apply=False, only=None):
     www → apex by a Redirect Rule (the SSR middleware did it). Saves the current routes to backups/ first.
     --only s01,s14: shard by shard while the SSR keeps the rest (/* stays on it); /_astro/* goes to sporteka-s00 at once,
     which also carries the SSR's own bundles (keep-astro), so both kinds of pages find their scripts."""
-    want = {'sporteka.cz/_astro/*': worker_name(MAIN, 'sporteka'),
-            # exit links of pages rendered before the goHref fix (9. 11.) and the cron-job.org health check stay on
-            # the SSR Worker until it is deleted
-            'sporteka.cz/go/*': 'sporteka', 'sporteka.cz/api/*': 'sporteka'}
+    want = {'sporteka.cz/_astro/*': worker_name(MAIN, 'sporteka')}   # the SSR Worker + D1 were deleted 10. 11. 2026
     if not only:
         want['sporteka.cz/*'] = worker_name(MAIN, 'sporteka')
     for sh, pfx in db.execute('SELECT shard, prefix FROM shards'):
