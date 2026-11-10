@@ -59,7 +59,7 @@ jobs:
     needs: scan
     if: github.event.schedule == '0 0 * * 1' || (github.event_name == 'workflow_dispatch' && inputs.data)
     runs-on: ubuntu-latest
-    timeout-minutes: 330
+    timeout-minutes: 355
     permissions:
       contents: write          # release "state" (encrypted)
     env:
@@ -95,13 +95,24 @@ jobs:
           printf '%s\n' "$S1" > "$SPT_ROOT/credentials/.sporteka-credentials.env"
           printf '%s\n' "$S2" > "$SPT_ROOT/credentials/.affiliateport-credentials.env"
           printf '%s\n' "$S3" > data/feedy.json
-      - name: Download feeds
-        timeout-minutes: 150
-        run: |
-          python3 -I scripts/cj-stahni.py
-          python3 -I scripts/decathlon-stahni.py
-          python3 -I scripts/xml-feedy-stahni.py
-          python3 -I scripts/cj-allegro.py
+      # each source on its own clock (10. 11.: CJ ~2 h, Decathlon ~1 min, XML feeds ~10 min, Allegro ~20 min); a source that
+      # fails or runs out of time keeps its previous files (restored above) and the gate checks every shop has one
+      - name: Download feeds — CJ
+        timeout-minutes: 170
+        continue-on-error: true
+        run: python3 -I scripts/cj-stahni.py
+      - name: Download feeds — Decathlon
+        timeout-minutes: 20
+        continue-on-error: true
+        run: python3 -I scripts/decathlon-stahni.py
+      - name: Download feeds — XML feeds
+        timeout-minutes: 30
+        continue-on-error: true
+        run: python3 -I scripts/xml-feedy-stahni.py
+      - name: Download feeds — Allegro
+        timeout-minutes: 45
+        continue-on-error: true
+        run: python3 -I scripts/cj-allegro.py
       - name: Gate (every enabled shop has a feed file)
         run: python3 -I scripts/feedy-kontrola.py
       - name: Build the catalogue
