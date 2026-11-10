@@ -1,0 +1,22 @@
+---
+import Base from '../../layouts/Base.astro';
+import { isStatic } from '../../lib/server/env';
+import Ik from '../Ik.astro';
+import Sp from '../Sp.astro';
+import { SECTIONS } from '../../lib/ikony';
+---
+<Base title="Stránka nenalezena | Sporteka" robots={['follow', 'noindex']} pageType="404">
+	<div class="w e404">
+		<Sp id="rozcestnik" size={120} class="e404__img" />
+		<h1>Tady stezka končí</h1>
+		<p class="intro" style="margin:0 auto">Stránku jsme nenašli — možná se přesunula nebo už neexistuje. Zkuste vyhledávání, nebo vyrazte jiným směrem.</p>
+		<div class="hs">
+			<form class="hs__f" role="search" method="get" action={isStatic() ? '/hledat/' : '/'}>
+				<label class="vh" for="q404">Hledat</label><Ik id="hledat" />
+				<input type="search" id="q404" name="s" placeholder="Hledat produkt, značku, kategorii…" />
+				<button type="submit">Hledat</button>
+			</form>
+		</div>
+		<ul class="hero__q" style="justify-content:center">{SECTIONS.slice(0, 8).map((s) => <li><a href={`/${s.slug}/`}>{s.label}</a></li>)}</ul>
+	</div>
+</Base>

@@ -1,0 +1,15 @@
+---
+// /slevy/ and /slevy/page/<n>/ — all discounted products of the catalogue (the header link "Slevy").
+import Slevy from '../../components/stranky/Slevy.astro';
+import Nenalezeno from '../../components/stranky/Nenalezeno.astro';
+import { discountView } from '../../lib/views';
+import { getEnv } from '../../lib/server/env';
+
+export const prerender = false;
+const rest = (Astro.params.rest ?? '').replace(/\/+$/, '');
+const m = rest === '' ? [null, '1'] : /^page\/(\d{1,3})$/.exec(rest);
+if (m && m[1] === '1' && rest !== '') return Astro.redirect('/slevy/', 301);
+const view = m ? await discountView(getEnv().DB, Number(m[1]), Astro.url.searchParams) : null;
+if (!view) Astro.response.status = 404;
+---
+{view ? <Slevy v={view} /> : <Nenalezeno />}

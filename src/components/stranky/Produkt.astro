@@ -1,0 +1,140 @@
+---
+// Product detail: gallery, summary (price range, best offer CTA, key params), offer table, description + params,
+// price history, similar products. The description keeps the Content Egg headings ("Kde koupit …", "Vývoj ceny …").
+import Base from '../../layouts/Base.astro';
+import Drobky from '../Drobky.astro';
+import Ik from '../Ik.astro';
+import Nabidky from '../Nabidky.astro';
+import GrafCen from '../GrafCen.astro';
+import Mrizka from '../Mrizka.astro';
+import { isStatic } from '../../lib/server/env';
+import { goHref } from '../../lib/golink';
+import { splitDescription, type productView } from '../../lib/views';
+import { cena, cislo, datum, decode, esc, texturize } from '../../lib/format';
+import { fluid, picture } from '../../lib/img';
+import { PARAM_LABEL, PARAM_ORDER, paramText } from '../../lib/params';
+import { shopLogo, shopName } from '../../lib/shops';
+
+interface Props { v: NonNullable<Awaited<ReturnType<typeof productView>>> }
+const { v } = Astro.props;
+const m = v.meta;
+const d = splitDescription(v.p.desc_html);
+const title = texturize(v.name);
+const best = v.best;
+// direct shop link in the static snapshot (no /go/ Worker there), /go/ on the SSR site
+const bestHref = (ctx: string) => (best ? goHref(best.go_slug, best.target_url, ctx) : '');
+const bestLogo = best ? shopLogo(best.domain) : null;
+const shops = v.stats.shops;
+const offersHeading = d.offersHeading || `<h3>Porovnání cen: ${esc(v.name)}</h3>`;
+// dead image hosts give no thumbnail → the next photo becomes the main one
+const photos = [v.img, ...v.gallery].filter((u) => !!u && !!picture(u, 160)).slice(0, 5);
+const main = fluid(photos[0]);
+const specs = PARAM_ORDER.filter((k) => k !== 'velikost' && v.params[k]?.length).map((k) => [PARAM_LABEL[k], paramText(k, v.params[k]!)] as const);
+const disc = best && best.price_old > best.price ? Math.round((1 - best.price / best.price_old) * 100) : 0;
+// sizes in stock: union over the shops (each offer keeps its own list for the table)
+const sizesOf = (o: { sizes?: string }) => { try { return o.sizes ? JSON.parse(o.sizes) as string[] : []; } catch { return []; } };
+const allSizes = [...new Set(v.offers.flatMap(sizesOf))];
+const updated = v.offers.reduce((m, o) => (o.updated_at > m ? o.updated_at : m), '');
+---
+<Base title={m.title} description={m.description} canonical={m.canonical} robots={m.robots} ogType={m.ogType} ogImage={m.ogImage} graph={m.graph} jsonLd={m.jsonLd} extraMeta={m.extraMeta} pageType="product">
+	{main && <link slot="head" rel="preload" as="image" href={main.src} imagesrcset={main.srcset} imagesizes="(min-width: 960px) 480px, calc(100vw - 32px)" fetchpriority="high" />}
+	<div class="w">
+		<Drobky items={v.crumbs} />
+		<section class="pd">
+			<div class="ga">
+				<div class="ga__m">
+					{main ? <img src={main.src} srcset={main.srcset} sizes="(min-width: 960px) 480px, calc(100vw - 32px)" alt={title} width="480" height="480" fetchpriority="high" decoding="async" /> : <Ik id="foto" />}
+				</div>
+				{photos.length > 1 && (
+					<ul class="ga__t" aria-label="Další fotky">
+						{photos.map((u, i) => { const t = picture(u, 160)!; const big = picture(u, 480)!; return t && big ? <li><button type="button" aria-current={i === 0 ? 'true' : 'false'} data-src={big.src} data-srcset={big.srcset} aria-label={`Fotka ${i + 1}`}><img src={t.src} alt="" width="60" height="60" loading="lazy" decoding="async" /></button></li> : null; })}
+					</ul>
+				)}
+			</div>
+			<div class="pi">
+				<h1>{title}</h1>
+				<p class="pi__ctx">Srovnání cen sportovních e-shopů{(v.brand || v.ctxCat) && ' — '}{v.brand && <>značka <a href={`/znacka/${v.brand.slug}/`}>{decode(v.brand.name)}</a></>}{v.brand && v.ctxCat && ', '}{v.ctxCat && <>kategorie <a href={`/${v.ctxCat.slug}/`}>{decode(v.ctxCat.name)}</a></>}.</p>
+				{specs.length > 0 && <ul class="pi__spec">{specs.slice(0, 5).map(([k, val]) => <li>{k}: <b>{val}</b></li>)}</ul>}
+				{v.p.short_html && <div class="pi__k" set:html={v.p.short_html} />}
+				<div class="pb">
+					{best ? (
+						<>
+							<div class="pb__c"><b class="num">{cena(best.price)}</b>{v.stats.n > 1 && v.stats.max > best.price && <span>až {cena(v.stats.max)}</span>}{disc >= 5 && <span class="sl">−{disc} %</span>}</div>
+							<p class="pb__i">
+								<span class="pb__shop">{shops > 1 ? `Porovnáváme ${cislo(shops)} ${shops < 5 ? 'obchody' : 'obchodů'}` : <>Prodává {bestLogo ? <img class="pb__lg" src={bestLogo.src} alt={shopName(best.domain)} width={bestLogo.w} height={bestLogo.h} decoding="async" /> : shopName(best.domain)}</>}</span>
+								<span><span class={best.stock === -1 ? 'dot dot--no' : 'dot'}></span> {best.stock === 1 ? 'skladem' : best.stock === -1 ? 'není skladem' : 'dostupnost ověřte v obchodě'}</span>
+							</p>
+							{allSizes.length > 0 && (
+								<>
+									<p class="pb__vel-t">Velikosti skladem{shops > 1 ? ' (všechny obchody)' : ''}:</p>
+									<ul class="pb__vel">{allSizes.slice(0, 24).map((x) => <li>{x}</li>)}{allSizes.length > 24 && <li>+{allSizes.length - 24}</li>}</ul>
+								</>
+							)}
+							<div class="pb__cta">
+								<a class="btn btn--l" href={bestHref('hlavni')} target="_blank" rel="nofollow sponsored" data-partner={best.domain} data-price={Math.round(best.price)}>Koupit za {cena(best.price)} v {shopName(best.domain)}<Ik id="ven" size={18} /></a>
+								{v.stats.n > 1 && <a class="btn btn--g" href="#ceny">Porovnat všech {cislo(v.stats.n)} nabídek</a>}
+							</div>
+							<ul class="pb__d">
+								<li><Ik id="obnova" />Cena ověřena {datum(updated)}, aktualizujeme každý týden</li>
+								<li><Ik id="balik" />Velikost a cenu si před nákupem ověřte v obchodě</li>
+								<li><Ik id="stit" />Nakupujete přímo u obchodu, cena je stejná</li>
+							</ul>
+						</>
+					) : <p class="pb__nic">Tento produkt teď žádný z obchodů nenabízí. Podívejte se na podobné níže.</p>}
+				</div>
+			</div>
+		</section>
+
+		{v.offers.length > 0 && (
+			<section class="sek" id="ceny" aria-labelledby="h-ceny">
+				<div class="sek__h"><h2 id="h-ceny">Porovnání cen{v.stats.n > 1 && ` (${cislo(v.stats.n)})`}</h2></div>
+				<Nabidky offers={v.offers} name={v.name} />
+			</section>
+		)}
+
+		<div class="pd2">
+			<section aria-labelledby="h-popis">
+				<h2 id="h-popis">Popis</h2>
+				<div class="obsah">
+					<Fragment set:html={d.before} />
+					{best && <Fragment set:html={offersHeading} />}
+					{best && <p>Nejnižší cena je teď <strong>{cena(best.price)}</strong> v obchodě {shopName(best.domain)}{v.stats.n > 1 ? ` — ceny všech ${cislo(v.stats.n)} nabídek porovnáváme ` : ' — nabídku najdete '}<a href="#ceny">v tabulce výše</a>.</p>}
+					<Fragment set:html={d.middle} />
+					<Fragment set:html={d.after} />
+				</div>
+			</section>
+			<aside>
+				{v.history.length >= 2 && (
+					<section class="card" aria-labelledby="h-graf">
+						<h2 id="h-graf">Vývoj ceny</h2>
+						<GrafCen points={v.history} name={v.name} current={v.stats.min} />
+					</section>
+				)}
+				{specs.length > 0 && (
+					<section class="card" aria-labelledby="h-par">
+						<h2 id="h-par">Parametry</h2>
+						<table class="pt"><tbody>
+							{specs.map(([k, val]) => <tr><th scope="row">{k}</th><td>{val}</td></tr>)}
+							{v.brand && v.brand.slug !== 'ostatni' && <tr><th scope="row">Značka</th><td><a class="lnk" href={`/znacka/${v.brand.slug}/`}>{decode(v.brand.name)}</a></td></tr>}
+							{v.p.ean && <tr><th scope="row">EAN</th><td class="num">{v.p.ean}</td></tr>}
+						</tbody></table>
+					</section>
+				)}
+				{v.relCats.length > 0 && (
+					<section class="card">
+						<h2>Související kategorie</h2>
+						<div class="cl__s" style="margin:0;padding:0;background:none">{v.relCats.map((c) => <a href={`/${c.slug}/`}>{decode(c.name)}</a>)}</div>
+					</section>
+				)}
+			</aside>
+		</div>
+
+		{v.related.length > 0 && (
+			<section class="sek">
+				<div class="sek__h"><h2>Podobné produkty</h2>{v.primary && <a href={`/${v.primary.slug}/`}>Vše v kategorii {decode(v.primary.name)}</a>}</div>
+				<Mrizka items={v.related} eager={false} ceny={!isStatic()} />
+			</section>
+		)}
+	</div>
+	{best && <div class="lista" aria-hidden="true"><div><b class="num">{cena(best.price)}</b><small>{shopName(best.domain)}</small></div><a class="btn" href={bestHref('lista')} target="_blank" rel="nofollow sponsored" tabindex="-1" data-partner={best.domain} data-price={Math.round(best.price)}>Do obchodu</a></div>}
+</Base>

@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  // Product photo thumbnails (src/index.ts): fetch the shop's photo, resize in WASM, WebP. Stateless, no bindings, nothing stored —
+  // only the edge cache and the browser keep the result. The route sporteka.cz/img/* is more specific than the web Worker's.
+  "name": "sporteka-img",
+  "main": "./src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "limits": { "cpu_ms": 10000 },
+  "rules": [{ "type": "CompiledWasm", "globs": ["**/*.wasm"], "fallthrough": true }],
+  // secret IMG_SECRET (same value as on the web Worker; scripts/deploy.ts --img sets both)
+  // thumbnails computed once, kept 180 days (bucket lifecycle) — Kenny 3. 11.: no repeated CPU for the same image
+  "r2_buckets": [{ "binding": "THUMBS", "bucket_name": "sporteka-thumbs" }],
+  "ratelimits": [{ "name": "RL_IMG", "namespace_id": "76031", "simple": { "limit": 300, "period": 60 } }],
+  "observability": { "enabled": true, "head_sampling_rate": 0.05 },
+  "routes": [{ "pattern": "sporteka.cz/img/*", "zone_name": "sporteka.cz" }]
+}

@@ -1,0 +1,29 @@
+---
+// /obchody/ — the shops we compare, with the number of products (homepage block from site_cache 'home').
+import Base from '../layouts/Base.astro';
+import Drobky from '../components/Drobky.astro';
+import { homeView } from '../lib/views';
+import { getEnv } from '../lib/server/env';
+import { cislo } from '../lib/format';
+import { shopColor, shopLogo, shopName } from '../lib/shops';
+import { BASE } from '../lib/site';
+import { robots } from '../lib/seo';
+
+export const prerender = false;
+const v = await homeView(getEnv().DB);
+const shops = v.home.shops;
+const title = 'Obchody, jejichž ceny porovnáváme | Sporteka';
+---
+<Base title={title} description={`Sporteka.cz porovnává ceny ${shops.length} českých sportovních e-shopů: ${shops.slice(0, 6).map(([d]) => shopName(d)).join(', ')} a další.`} canonical={BASE + '/obchody/'} robots={robots(false)} pageType="page">
+	<div class="w">
+		<Drobky items={[{ name: 'Domů', url: '/' }, { name: 'Obchody' }]} />
+		<h1>Obchody, které porovnáváme</h1>
+		<p class="intro">Ceny, velikosti a dostupnost načítáme z těchto českých e-shopů a aktualizujeme je každý týden. Nákup vždy dokončíte přímo v obchodě.</p>
+		<ul class="ob" style="margin-top:22px">{shops.map(([d, n]) => { const l = shopLogo(d); return (
+			<li style={`--ob:${shopColor(d)}`}>
+				<span class="ob__l">{l ? <img class="ob__logo" src={l.src} alt={shopName(d)} width={l.w} height={l.h} loading="lazy" decoding="async" /> : <b>{shopName(d)}</b>}</span>
+				<small>{cislo(n)} produktů</small>
+			</li>
+		); })}</ul>
+	</div>
+</Base>

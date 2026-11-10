@@ -1,0 +1,106 @@
+---
+// Filter form (GET; src/scripts/ui.ts joins repeated names with commas and auto-submits on desktop). Counts are the
+// nightly facets of the unfiltered listing. Desktop: sidebar; mobile: full-screen sheet opened by "Filtry".
+import Ik from './Ik.astro';
+import type { BrandLite, Cat, Facets } from '../lib/db';
+import type { FilterState } from '../lib/filters';
+import { BUCKETS, PARAM_LABEL, PARAM_ORDER, VALUE_ORDER, numRank, sizeRank, valueSlug } from '../lib/params';
+import { cislo, decode } from '../lib/format';
+import { shopName } from '../lib/shops';
+
+interface Props {
+	action: string; f: FilterState; fc: Facets | null; brands: { byId: Map<number, BrandLite> };
+	links?: { title: string; items: Array<{ slug: string; name: string; count: number }>; current?: string } | undefined;
+	cats?: Map<number, Cat> | undefined;
+	/** `key=value` → facet landing slug (views.ts): such a value is a crawlable link to its landing, not a checkbox */
+	landings?: Record<string, string> | undefined;
+}
+const { action, f, fc, brands, links, cats, landings = {} } = Astro.props;
+const n = fc?.n ?? 0;
+type Opt = { v: string; label: string; c: number; on: boolean; to?: string | undefined };
+const brandOpts: Opt[] = (fc?.b ?? []).flatMap(([id, c]): Opt[] => {
+	const b = brands.byId.get(id);
+	return b && b.slug !== 'ostatni' ? [{ v: b.slug, label: decode(b.name), c, on: f.znacka.includes(b.slug), to: landings[`brand=${b.slug}`] }] : [];
+});
+const shopOpts: Opt[] = (fc?.s ?? []).map(([d, c]) => ({ v: d, label: shopName(d), c, on: f.obchod.includes(d) }));
+const catOpts: Opt[] = cats ? (fc?.c ?? []).map(([id, c]) => cats.get(id) ? { v: cats.get(id)!.slug, label: decode(cats.get(id)!.name), c, on: f.kat === cats.get(id)!.slug } : null).filter((x): x is Opt => !!x) : [];
+const params = PARAM_ORDER.map((k) => {
+	const vals = fc?.p[k] ?? [];
+	const total = vals.reduce((a, [, c]) => a + c, 0);
+	if (!vals.length || total < Math.max(15, n * 0.12)) return null;
+	const b = BUCKETS[k];
+	const opts: Opt[] = b
+		? b.map(([id, label]) => ({ v: id, label, c: vals.find(([v]) => v === id)?.[1] ?? 0, on: (f.p[k] ?? []).includes(id) })).filter((o) => o.c > 0)
+		: vals.map(([v, c]) => ({ v: valueSlug(v), label: v, c, on: (f.p[k] ?? []).includes(valueSlug(v)), to: landings[`${k}=${valueSlug(v)}`] }));
+	if (k === 'velikost') {
+		// a broad category mixes letters, EU numbers, heights: keep the common ones (≥ 1 % of the listing, at most 32), selected ones always
+		const keep = opts.filter((o) => o.on || o.c >= Math.max(5, n * 0.01)).sort((x, y) => y.c - x.c).slice(0, 32);
+		opts.length = 0;
+		opts.push(...keep.sort((x, y) => sizeRank(x.label) - sizeRank(y.label) || x.label.localeCompare(y.label, 'cs')));
+	}
+	const vo = VALUE_ORDER[k];
+	if (vo) opts.sort((x, y) => (vo.indexOf(x.label) + 1 || 99) - (vo.indexOf(y.label) + 1 || 99));
+	if (k === 'objem' || k === 'osoby' || k === 'delka' || k === 'membrana' || k === 'flex') opts.sort((x, y) => numRank(x.label) - numRank(y.label));
+	return { k, label: PARAM_LABEL[k], opts };
+}).filter((x): x is { k: (typeof PARAM_ORDER)[number]; label: string; opts: Opt[] } => !!x && x.opts.length > 1);
+const SHOW = 7;
+---
+<form class="fl" method="get" action={action} aria-label="Filtry">
+	<div class="fl__hd"><span>Filtry</span><button type="button" class="btn btn--g" data-filtry-zavrit aria-label="Zavřít filtry"><Ik id="zavrit" /></button></div>
+	{f.sort !== 'pop' && <input type="hidden" name="orderby" value={f.sort} />}
+	{links && links.items.length > 0 && (
+		<details class="fg fk" open>
+			<summary>{links.title}<Ik id="dolu" /></summary>
+			<ul class="fo">{links.items.map((c) => <li><a href={`/${c.slug}/`} aria-current={c.slug === links.current ? 'true' : undefined}><span>{c.name}</span><small>{cislo(c.count)}</small></a></li>)}</ul>
+		</details>
+	)}
+	{catOpts.length > 0 && (
+		<details class="fg" open>
+			<summary>Kategorie<Ik id="dolu" /></summary>
+			<ul class="fo">
+				{catOpts.slice(0, 12).map((o) => <li><label><input type="radio" name="kat" value={o.v} checked={o.on} /><span>{o.label}</span><small>{cislo(o.c)}</small></label></li>)}
+			</ul>
+		</details>
+	)}
+	<details class="fg" open>
+		<summary>Cena<Ik id="dolu" /></summary>
+		<div class="fc">
+			<label class="vh" for="f-min">Cena od</label><input id="f-min" type="number" inputmode="numeric" min="0" name="min_price" value={f.min ?? ''} placeholder={fc?.lo ? `od ${cislo(fc.lo)}` : 'od'} />
+			<span>–</span>
+			<label class="vh" for="f-max">Cena do</label><input id="f-max" type="number" inputmode="numeric" min="0" name="max_price" value={f.max ?? ''} placeholder={fc?.hi ? `do ${cislo(fc.hi)}` : 'do'} />
+		</div>
+	</details>
+	<details class="fg" open>
+		<summary>Dostupnost a slevy<Ik id="dolu" /></summary>
+		<ul class="fo">
+			<li><label><input type="checkbox" name="skladem" value="1" checked={f.skladem} /><span>Jen skladem</span>{fc && <small>{cislo(fc.st)}</small>}</label></li>
+			{(fc?.d ?? 0) > 0 && <li><label><input type="checkbox" name="sleva" value="1" checked={f.sleva} /><span>Ve slevě</span><small>{cislo(fc!.d)}</small></label></li>}
+		</ul>
+	</details>
+	{brandOpts.length > 1 && (
+		<details class="fg" open>
+			<summary>Značka<Ik id="dolu" /></summary>
+			<ul class="fo">
+				{brandOpts.filter((o, i) => i < SHOW || o.on || o.to).map((o) => <li>{o.to && !o.on ? <a class="fo__l" href={`/${o.to}/`}><i aria-hidden="true"></i><span>{o.label}</span><small>{cislo(o.c)}</small></a> : <label><input type="checkbox" name="znacka" value={o.v} checked={o.on} /><span>{o.label}</span><small>{cislo(o.c)}</small></label>}</li>)}
+			</ul>
+			{brandOpts.filter((o, i) => i >= SHOW && !o.on && !o.to).length > 0 && (
+				<details class="fo__vic"><summary>Další značky ({brandOpts.filter((o, i) => i >= SHOW && !o.on && !o.to).length})</summary>
+					<ul class="fo">{brandOpts.filter((o, i) => i >= SHOW && !o.on && !o.to).map((o) => <li><label><input type="checkbox" name="znacka" value={o.v} /><span>{o.label}</span><small>{cislo(o.c)}</small></label></li>)}</ul>
+				</details>
+			)}
+		</details>
+	)}
+	{params.map((g, gi) => (
+		<details class="fg" open={gi < 2 || g.opts.some((o) => o.on)}>
+			<summary>{g.label}<Ik id="dolu" /></summary>
+			<ul class={g.k === 'velikost' ? 'fo fo--vel' : 'fo'}>{g.opts.map((o) => <li>{o.to && !o.on ? <a class="fo__l" href={`/${o.to}/`}><i aria-hidden="true"></i><span>{o.label}</span><small>{cislo(o.c)}</small></a> : <label><input type="checkbox" name={`p_${g.k}`} value={o.v} checked={o.on} /><span>{o.label}</span><small>{cislo(o.c)}</small></label>}</li>)}</ul>
+		</details>
+	))}
+	{shopOpts.length > 1 && (
+		<details class="fg" open={f.obchod.length > 0}>
+			<summary>Obchod<Ik id="dolu" /></summary>
+			<ul class="fo">{shopOpts.map((o) => <li><label><input type="checkbox" name="obchod" value={o.v} checked={o.on} /><span>{o.label}</span><small>{cislo(o.c)}</small></label></li>)}</ul>
+		</details>
+	)}
+	<div class="fl__ok"><button class="btn btn--b" type="submit">Zobrazit výsledky</button></div>
+</form>

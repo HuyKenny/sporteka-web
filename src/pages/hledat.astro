@@ -1,0 +1,18 @@
+---
+// /hledat/?s= — search page of the static export: the results come from the JSON index /_s/ (src/scripts/hledat.ts).
+// The live SSR keeps searching on /?s= and sends this URL there.
+import Base from '../layouts/Base.astro';
+import Drobky from '../components/Drobky.astro';
+import { isStatic } from '../lib/server/env';
+
+export const prerender = false;
+if (!isStatic()) return Astro.redirect('/' + Astro.url.search, 302);
+---
+<Base title="Hledání | Sporteka" robots={['noindex', 'follow']} pageType="search">
+	<div class="w">
+		<Drobky items={[{ name: 'Domů', url: '/' }, { name: 'Hledání' }]} />
+		<div class="lh"><h1 id="hl-h">Hledání</h1><span class="lh__n" id="hl-n"></span></div>
+		<ul class="pk" id="hl-pk" aria-label="Kategorie a značky" hidden></ul>
+		<div style="margin-top:16px" id="hl"><p class="prazdno">Napište, co hledáte.</p></div>
+	</div>
+</Base>

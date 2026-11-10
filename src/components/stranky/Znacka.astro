@@ -1,0 +1,23 @@
+---
+import Base from '../../layouts/Base.astro';
+import Vypis from './Vypis.astro';
+import type { brandView } from '../../lib/views';
+import { decode } from '../../lib/format';
+
+interface Props { v: NonNullable<Awaited<ReturnType<typeof brandView>>> }
+const { v } = Astro.props;
+const m = v.meta;
+---
+<Base title={m.title} description={m.description} canonical={m.canonical} prev={m.prev} next={m.next} robots={m.robots} graph={m.graph} jsonLd={m.jsonLd} pageType="brand">
+	<Vypis crumbs={v.crumbs} h1={decode(v.brand.name)} introHtml={v.page === 1 && !v.isFiltered ? v.brand.description_html : undefined}
+		f={v.f} fc={v.fc} brands={v.brands} cats={v.tree.byId} items={v.items} total={v.total} page={v.page} pages={v.pages} base={v.base} qs={v.qs}
+		empty="Od této značky teď nemáme žádné produkty.">
+		{v.page === 1 && !v.isFiltered && v.brand.second_html && <section class="sek txt" set:html={v.brand.second_html} />}
+		{v.page === 1 && !v.isFiltered && v.faq.length > 0 && (
+			<section class="sek faq ah-faq">
+				<h2>Často kladené dotazy</h2>
+				{v.faq.map((f) => <details><summary>{f.q}</summary><div set:html={f.a} /></details>)}
+			</section>
+		)}
+	</Vypis>
+</Base>

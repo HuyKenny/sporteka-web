@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import Drobky from '../Drobky.astro';
+import Mrizka from '../Mrizka.astro';
+import Strankovani from '../Strankovani.astro';
+import type { searchView } from '../../lib/views';
+import { cislo, decode, produktu } from '../../lib/format';
+
+interface Props { v: Awaited<ReturnType<typeof searchView>> }
+const { v } = Astro.props;
+const qs = '?s=' + encodeURIComponent(v.query);
+---
+<Base title={v.meta.title} robots={v.meta.robots} pageType="search">
+	<div class="w">
+		<Drobky items={[{ name: 'Domů', url: '/' }, { name: 'Hledání' }]} />
+		<div class="lh"><h1>Výsledky hledání: {v.query}</h1>{v.total > 0 && <span class="lh__n">{cislo(v.total)} {produktu(v.total)}</span>}</div>
+		{(v.cats.length > 0 || v.brs.length > 0) && (
+			<ul class="pk" aria-label="Kategorie a značky">
+				{v.cats.map((c) => <li><a href={`/${c.slug}/`}><span>{decode(c.name)} <small>{cislo(c.count_total)}</small></span></a></li>)}
+				{v.brs.map((b) => <li><a href={`/znacka/${b.slug}/`}><span>Značka {decode(b.name)} <small>{cislo(b.count)}</small></span></a></li>)}
+			</ul>
+		)}
+		<div style="margin-top:16px">
+			{v.total > 0 ? (
+				<>
+					<Mrizka items={v.items} />
+					<Strankovani base="/" page={v.page} pages={v.pages} query={qs} />
+				</>
+			) : <p class="prazdno">{v.query ? 'Nic jsme nenašli. Zkuste jiné slovo nebo vyberte kategorii nahoře.' : 'Napište, co hledáte.'}</p>}
+		</div>
+	</div>
+</Base>

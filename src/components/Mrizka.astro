@@ -1,0 +1,7 @@
+---
+import Karta from './Karta.astro';
+import type { Card } from '../lib/db';
+interface Props { items: Card[]; cols?: 4 | 5 | 6; h?: 'h2' | 'h3'; eager?: boolean; ceny?: boolean }
+const { items, cols = 4, h = 'h3', eager = true, ceny = true } = Astro.props;
+---
+<ul class={`g${cols !== 4 ? ` g--${cols}` : ''}`}>{items.map((p, i) => <Karta p={p} idx={eager ? i : 99} h={h} ceny={ceny} />)}</ul>

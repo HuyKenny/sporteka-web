@@ -1,0 +1,5 @@
+# pnpm 11 ignores postinstall build scripts unless allowed; these ship native binaries.
+allowBuilds:
+  esbuild: true
+  sharp: set this to true or false
+  workerd: true

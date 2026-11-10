@@ -1,0 +1,13 @@
+---
+import Domu from '../components/stranky/Domu.astro';
+import Hledani from '../components/stranky/Hledani.astro';
+import { homeView, searchView } from '../lib/views';
+import { getEnv } from '../lib/server/env';
+
+export const prerender = false;
+const db = getEnv().DB;
+const s = Astro.url.searchParams.get('s');
+const search = s !== null ? await searchView(db, s.trim().slice(0, 100), 1) : null;
+const home = search ? null : await homeView(db);
+---
+{search ? <Hledani v={search} /> : <Domu v={home!} />}

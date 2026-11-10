@@ -1,0 +1,19 @@
+---
+import type { PostCard } from '../lib/db';
+import { datum, decode, excerpt, texturize } from '../lib/format';
+import Ik from './Ik.astro';
+import { ownUpload } from '../lib/img';
+interface Props { p: PostCard; h?: 'h2' | 'h3'; eager?: boolean; perex?: boolean }
+const { p, h = 'h2', eager = false, perex = true } = Astro.props;
+const H = h;
+---
+<li>
+	<article class="pk2">
+		<div class="pk2__i">
+			{p.image ? <img src={ownUpload(p.image_card || p.image)} alt={p.image_alt || ''} width="768" height="432" loading={eager ? 'eager' : 'lazy'} decoding="async" /> : <Ik id="foto" size={40} />}
+		</div>
+		<time datetime={p.published_at.slice(0, 10)}>{datum(p.published_at)}</time>
+		<H><a href={`/${p.slug}/`}>{texturize(decode(p.title))}</a></H>
+		{perex && p.excerpt && <p>{excerpt(p.excerpt, 150)}</p>}
+	</article>
+</li>

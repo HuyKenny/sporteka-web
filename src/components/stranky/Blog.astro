@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import Drobky from '../Drobky.astro';
+import PostKarta from '../PostKarta.astro';
+import Strankovani from '../Strankovani.astro';
+import type { blogView } from '../../lib/views';
+import { decode } from '../../lib/format';
+
+interface Props { v: NonNullable<Awaited<ReturnType<typeof blogView>>> }
+const { v } = Astro.props;
+const m = v.meta;
+const h1 = v.h1 || (v.cat ? decode(v.cat.name) : 'Blog');
+const crumbs = [{ name: 'Domů', url: '/' }, ...(v.cat ? [{ name: 'Magazín', url: '/blog/' }] : []), { name: h1 }];
+---
+<Base title={m.title} description={m.description} canonical={m.canonical} prev={m.prev} next={m.next} robots={m.robots} graph={m.graph} jsonLd={m.jsonLd} pageType="blog">
+	<div class="w">
+		<Drobky items={crumbs} />
+		<h1>{h1}</h1>
+		{v.page === 1 && !v.cat && <p class="intro" style="margin-bottom:22px">Recenze alkoholu, nákupní rádce a tipy na dárky. Vybírejte chytře a porovnejte ceny whisky, rumu, ginu i vína z více než 20 e-shopů.</p>}
+		{v.page === 1 && v.cat?.description && <div class="intro" style="margin-bottom:22px" set:html={v.cat.description} />}
+		<ul class="pc">{v.items.map((p, i) => <PostKarta p={p} h="h2" eager={i < 3} />)}</ul>
+		<Strankovani base={v.base} page={v.page} pages={v.pages} />
+	</div>
+</Base>

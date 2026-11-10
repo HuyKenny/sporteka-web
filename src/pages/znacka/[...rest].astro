@@ -1,0 +1,24 @@
+---
+// /znacka/<slug>/ and /znacka/<slug>/page/<n>/ (WooCommerce brands, Rank Math base "znacka")
+import Znacka from '../../components/stranky/Znacka.astro';
+import Nenalezeno from '../../components/stranky/Nenalezeno.astro';
+import { brandView } from '../../lib/views';
+import { deadUrlTarget } from '../../lib/db';
+import { getEnv } from '../../lib/server/env';
+
+export const prerender = false;
+const seg = (Astro.params.rest ?? '').split('/').filter(Boolean);
+let page = 1;
+if (seg.length === 3 && seg[1] === 'page' && /^\d+$/.test(seg[2]!)) {
+	page = Number(seg[2]);
+	if (page <= 1) return Astro.redirect(`/znacka/${seg[0]}/` + Astro.url.search, 301);
+}
+const ok = seg.length === 1 || (seg.length === 3 && page > 1);
+const view = ok ? await brandView(getEnv().DB, decodeURIComponent(seg[0]!).toLowerCase(), page, Astro.url.searchParams) : null;
+if (!view && Astro.request.method === 'GET') {
+	const t = await deadUrlTarget(getEnv().DB, Astro.url.pathname);
+	if (t && t.to !== Astro.url.pathname) return Astro.redirect(t.to, t.status);
+}
+if (!view) Astro.response.status = 404;
+---
+{view ? <Znacka v={view} /> : <Nenalezeno />}

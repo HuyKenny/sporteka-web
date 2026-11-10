@@ -1,0 +1,40 @@
+---
+import Produkt from '../components/stranky/Produkt.astro';
+import Kategorie from '../components/stranky/Kategorie.astro';
+import Clanek from '../components/stranky/Clanek.astro';
+import Blog from '../components/stranky/Blog.astro';
+import Hledani from '../components/stranky/Hledani.astro';
+import Nenalezeno from '../components/stranky/Nenalezeno.astro';
+import { dispatch } from '../lib/dispatch';
+import { blogView, categoryView, facetView, postView, productView, searchView } from '../lib/views';
+import { deadUrlTarget } from '../lib/db';
+import { getEnv } from '../lib/server/env';
+
+export const prerender = false;
+
+const db = getEnv().DB;
+const url = Astro.url;
+const r = await dispatch(db, url.pathname, url.searchParams);
+if (r.kind === 'redirect') return Astro.redirect(r.to + url.search, 301);
+
+let view: any = null;
+if (r.kind === 'product') view = await productView(db, r.id);
+else if (r.kind === 'category') view = await categoryView(db, r.id, r.page, url.searchParams);
+else if (r.kind === 'facet') view = await facetView(db, r.id, r.page, url.searchParams);
+if (view?.redirect) return Astro.redirect(view.redirect, 301);
+else if (r.kind === 'post' || r.kind === 'page') view = await postView(db, r.id);
+else if (r.kind === 'postcat') view = await blogView(db, r.page, r.id);
+else if (r.kind === 'blog') view = await blogView(db, r.page);
+else if (r.kind === 'search') view = await searchView(db, (url.searchParams.get('s') ?? '').trim().toLowerCase().slice(0, 100), r.page);
+if (!view && Astro.request.method === 'GET') {
+	const t = await deadUrlTarget(db, url.pathname);
+	if (t && t.to !== url.pathname) return Astro.redirect(t.to, t.status);
+}
+if (!view) Astro.response.status = 404;
+---
+{!view && <Nenalezeno />}
+{view && r.kind === 'product' && <Produkt v={view} />}
+{view && (r.kind === 'category' || r.kind === 'facet') && <Kategorie v={view} />}
+{view && (r.kind === 'post' || r.kind === 'page') && <Clanek v={view} />}
+{view && (r.kind === 'postcat' || r.kind === 'blog') && <Blog v={view} />}
+{view && r.kind === 'search' && <Hledani v={view} />}

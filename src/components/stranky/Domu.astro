@@ -1,0 +1,142 @@
+---
+// Homepage: search first (H1 + search + popular searches) with the signpost of sections, section tiles, today's biggest
+// discounts, the most compared products, brands, how the comparison works, shops, SEO text and FAQ (FAQPage).
+import Base from '../../layouts/Base.astro';
+import { isStatic } from '../../lib/server/env';
+import Ik from '../Ik.astro';
+import Sp from '../Sp.astro';
+import Karta from '../Karta.astro';
+import type { homeView } from '../../lib/views';
+import { cislo, decode } from '../../lib/format';
+import { SECTIONS, TOP } from '../../lib/ikony';
+import { shopColor, shopLogo, shopName } from '../../lib/shops';
+import { BASE, OG_HOME } from '../../lib/site';
+import { robots } from '../../lib/seo';
+
+interface Props { v: Awaited<ReturnType<typeof homeView>> }
+const { v } = Astro.props;
+const title = 'Sportovní vybavení a oblečení — srovnání cen | Sporteka';
+const description = 'Porovnejte ceny sportovního oblečení, bot, outdoorového a kempingového vybavení z českých e-shopů. Stejné zboží spárujeme, ukážeme velikosti skladem a vývoj ceny, ať vyberete s jistotou.';
+const secs = SECTIONS.map((s) => ({ ...s, count: v.tree.bySlug.get(s.slug)?.count_total ?? 0 })).filter((s) => s.count > 0);
+const POPULAR: Array<[string, string]> = [['/bezecka-obuv/', 'běžecké boty'], ['/trekova-obuv/', 'trekové boty'], ['/lyzarske-bundy/', 'lyžařské bundy'], ['/termopradlo/', 'termoprádlo'],
+	['/turisticke-batohy/', 'batohy'], ['/stany/', 'stany'], ['/cinky-a-kotouce/', 'činky'], ['/plavecke-bryle/', 'plavecké brýle']];
+const tiles = TOP.slice(0, 12).map((x) => secs.find((s) => s.slug === x)).filter((s): s is NonNullable<typeof s> => !!s);
+const popular = POPULAR.filter(([u]) => (v.tree.bySlug.get(u.slice(1, -1))?.count_total ?? 0) >= 5);
+const brands = v.home.brands.map(([id, n]) => { const b = v.brands.byId.get(id); return b ? { slug: b.slug, name: decode(b.name), n } : null; }).filter((x): x is NonNullable<typeof x> => !!x).slice(0, 18);
+// Homepage shows 14 shops as two rows of 7 (the full list lives on /obchody/); order = who the visitor knows best.
+const FEATURED = ['decathlon.cz', 'sportisimo.cz', 'answear.cz', 'bezvasport.cz', 'd-sport.cz', 'nejoutdoor.cz', 'outdoormarket.cz',
+	'hs-sport.cz', 'insportline.cz', 'swix.cz', 'relaxworld.cz', 'trailstore.cz', 'sunshop.cz', 'merinoobchod.cz'];
+const counts = new Map(v.home.shops);
+const shops = FEATURED.filter((d) => (counts.get(d) ?? 0) >= 20).map((d): [string, number] => [d, counts.get(d)!]);
+const FAQ: Array<[string, string]> = [
+	['Jak Sporteka.cz srovnává ceny?', 'Načítáme nabídky z ověřených českých sportovních e-shopů a stejný produkt od různých prodejců spárujeme podle kódu EAN a názvu. U každého produktu pak vidíte všechny ceny vedle sebe, dostupné velikosti a vývoj nejnižší ceny.'],
+	['Je nákup přes Sporteka.cz bezpečný?', 'Sami nic neprodáváme. Kliknutím přejdete přímo do e-shopu, kde nákup dokončíte za stejnou cenu, jako byste do obchodu šli napřímo. Za odkazy můžeme od obchodu dostat provizi, cenu pro vás nemění.'],
+	['Jak často aktualizujete ceny?', 'Ceny a dostupnost načítáme pravidelně každý týden, u produktu vždy uvidíte datum poslední aktualizace. Konečnou cenu a velikosti skladem si před nákupem ověřte v obchodě.'],
+	['Jak vybrat správnou velikost bot a oblečení?', 'Řiďte se tabulkou velikostí konkrétní značky, protože střihy se liší. U bot změřte chodidlo večer a přidejte 0,5–1 cm rezervu, u běžeckých a trekových bot spíš víc. U produktu vidíte velikosti, které obchod právě skladem má.'],
+	['Jak poznám skutečnou slevu?', 'Slevu ukazujeme jen tehdy, když ji uvádí obchod (původní a akční cena). Spolehlivější je ale podívat se na graf vývoje ceny u produktu: ukáže, za kolik se produkt prodával v minulosti.'],
+	['Které obchody Sporteka.cz porovnává?', 'Porovnáváme desítky českých a slovenských sportovních e-shopů, od velkých řetězců jako Decathlon nebo Sportisimo po specializované outdoorové, cyklistické a fitness obchody. Úplný seznam najdete na stránce Obchody.'],
+	['Proč se u bot a oblečení liší ceny podle velikosti?', 'Obchody často zlevňují jen některé velikosti nebo barvy. Ukazujeme nejnižší cenu, za kterou produkt v obchodě skladem je, a seznam velikostí, které obchod právě má.'],
+];
+const graph = [
+	{
+		'@type': 'FAQPage', '@id': BASE + '/#webpage', url: BASE + '/', name: title, about: { '@id': BASE + '/#organization' }, isPartOf: { '@id': BASE + '/#website' }, inLanguage: 'cs',
+		mainEntity: FAQ.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+	},
+];
+---
+<Base title={title} description={description} canonical={BASE + '/'} robots={robots(false)} ogType="website" ogImage={OG_HOME} graph={graph} pageType="home" searchAction={true}>
+	<section class="hero">
+		<div class="w">
+			<div>
+				<h1>Sportovní vybavení: <em>porovnejte</em> nabídky a vyberte správně</h1>
+				<p class="hero__l">Porovnáváme ceny bot, oblečení, outdooru a kempingu z českých sportovních e-shopů. Stejné zboží spárujeme, takže vedle sebe vidíte ceny, velikosti skladem i slevy. Vyrazte s vybavením, které sedí.</p>
+				<div class="hs">
+					<form class="hs__f" role="search" method="get" action={isStatic() ? '/hledat/' : '/'} autocomplete="off">
+						<label class="vh" for="hs-hero">Hledat produkt, značku nebo kategorii</label>
+						<Ik id="hledat" />
+						<input type="search" id="hs-hero" name="s" placeholder="Např. Salomon, softshellová bunda, karimatka…" data-suggest enterkeyhint="search" />
+						<button type="submit">Hledat</button>
+					</form>
+					<div class="hs__s" role="listbox" hidden></div>
+				</div>
+				{popular.length > 0 && <ul class="hero__q"><li>Často hledané:</li>{popular.map(([u, t]) => <li><a href={u}>{t}</a></li>)}</ul>}
+				<ul class="hero__s">
+					<li><b class="num">{cislo(v.home.products)}</b> produktů</li>
+					<li><b class="num">{cislo(v.home.offers)}</b> nabídek</li>
+					<li><b class="num">{cislo(v.home.shops.length)}</b> obchodů</li>
+				</ul>
+			</div>
+			<nav class="rc" aria-label="Rozcestník kategorií">
+				<ul>{secs.slice(0, 7).map((s) => <li><a href={`/${s.slug}/`}><Sp id={s.icon} size={26} />{s.label}<small>{cislo(s.count)}</small></a></li>)}</ul>
+			</nav>
+		</div>
+	</section>
+
+	{shops.length > 0 && (
+		<div class="ps" role="region" aria-label="Obchody, které porovnáváme">
+			<ul><li class="ps__t">Porovnáváme ceny z</li>{shops.slice(0, 7).map(([d]) => { const l = shopLogo(d); return l ? <li><a href="/obchody/" title={shopName(d)}><img src={l.src} alt={shopName(d)} width={l.w} height={l.h} loading="lazy" decoding="async" /></a></li> : null; })}</ul>
+		</div>
+	)}
+
+	<div class="w">
+		<section class="sek" id="kategorie" aria-labelledby="h-kat">
+			<div class="sek__h"><h2 id="h-kat">Kam vyrazíte?</h2></div>
+			<ul class="kt">
+				{tiles.map((s) => <li><a href={`/${s.slug}/`}><span class={`zn-m m-${s.mark}`} aria-hidden="true"></span><Sp id={s.icon} size={54} /><b>{s.label}</b><small>{cislo(s.count)} produktů</small></a></li>)}
+			</ul>
+		</section>
+
+		{v.deals.length > 0 && (
+			<section class="sek" aria-labelledby="h-sl">
+				<div class="sek__h"><h2 id="h-sl"><Sp id="sleva" size={36} />Největší slevy</h2><a href="/slevy/">Další slevy</a></div>
+				<ul class="g g--6 sc">{v.deals.slice(0, 12).map((p) => <Karta p={p} />)}</ul>
+			</section>
+		)}
+
+		{v.popular.length > 0 && (
+			<section class="sek" aria-labelledby="h-pop">
+				<div class="sek__h"><h2 id="h-pop"><Sp id="hvezda" size={36} />Nejvíc srovnávané</h2></div>
+				<ul class="g g--6">{v.popular.slice(0, 12).map((p) => <Karta p={p} />)}</ul>
+			</section>
+		)}
+
+		{brands.length > 0 && (
+			<section class="sek" aria-labelledby="h-zn">
+				<div class="sek__h"><h2 id="h-zn"><Sp id="batoh" size={36} />Oblíbené značky</h2></div>
+				<ul class="zn">{brands.map((b) => <li><a href={`/znacka/${b.slug}/`} title={b.name}><span>{b.name}</span><small>{cislo(b.n)}</small></a></li>)}</ul>
+			</section>
+		)}
+
+		<section class="sek" aria-labelledby="h-jak">
+			<div class="sek__h"><h2 id="h-jak"><Sp id="rozcestnik" size={36} />Jak srovnáváme ceny</h2></div>
+			<ol class="jak">
+				<li><h3>Sbíráme nabídky</h3><p>Pravidelně načítáme ceny, velikosti a dostupnost z ověřených českých sportovních e-shopů.</p></li>
+				<li><h3>Párujeme stejné zboží</h3><p>Stejnou bundu nebo boty od různých prodejců spojíme podle kódu EAN a názvu, takže vidíte všechny ceny vedle sebe.</p></li>
+				<li><h3>Vyberete a jdete na věc</h3><p>Kliknutím přejdete přímo do obchodu. Cena je stejná jako u prodejce, nic nepřiplácíte.</p></li>
+			</ol>
+		</section>
+
+		{shops.length > 0 && (
+			<section class="sek" aria-labelledby="h-ob">
+				<div class="sek__h"><h2 id="h-ob">Obchody, které porovnáváme</h2><a href="/obchody/">Všechny obchody</a></div>
+				<ul class="ob">{shops.map(([d, n]) => { const l = shopLogo(d); return (
+					<li style={`--ob:${shopColor(d)}`}>
+						<span class="ob__l">{l ? <img class="ob__logo" src={l.src} alt={shopName(d)} width={l.w} height={l.h} loading="lazy" decoding="async" /> : <b>{shopName(d)}</b>}</span>
+						<small>{cislo(n)} produktů</small>
+					</li>
+				); })}</ul>
+			</section>
+		)}
+
+		<section class="sek seo">
+			<h2>Sportovní vybavení online: jak nakoupit chytře</h2>
+			<p>Stejné <strong>běžecké boty, softshellová bunda nebo stan</strong> se v českých e-shopech prodávají za velmi rozdílné ceny a slevy se často týkají jen některých velikostí nebo barev. Sporteka.cz je nezávislý srovnávač: načítáme nabídky sportovních obchodů, stejné zboží párujeme podle kódu EAN a názvu a u každého produktu ukazujeme nejnižší cenu, velikosti skladem i vývoj ceny v čase.</p>
+			<p>Vybírejte podle sportu: <a href="/sportovni-obuv/">sportovní obuv</a> od <a href="/bezecka-obuv/">běžeckých</a> po <a href="/trekova-obuv/">trekové boty</a>, <a href="/sportovni-obleceni/">sportovní oblečení</a> včetně <a href="/termopradlo/">termoprádla</a>, vybavení na <a href="/outdoor/">outdoor</a> a <a href="/kemping/">kemping</a>, <a href="/zimni-sporty/">zimní sporty</a>, <a href="/cyklistika/">cyklistiku</a>, <a href="/fitness/">fitness</a> i <a href="/rybareni/">rybaření</a>. Nic neprodáváme — nákup dokončíte přímo u obchodu za stejnou cenu.</p>
+		</section>
+
+		<section class="sek faq" aria-labelledby="h-faq" style="max-width:860px">
+			<h2 id="h-faq">Časté dotazy</h2>
+			{FAQ.map(([q, a]) => <details><summary>{q}</summary><p>{a}</p></details>)}
+		</section>
+	</div>
+</Base>

@@ -1,0 +1,48 @@
+---
+// Product category: listing + blocks under it (page 1 only): TOP 8 comparison table, buying guide (guide_html),
+// FAQ (faq_json → FAQPage in views.ts), second text.
+import Base from '../../layouts/Base.astro';
+import Vypis from './Vypis.astro';
+import type { categoryView } from '../../lib/views';
+import { cena, decode, texturize } from '../../lib/format';
+import { shopName } from '../../lib/shops';
+import { catIcon } from '../../lib/ikony';
+import { picture } from '../../lib/img';
+
+interface Props { v: Exclude<NonNullable<Awaited<ReturnType<typeof categoryView>>>, { redirect: string }> }
+const { v } = Astro.props;
+const m = v.meta;
+const first = v.page === 1 && !v.isFiltered;
+const tiles = v.kids.map((c) => ({ slug: c.slug, name: decode(c.name), count: c.count_total, img: v.imgs[String(c.id)], icon: catIcon(c.slug, v.tree) }));
+const name = decode(v.cat.name);
+const top = first ? v.items.slice(0, 8) : [];
+const lcp = picture(v.items[0]?.image, 240);   // the first card photo is the LCP element: preload it
+---
+<Base title={m.title} description={m.description} canonical={m.canonical} prev={m.prev} next={m.next} robots={m.robots} graph={m.graph} jsonLd={m.jsonLd} shortOrg={m.shortOrg} ogType={m.ogType} pageType="category">
+	{lcp && <link slot="head" rel="preload" as="image" href={lcp.src} imagesrcset={lcp.srcset} fetchpriority="high" />}
+	<Vypis crumbs={v.crumbs} h1={name} icon={catIcon(v.cat.slug, v.tree)} introHtml={first ? v.cat.description_html : undefined} tiles={tiles} tilesTitle={v.kidsTitle}
+		f={v.f} fc={v.fc} brands={v.brands} landings={v.landings} popular={first ? v.popular : []} items={v.items} total={v.total} page={v.page} pages={v.pages} base={v.base} qs={v.qs}
+		empty="V této kategorii teď nejsou žádné produkty.">
+		{top.length >= 3 && (
+			<section class="sek ah-ctable">
+				<h2>TOP {name} – srovnání cen</h2>
+				<div class="tw"><table class="ct">
+					<thead><tr><th>#</th><th>Produkt</th><th>Obchody</th><th>Cena od</th><th></th></tr></thead>
+					<tbody>{top.map((p, i) => { const n = decode(p.name); return (
+						<tr><td>{i + 1}</td><td><a href={`/${p.slug}/`}>{texturize(n)}</a></td><td>{(p.shop_count || 1) > 1 ? `${p.shop_count} obchody` : shopName(p.best_domain)}</td>
+						<td class="num">{p.min_price > 0 ? 'od ' + cena(p.min_price) : '—'}</td><td><a class="btn btn--g" href={`/${p.slug}/`}>Porovnat ceny</a></td></tr>
+					); })}</tbody>
+				</table></div>
+				<p class="pozn">Ceny načítáme ze sportovních e-shopů a aktualizujeme je každý týden. Pořadí dle oblíbenosti.</p>
+			</section>
+		)}
+		{v.guide && <section class="sek txt ah-guide" set:html={v.guide} />}
+		{v.faq.length > 0 && (
+			<section class="sek faq ah-faq">
+				<h2>Často kladené dotazy</h2>
+				{v.faq.map((f) => <details><summary>{f.q}</summary><div set:html={f.a} /></details>)}
+			</section>
+		)}
+		{first && v.cat.second_html && <section class="sek txt" set:html={v.cat.second_html} />}
+	</Vypis>
+</Base>

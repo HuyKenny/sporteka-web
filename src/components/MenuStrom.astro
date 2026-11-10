@@ -1,0 +1,28 @@
+---
+// Full category tree (src/data/menu.json): the /kategorie/ page and, loaded on first open, the header mega menu
+// (kept out of every page's HTML: ~20 kB × 700k static pages).
+import Sp from './Sp.astro';
+import { SECTIONS, TOP } from '../lib/ikony';
+import menu from '../data/menu.json';
+
+const icon = new Map(SECTIONS.map((s) => [s.slug, s.icon]));
+const bySlug = new Map(menu.map((n) => [n.slug, n]));
+const top = TOP.map((x) => bySlug.get(x)).filter((n): n is NonNullable<typeof n> => !!n);
+const more = menu.filter((n) => !TOP.includes(n.slug));
+---
+<div class="mm-strom">
+	<div class="mm__g">
+		{top.map((n) => (
+			<div class="mm__sk">
+				<a href={`/${n.slug}/`}>{icon.get(n.slug) && <Sp id={icon.get(n.slug)!} size={28} />}{n.name}</a>
+				{n.kids.length > 0 && <ul>{n.kids.map((k) => <li><a href={`/${k.slug}/`}>{k.name}</a></li>)}</ul>}
+			</div>
+		))}
+	</div>
+	{more.length > 0 && (
+		<section class="mm__grp">
+			<h3 class="mm__gh">Další kategorie</h3>
+			<ul class="mm__more">{more.map((n) => <li><a href={`/${n.slug}/`}>{n.name}</a></li>)}</ul>
+		</section>
+	)}
+</div>

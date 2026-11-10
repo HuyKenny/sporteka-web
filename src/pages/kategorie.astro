@@ -1,0 +1,10 @@
+---
+// All categories (the tree the header menu loads on first open). Indexable hub page.
+import Base from '../layouts/Base.astro';
+import MenuStrom from '../components/MenuStrom.astro';
+import { BASE } from '../lib/site';
+export const prerender = false;
+---
+<Base title="Všechny kategorie sportovního vybavení | Sporteka.cz" description="Přehled všech kategorií sportovního a outdoorového vybavení, ve kterých na Sporteka.cz porovnáváme ceny e-shopů." canonical={BASE + '/kategorie/'} robots={['follow', 'index']} pageType="page">
+	<div class="w"><h1>Všechny kategorie</h1><nav class="mm mm--stranka" aria-label="Všechny kategorie"><MenuStrom /></nav></div>
+</Base>

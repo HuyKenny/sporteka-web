@@ -1,0 +1,30 @@
+---
+// Offer table (price comparison). Every link goes through /go/<slug>/?ctx=tabulka (302 to the affiliate URL, click logged).
+// "Jen skladem" is a CSS-only toggle (:has), the first 8 rows are visible, the rest behind <details>.
+// One row per shop: sizes/colours of one product are separate offers of the same shop → its cheapest (in stock first,
+// the order of loadProduct) + the number of variants.
+import NabidkaRadek from './NabidkaRadek.astro';
+import type { Offer } from '../lib/db';
+
+interface Props { offers: Offer[]; name: string }
+const { offers: all, name } = Astro.props;
+const per = new Map<string, { o: Offer; n: number }>();
+for (const o of all) { const r = per.get(o.domain); if (r) r.n++; else per.set(o.domain, { o, n: 1 }); }
+const offers = [...per.values()].map((r) => r.o);
+const variants = new Map([...per.values()].map((r) => [r.o, r.n]));
+const FIRST = 8;
+const cheapest = offers.find((o) => o.stock !== -1) ?? offers[0];
+const head = offers.slice(0, FIRST);
+const rest = offers.slice(FIRST);
+const hasOut = offers.some((o) => o.stock === -1);
+---
+<div class="ot-w">
+	{hasOut && <div class="ot-f"><span></span><label><input type="checkbox" id="jen-sklad" />Jen skladem</label></div>}
+	<ul class="ot" aria-label={`Nabídky obchodů: ${name}`}>{head.map((o) => <NabidkaRadek o={o} n={variants.get(o)} nej={o === cheapest && offers.length > 1} />)}</ul>
+	{rest.length > 0 && (
+		<details class="ot-more">
+			<summary>Zobrazit dalších {rest.length} nabídek</summary>
+			<ul class="ot">{rest.map((o) => <NabidkaRadek o={o} n={variants.get(o)} nej={false} />)}</ul>
+		</details>
+	)}
+</div>

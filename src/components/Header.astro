@@ -1,0 +1,45 @@
+---
+// Header: logo, mega menu (one markup: desktop dropdown / mobile full screen, <details> works without JS), search with
+// suggestions (/api/suggest, src/scripts/ui.ts) and the shelf of sections. The tree itself (MenuStrom.astro) is fetched
+// from /kategorie/ on first open (src/scripts/ui.ts).
+import Ik from './Ik.astro';
+import Sp from './Sp.astro';
+import Logo from './Logo.astro';
+import { SECTIONS, TOP } from '../lib/ikony';
+import { isStatic } from '../lib/server/env';
+
+const topSecs = TOP.map((x) => SECTIONS.find((s) => s.slug === x)).filter((s): s is NonNullable<typeof s> => !!s);
+const q = isStatic() ? '' : (Astro.url.searchParams.get('s') ?? '').trim().toLowerCase();
+// static export: no server search, /hledat/ searches the JSON index in the browser (src/scripts/hledat.ts)
+const action = isStatic() ? '/hledat/' : '/';
+---
+<a class="skip" href="#obsah">Přeskočit na obsah</a>
+<div class="usp"><ul><li>Ceny sportovních e-shopů na jednom místě</li><li>Stejné zboží spárujeme napříč obchody</li><li>Kupujete přímo u obchodu, za stejnou cenu</li><li>Ceny aktualizujeme každý týden</li></ul></div>
+<header class="hl">
+	<div class="w hl__in">
+		<details class="mm">
+			<summary aria-label="Kategorie"><Ik id="menu" size={22} /><span class="mm__t">Kategorie</span></summary>
+			<nav class="mm__p" aria-label="Kategorie">
+				<div class="mm__top"><b>Kategorie</b><span class="mm__x" data-zavrit aria-label="Zavřít"><Ik id="zavrit" size={22} /></span></div>
+				<div class="mm-strom" data-menu="/kategorie/"><p class="mm__vse"><a href="/kategorie/">Všechny kategorie</a></p></div>
+			</nav>
+		</details>
+		<Logo label="Sporteka.cz — srovnání cen sportovního vybavení" />
+		<div class="hs">
+			<form class="hs__f" role="search" method="get" action={action} autocomplete="off">
+				<label class="vh" for="hs-q">Hledat produkt, značku nebo kategorii</label>
+				<Ik id="hledat" />
+				<input type="search" id="hs-q" name="s" value={q} placeholder="Hledat boty, bundu, stan, značku…" data-suggest aria-autocomplete="list" aria-controls="hs-s" enterkeyhint="search" />
+				<button type="submit">Hledat</button>
+			</form>
+			<div class="hs__s" id="hs-s" role="listbox" hidden></div>
+		</div>
+		<div class="hl__akce">
+			<a class="hl__a" href="/slevy/"><Sp id="sleva" size={26} /><span>Slevy</span></a>
+			<a class="hl__a" href="/obchody/"><Sp id="rozcestnik" size={26} /><span>Obchody</span></a>
+		</div>
+	</div>
+	<nav class="kn" aria-label="Hlavní kategorie">
+		<ul>{topSecs.map((s) => <li><a href={`/${s.slug}/`}><Sp id={s.icon} size={32} />{s.label}</a></li>)}</ul>
+	</nav>
+</header>

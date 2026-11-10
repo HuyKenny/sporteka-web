@@ -1,0 +1,6 @@
+---
+// Icon from the external sprite /a/i1.svg (cached for a year; bump the file name when icons change).
+interface Props { id: string; size?: number; class?: string }
+const { id, size = 20, class: cls = '' } = Astro.props;
+---
+<svg class={`ik ${cls}`.trim()} width={size} height={size} aria-hidden="true" focusable="false"><use href={`/a/i1.svg#${id}`} /></svg>

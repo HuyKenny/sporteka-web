@@ -1,0 +1,52 @@
+---
+// Footer: sections and info pages hard-coded (must not depend on the catalogue), affiliate disclosure.
+import Logo from './Logo.astro';
+import { SECTIONS } from '../lib/ikony';
+import { OPERATOR as O } from '../lib/site';
+const year = new Date().getFullYear();
+const half = Math.ceil(SECTIONS.length / 2);
+---
+<footer class="pa-t">
+	<div class="w pa-t__in">
+		<div>
+			<Logo />
+			<p>Nezávislý srovnávač cen sportovního vybavení, oblečení a outdoorového vybavení. Stejné zboží párujeme napříč českými e-shopy, takže hned vidíte rozdíly v ceně, velikosti skladem i vývoj ceny.</p>
+		</div>
+		<nav aria-label="Sporty">
+			<h2>Sporty</h2>
+			<ul>{SECTIONS.slice(0, half).map((s) => <li><a href={`/${s.slug}/`}>{s.label}</a></li>)}</ul>
+		</nav>
+		<nav aria-label="Další sporty">
+			<h2>A další</h2>
+			<ul>{SECTIONS.slice(half).map((s) => <li><a href={`/${s.slug}/`}>{s.label}</a></li>)}</ul>
+		</nav>
+		<nav aria-label="Oblíbené">
+			<h2>Oblíbené</h2>
+			<ul>
+				<li><a href="/bezecka-obuv/">Běžecké boty</a></li>
+				<li><a href="/trekova-obuv/">Trekové boty</a></li>
+				<li><a href="/turisticke-batohy/">Turistické batohy</a></li>
+				<li><a href="/stany/">Stany</a></li>
+				<li><a href="/spaci-pytle/">Spací pytle</a></li>
+				<li><a href="/lyzarske-bundy/">Lyžařské bundy</a></li>
+				<li><a href="/termopradlo/">Termoprádlo</a></li>
+			</ul>
+		</nav>
+		<nav aria-label="O webu">
+			<h2>O Sporteka.cz</h2>
+			<ul>
+				<li><a href="/o-nas/">O nás a redakční zásady</a></li>
+				<li><a href="/jak-srovnavame/">Jak srovnáváme ceny</a></li>
+				<li><a href="/obchody/">Obchody</a></li>
+				<li><a href="/podminky-pouziti/">Podmínky použití</a></li>
+				<li><a href="/ochrana-osobnich-udaju/">Ochrana osobních údajů</a></li>
+				<li><a href="/sitemap_index.xml">Mapa webu</a></li>
+				<li><a href={`mailto:${O.email}`}>Kontakt: {O.email}</a></li>
+			</ul>
+		</nav>
+	</div>
+	<div class="w pa-t__sp">
+		<span>© {year} Sporteka.cz · Provozovatel {O.name}, IČO {O.ico}</span>
+		<span>Nejsme e-shop. Při nákupu přes naše odkazy můžeme získat provizi, cena se pro vás nemění.</span>
+	</div>
+</footer>

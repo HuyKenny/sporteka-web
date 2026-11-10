@@ -1,0 +1,22 @@
+---
+// WooCommerce/WordPress pagination shape: 1 2 3 4 … 74 75 76 → (mid_size 3, end_size 3)
+interface Props { base: string; page: number; pages: number; query?: string }
+const { base, page, pages, query = '' } = Astro.props;
+const url = (n: number) => (n <= 1 ? base : `${base}page/${n}/`) + query;
+const show = new Set<number>();
+for (let i = 1; i <= Math.min(3, pages); i++) show.add(i);
+for (let i = Math.max(1, pages - 2); i <= pages; i++) show.add(i);
+for (let i = Math.max(1, page - 3); i <= Math.min(pages, page + 3); i++) show.add(i);
+const list = [...show].sort((a, b) => a - b);
+const out: Array<number | 0> = [];
+list.forEach((n, i) => { if (i && n - list[i - 1]! > 1) out.push(0); out.push(n); });
+---
+{pages > 1 && (
+	<nav class="str" aria-label="Stránkování">
+		<ul>
+			{page > 1 && <li><a href={url(page - 1)} rel="prev" aria-label="Předchozí stránka">←</a></li>}
+			{out.map((n) => n === 0 ? <li><span>…</span></li> : n === page ? <li><span aria-current="page">{n}</span></li> : <li><a href={url(n)} aria-label={`Stránka ${n}`}>{n}</a></li>)}
+			{page < pages && <li><a href={url(page + 1)} rel="next" aria-label="Další stránka">→</a></li>}
+		</ul>
+	</nav>
+)}

@@ -1,0 +1,17 @@
+---
+// /slevy/: every discounted product (≥ 10 %) of all shops, biggest discount first, with the same filters as a category
+// (sport = "Kategorie", brand, shop, price, size, gender …; the facets of the discounted set are `f:slevy` in site_cache).
+import Base from '../../layouts/Base.astro';
+import Vypis from './Vypis.astro';
+import type { discountView } from '../../lib/views';
+
+interface Props { v: NonNullable<Awaited<ReturnType<typeof discountView>>> }
+const { v } = Astro.props;
+const m = v.meta;
+const intro = '<p>Všechny zlevněné produkty z porovnávaných e-shopů na jednom místě, od největší slevy. Sleva je počítaná z běžné ceny u obchodu, který produkt nabízí za nejnižší cenu. Zúžit výběr můžete podle sportu, značky, velikosti, pohlaví nebo ceny.</p>';
+---
+<Base title={m.title} description={m.description} canonical={m.canonical} prev={m.prev} next={m.next} robots={m.robots} graph={m.graph} jsonLd={m.jsonLd} shortOrg={m.shortOrg} pageType="category">
+	<Vypis crumbs={v.crumbs} h1="Slevy na sportovní vybavení" introHtml={v.page === 1 && !v.isFiltered ? intro : undefined}
+		f={v.f} fc={v.fc} brands={v.brands} cats={v.cats} items={v.items} total={v.total} page={v.page} pages={v.pages} base={v.base} qs={v.qs}
+		empty="Těmto filtrům nic neodpovídá. Zkuste některý zrušit." />
+</Base>

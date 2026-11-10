@@ -1,0 +1,45 @@
+---
+// Product card. Several shops → "Porovnat ceny" (product page); one offer → straight to the shop via /go/ (ctx=karta).
+// The price is a signpost arrow (trail.css .k__p).
+import Ik from './Ik.astro';
+import type { Card } from '../lib/db';
+import { cena, decode, texturize } from '../lib/format';
+import { picture } from '../lib/img';
+import { goHref } from '../lib/golink';
+import { shopLogo, shopName } from '../lib/shops';
+
+/** ceny=false: no price, discount, stock or shop link (related products of the static export: they must not change with
+ *  the neighbour's price) */
+interface Props { p: Card; idx?: number; h?: 'h2' | 'h3'; ceny?: boolean }
+const { p, idx = 99, h = 'h3', ceny = true } = Astro.props;
+const H = h;
+const name = texturize(decode(p.name));
+const img = picture(p.image, 240);
+const href = `/${p.slug}/`;
+const shops = p.shop_count || p.offer_count;
+const logo = shopLogo(p.best_domain);
+---
+<li>
+	<article class="k">
+		<div class="k__img">
+			{img ? <img src={img.src} srcset={img.srcset} alt={name} width="240" height="240" loading={idx < 4 ? 'eager' : 'lazy'} fetchpriority={idx === 0 ? 'high' : undefined} decoding="async" /> : <Ik id="foto" />}
+			{ceny && p.disc_pct >= 10 && <span class="k__s">−{p.disc_pct} %</span>}
+		</div>
+		<H class="k__n"><a href={href}>{name}</a></H>
+		{!ceny ? (
+			<p class="k__m">{shops > 1 ? `Srovnání cen v ${shops} obchodech` : 'Cena u obchodu'}</p>
+		) : p.min_price > 0 ? (
+			<>
+				<p class="k__p num"><span>{shops > 1 && <small>od </small>}{cena(p.min_price)}</span></p>
+				<p class="k__m"><span class={p.in_stock ? 'dot' : 'dot dot--no'}></span>{shops > 1 ? `v ${shops} obchodech` : logo ? <img class="k__lg" src={logo.src} alt={shopName(p.best_domain)} width={logo.w} height={logo.h} loading="lazy" decoding="async" /> : shopName(p.best_domain)}</p>
+			</>
+		) : <p class="k__m">Teď není v nabídce</p>}
+		{ceny && shops === 1 && p.go_slug ? (
+			<a class="btn k__b" href={goHref(p.go_slug, p.target_url, 'karta')} target="_blank" rel="nofollow sponsored noopener" data-partner={p.best_domain} data-price={Math.round(p.min_price)}>Do obchodu</a>
+		) : shops > 1 ? (
+			<a class="btn btn--o k__b" href={href} tabindex="-1">Porovnat ceny</a>
+		) : (
+			<a class="btn btn--g k__b" href={href} tabindex="-1">Zobrazit</a>
+		)}
+	</article>
+</li>

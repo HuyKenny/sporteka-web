@@ -1,0 +1,92 @@
+---
+// Listing shell (category, brand): breadcrumb, H1 + count, intro, subcategory tiles, filters, sort tabs, active
+// filter chips, grid, pagination. Blocks below the grid (magazine box, SEO text) come through the default slot.
+import Drobky from '../Drobky.astro';
+import Mrizka from '../Mrizka.astro';
+import Strankovani from '../Strankovani.astro';
+import Filtry from '../Filtry.astro';
+import Ik from '../Ik.astro';
+import Sp from '../Sp.astro';
+import type { BrandLite, Card, Cat, Facets } from '../../lib/db';
+import { SORTS, toQuery, withFilter, type FilterState } from '../../lib/filters';
+import { BUCKETS, PARAM_LABEL, PARAM_ORDER, valueSlug } from '../../lib/params';
+import { cislo, decode, produktu, stripTags } from '../../lib/format';
+import { shopName } from '../../lib/shops';
+import Dlazdice from '../Dlazdice.astro';
+const TILE_FIRST = 12;
+
+interface Props {
+	crumbs: Array<{ name: string; url?: string }>;
+	h1: string;
+	/** section icon next to the H1 (lib/ikony.ts, sprite id) */
+	icon?: string | null | undefined;
+	introHtml?: string | undefined;
+	tiles?: Array<{ slug: string; name: string; count: number; img?: string | undefined; icon?: string | null | undefined }> | undefined;
+	tilesTitle?: string | undefined;
+	links?: { title: string; items: Array<{ slug: string; name: string; count: number }>; current?: string } | undefined;
+	f: FilterState; fc: Facets | null; brands: { byId: Map<number, BrandLite>; bySlug: Map<string, BrandLite> }; cats?: Map<number, Cat> | undefined;
+	landings?: Record<string, string> | undefined;
+	/** most searched facet landings of this category ("Dámské běžecké boty"): crawlable, visible on mobile too */
+	popular?: Array<{ slug: string; h1: string }> | undefined;
+	items: Card[]; total: number; page: number; pages: number; base: string; qs: string; empty?: string | undefined;
+}
+const { crumbs, h1, icon, introHtml, tiles = [], tilesTitle = 'Podkategorie', links, f, fc, brands, cats, landings, popular = [], items, total, page, pages, base, qs, empty = 'Tady zatím nic není.' } = Astro.props;
+// active filters as removable chips
+const chips: Array<[string, string]> = [];
+const url = (s: FilterState) => base + toQuery(s);
+if (f.min !== undefined || f.max !== undefined) chips.push([`Cena ${f.min !== undefined ? 'od ' + cislo(f.min) : ''} ${f.max !== undefined ? 'do ' + cislo(f.max) : ''} Kč`, url(withFilter(f, { min: undefined, max: undefined }))]);
+if (f.skladem) chips.push(['Jen skladem', url(withFilter(f, { skladem: false }))]);
+if (f.sleva) chips.push(['Ve slevě', url(withFilter(f, { sleva: false }))]);
+if (f.kat && cats) { const c = [...cats.values()].find((x) => x.slug === f.kat); chips.push([c ? decode(c.name) : f.kat, url(withFilter(f, { kat: '' }))]); }
+for (const s of f.znacka) chips.push([decode(brands.bySlug.get(s)?.name ?? s), url(withFilter(f, { znacka: f.znacka.filter((x) => x !== s) }))]);
+for (const s of f.obchod) chips.push([shopName(s), url(withFilter(f, { obchod: f.obchod.filter((x) => x !== s) }))]);
+for (const k of PARAM_ORDER) for (const v of f.p[k] ?? []) {
+	const label = BUCKETS[k]?.find(([id]) => id === v)?.[1] ?? (fc?.p[k] ?? []).map(([x]) => x).find((x) => valueSlug(x) === v) ?? v;
+	chips.push([`${PARAM_LABEL[k]}: ${label}`, url(withFilter(f, { p: { ...f.p, [k]: (f.p[k] ?? []).filter((x) => x !== v) } }))]);
+}
+const plain = withFilter(f, { min: undefined, max: undefined, znacka: [], obchod: [], skladem: false, sleva: false, kat: '', p: {} });
+---
+<div class="w">
+	<Drobky items={crumbs} />
+	<div class="lh"><h1>{icon && <Sp id={icon} size={56} class="lh__ik" />}{h1}</h1><span class="lh__n">{cislo(total)} {produktu(total)}</span></div>
+	{introHtml && (stripTags(introHtml).length > 150 ? <><div class="intro je-zav" set:html={introHtml} /><button type="button" class="vice" aria-expanded="false" data-vice>Zobrazit více</button></> : <div class="intro" set:html={introHtml} />)}
+	{tiles.length > 0 && (
+		<nav class="podk" aria-label={tilesTitle}>
+			<h2 class="vh">{tilesTitle}</h2>
+			<ul>{tiles.slice(0, TILE_FIRST).map((t, i) => <Dlazdice t={t} eager={i < 6} />)}</ul>
+			{tiles.length > TILE_FIRST && (
+				<details>
+					<summary>Zobrazit všechny podkategorie ({tiles.length})</summary>
+					<ul>{tiles.slice(TILE_FIRST).map((t) => <Dlazdice t={t} eager={false} />)}</ul>
+				</details>
+			)}
+		</nav>
+	)}
+	{popular.length > 0 && (
+		<nav class="pop" aria-label="Často hledané"><span>Často hledané:</span><ul>{popular.map((l) => <li><a href={`/${l.slug}/`}>{l.h1}</a></li>)}</ul></nav>
+	)}
+	<div class="lv">
+		<Filtry action={base} f={f} fc={fc} brands={brands} links={links} cats={cats} landings={landings} />
+		<div>
+			<div class="lt">
+				<button type="button" class="btn btn--g fbtn" data-filtry><Ik id="filtr" />Filtry{chips.length > 0 && ` (${chips.length})`}</button>
+				<nav class="rz" aria-label="Řazení">
+					{SORTS.map(([k, label]) => { const u = url(withFilter(f, { sort: k })); return <a href={u} rel={u.includes('?') ? 'nofollow' : undefined} aria-current={f.sort === k ? 'true' : undefined}>{label}</a>; })}
+				</nav>
+			</div>
+			{chips.length > 0 && (
+				<ul class="ch" aria-label="Aktivní filtry">
+					{chips.map(([t, u]) => <li><a href={u} rel="nofollow">{t}<Ik id="zavrit" /></a></li>)}
+					<li><a class="ch__x" href={url(plain)} rel="nofollow">Zrušit filtry</a></li>
+				</ul>
+			)}
+			{total > 0 ? (
+				<>
+					<Mrizka items={items} />
+					<Strankovani base={base} page={page} pages={pages} query={qs} />
+				</>
+			) : <p class="prazdno">{chips.length ? 'Těmto filtrům nic neodpovídá. Zkuste některý zrušit.' : empty}</p>}
+		</div>
+	</div>
+	<slot />
+</div>

@@ -1,0 +1,6 @@
+---
+// Section icon from the sprite /a/s2.svg (lib/ikony.ts). Decorative: the label is always next to it.
+interface Props { id: string; size?: number; class?: string }
+const { id, size = 32, class: cls = '' } = Astro.props;
+---
+<svg class={`sp ${cls}`.trim()} width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href={`/a/s2.svg#${id}`} /></svg>

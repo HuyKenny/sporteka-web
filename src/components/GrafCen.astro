@@ -1,0 +1,68 @@
+---
+// Price history (daily minimum across shops) as inline SVG step lines for the last 30 / 90 / 180 days; the range
+// switch is CSS-only (radio + :has). A range is shown only when the price history reaches into it.
+import { cena, datum } from '../lib/format';
+import { renderNow } from '../lib/now';
+
+interface Props { points: Array<{ day: string; min_price: number }>; name: string; current: number }
+const { points, name, current } = Astro.props;
+// the static export renders with DATA_DAY = first day of the month: the graph ends at that day or at the last price change,
+// so a product page changes only with its own data (and once a month)
+const lastDay = points.at(-1)?.day;
+const now = Math.max(renderNow(), lastDay ? Date.parse(lastDay + 'T12:00:00Z') : 0);
+const today = new Date(now).toISOString().slice(0, 10);
+const W = 640, H = 210, P = { l: 52, r: 10, t: 12, b: 26 };
+function series(days: number) {
+	const from = new Date(now - days * 86400_000).toISOString().slice(0, 10);
+	const before = points.filter((p) => p.day <= from).at(-1);
+	const inside = points.filter((p) => p.day > from);
+	const pts = [...(before ? [{ day: from, min_price: before.min_price }] : []), ...inside];
+	if (current > 0 && pts.length) pts.push({ day: today, min_price: current });
+	if (pts.length < 2 || pts[0]!.day === pts.at(-1)!.day) return null;
+	const prices = pts.map((p) => p.min_price);
+	const lo = Math.min(...prices), hi = Math.max(...prices);
+	const span = hi - lo || Math.max(1, hi * 0.1);
+	const yMin = Math.max(0, lo - span * 0.2), yMax = hi + span * 0.2;
+	const t0 = Date.parse(pts[0]!.day), t1 = Date.parse(pts.at(-1)!.day);
+	const x = (d: string) => P.l + ((Date.parse(d) - t0) / Math.max(1, t1 - t0)) * (W - P.l - P.r);
+	const y = (v: number) => P.t + (1 - (v - yMin) / (yMax - yMin)) * (H - P.t - P.b);
+	let d = '';
+	pts.forEach((p, i) => { d += i === 0 ? `M${x(p.day).toFixed(1)},${y(p.min_price).toFixed(1)}` : `H${x(p.day).toFixed(1)}V${y(p.min_price).toFixed(1)}`; });
+	const area = `${d}V${H - P.b}H${P.l}Z`;
+	const ticks = [lo, (lo + hi) / 2, hi].filter((v, i, a) => a.indexOf(v) === i);
+	return { days, pts, lo, hi, d, area, ticks, y, x, last: pts.at(-1)! };
+}
+const all = [30, 90, 180].map(series);
+const shown = all.filter((s): s is NonNullable<typeof s> => !!s);
+const def = shown.find((s) => s.days === 90) ?? shown.at(-1);
+const s90 = all[1];
+const lowest90 = s90 && current > 0 && current <= s90.lo && s90.hi > s90.lo;
+---
+{shown.length > 0 && def && (
+	<div class="gr">
+		{shown.length > 1 && (
+			<div class="gr__t" role="radiogroup" aria-label="Období">
+				{shown.map((s) => <label><input type="radio" name="gr" id={`gr-${s.days}`} checked={s === def} />{s.days} dní</label>)}
+			</div>
+		)}
+		{shown.map((s) => (
+			<div class={`gr__p gr__p--${s.days}${s === def ? ' je-vych' : ''}`}>
+				<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Vývoj nejnižší ceny za ${s.days} dní: ${name}, od ${cena(s.lo)} do ${cena(s.hi)}`}>
+					{s.ticks.map((v) => (
+						<g>
+							<line x1={P.l} x2={W - P.r} y1={s.y(v)} y2={s.y(v)} stroke="#E6E3E8" stroke-width="1" />
+							<text x={P.l - 8} y={s.y(v) + 4} text-anchor="end" font-size="12" fill="#8A8690">{Math.round(v)}</text>
+						</g>
+					))}
+					<text x={P.l} y={H - 6} font-size="12" fill="#8A8690">{datum(s.pts[0]!.day)}</text>
+					<text x={W - P.r} y={H - 6} font-size="12" fill="#8A8690" text-anchor="end">dnes</text>
+					<path d={s.area} fill="#8F3E10" fill-opacity=".07" />
+					<path d={s.d} fill="none" stroke="#8F3E10" stroke-width="2.4" stroke-linejoin="round" />
+					<circle cx={s.x(s.last.day)} cy={s.y(s.last.min_price)} r="4.5" fill="#fff" stroke="#8F3E10" stroke-width="2.4" />
+				</svg>
+				<p class="gr__n"><span>Nejnižší: <b class="num">{cena(s.lo)}</b></span><span>Nejvyšší: <b class="num">{cena(s.hi)}</b></span></p>
+			</div>
+		))}
+		{lowest90 && <p class="gr__i">Aktuální cena je nejnižší za posledních 90 dní.</p>}
+	</div>
+)}
