@@ -1,0 +1,856 @@
+[
+ {
+  "slug": "sportovni-obleceni",
+  "name": "Sportovní oblečení",
+  "kids": [
+   {
+    "slug": "sportovni-bundy",
+    "name": "Sportovní bundy a vesty"
+   },
+   {
+    "slug": "mikiny",
+    "name": "Mikiny"
+   },
+   {
+    "slug": "sportovni-tricka",
+    "name": "Trička a tílka"
+   },
+   {
+    "slug": "sportovni-kalhoty",
+    "name": "Sportovní kalhoty"
+   },
+   {
+    "slug": "sportovni-kratasy",
+    "name": "Kraťasy"
+   },
+   {
+    "slug": "leginy",
+    "name": "Legíny"
+   },
+   {
+    "slug": "soupravy",
+    "name": "Soupravy a komplety"
+   },
+   {
+    "slug": "termopradlo",
+    "name": "Funkční a termo prádlo"
+   },
+   {
+    "slug": "sportovni-podprsenky",
+    "name": "Sportovní podprsenky"
+   },
+   {
+    "slug": "sportovni-spodni-pradlo",
+    "name": "Sportovní spodní prádlo"
+   },
+   {
+    "slug": "sportovni-ponozky",
+    "name": "Sportovní ponožky"
+   },
+   {
+    "slug": "cepice-a-celenky",
+    "name": "Čepice, kšiltovky a čelenky"
+   },
+   {
+    "slug": "sportovni-rukavice",
+    "name": "Rukavice"
+   },
+   {
+    "slug": "nakrcniky-a-satky",
+    "name": "Nákrčníky a kukly"
+   },
+   {
+    "slug": "plavky",
+    "name": "Plavky"
+   },
+   {
+    "slug": "dresy",
+    "name": "Dresy"
+   },
+   {
+    "slug": "sportovni-sukne-a-saty",
+    "name": "Sportovní sukně a šaty"
+   },
+   {
+    "slug": "kosile",
+    "name": "Turistické a outdoorové košile"
+   },
+   {
+    "slug": "kombinezy",
+    "name": "Kombinézy a overaly"
+   },
+   {
+    "slug": "kabaty-a-parky",
+    "name": "Kabáty a parky"
+   }
+  ]
+ },
+ {
+  "slug": "sportovni-obuv",
+  "name": "Sportovní obuv",
+  "kids": [
+   {
+    "slug": "bezecka-obuv",
+    "name": "Běžecké boty"
+   },
+   {
+    "slug": "trekova-obuv",
+    "name": "Trekové boty"
+   },
+   {
+    "slug": "tenisky",
+    "name": "Tenisky a volnočasové boty"
+   },
+   {
+    "slug": "kopacky",
+    "name": "Kopačky"
+   },
+   {
+    "slug": "salova-obuv",
+    "name": "Sálová a halová obuv"
+   },
+   {
+    "slug": "treninkova-obuv",
+    "name": "Fitness a tréninková obuv"
+   },
+   {
+    "slug": "tenisova-obuv",
+    "name": "Tenisová obuv"
+   },
+   {
+    "slug": "zimni-obuv",
+    "name": "Zimní boty a sněhule"
+   },
+   {
+    "slug": "sandaly",
+    "name": "Sportovní sandály"
+   },
+   {
+    "slug": "pantofle-a-zabky",
+    "name": "Pantofle a žabky"
+   },
+   {
+    "slug": "barefoot-obuv",
+    "name": "Barefoot boty"
+   },
+   {
+    "slug": "obuv-do-vody",
+    "name": "Boty do vody"
+   },
+   {
+    "slug": "holinky",
+    "name": "Holínky"
+   },
+   {
+    "slug": "basketbalova-obuv",
+    "name": "Basketbalové boty"
+   },
+   {
+    "slug": "doplnky-k-obuvi",
+    "name": "Tkaničky, vložky a péče o boty"
+   }
+  ]
+ },
+ {
+  "slug": "outdoor",
+  "name": "Outdoor a turistika",
+  "kids": [
+   {
+    "slug": "batohy",
+    "name": "Batohy"
+   },
+   {
+    "slug": "sportovni-tasky",
+    "name": "Sportovní tašky a ledvinky"
+   },
+   {
+    "slug": "trekove-hole",
+    "name": "Trekové a nordic walking hole"
+   },
+   {
+    "slug": "celovky-a-svitilny",
+    "name": "Čelovky a svítilny"
+   },
+   {
+    "slug": "lahve-a-termosky",
+    "name": "Láhve a termosky"
+   },
+   {
+    "slug": "sportovni-bryle",
+    "name": "Sportovní a sluneční brýle"
+   },
+   {
+    "slug": "horolezectvi",
+    "name": "Horolezectví a ferraty"
+   },
+   {
+    "slug": "outdoor-doplnky",
+    "name": "Outdoorové doplňky"
+   },
+   {
+    "slug": "sportovni-hodinky",
+    "name": "Sportovní hodinky a elektronika"
+   },
+   {
+    "slug": "dalekohledy-a-kompasy",
+    "name": "Dalekohledy, kompasy a navigace"
+   },
+   {
+    "slug": "prvni-pomoc",
+    "name": "Lékárničky a první pomoc"
+   },
+   {
+    "slug": "hygiena-a-repelenty",
+    "name": "Hygiena, repelenty a úprava vody"
+   },
+   {
+    "slug": "outdoorove-noze-a-multitoola",
+    "name": "Outdoorové nože a multitoolly"
+   },
+   {
+    "slug": "powerbanky-a-nabijeni",
+    "name": "Powerbanky a nabíjení"
+   },
+   {
+    "slug": "outdoorova-strava",
+    "name": "Outdoorová a lyofilizovaná strava"
+   },
+   {
+    "slug": "plastenky",
+    "name": "Pláštěnky a pončo"
+   },
+   {
+    "slug": "nesmeky",
+    "name": "Nesmeky a protiskluzové návleky"
+   }
+  ]
+ },
+ {
+  "slug": "kemping",
+  "name": "Kemping",
+  "kids": [
+   {
+    "slug": "stany",
+    "name": "Stany"
+   },
+   {
+    "slug": "spaci-pytle",
+    "name": "Spací pytle"
+   },
+   {
+    "slug": "karimatky-a-matrace",
+    "name": "Karimatky a matrace"
+   },
+   {
+    "slug": "kempingovy-nabytek",
+    "name": "Kempingový nábytek"
+   },
+   {
+    "slug": "vareni-v-prirode",
+    "name": "Vaření v přírodě"
+   },
+   {
+    "slug": "chladici-boxy",
+    "name": "Chladicí boxy a tašky"
+   },
+   {
+    "slug": "hamaky",
+    "name": "Hamaky"
+   },
+   {
+    "slug": "kempingove-doplnky",
+    "name": "Kempingové doplňky"
+   },
+   {
+    "slug": "stanove-kolky",
+    "name": "Stanové kolíky a kotvení"
+   },
+   {
+    "slug": "stanove-doplnky",
+    "name": "Plachty, podlážky a opravy stanů"
+   }
+  ]
+ },
+ {
+  "slug": "cyklistika",
+  "name": "Cyklistika",
+  "kids": [
+   {
+    "slug": "jizdni-kola",
+    "name": "Jízdní kola"
+   },
+   {
+    "slug": "cyklisticke-helmy",
+    "name": "Cyklistické helmy"
+   },
+   {
+    "slug": "cyklisticke-obleceni",
+    "name": "Cyklistické oblečení"
+   },
+   {
+    "slug": "cyklisticka-obuv",
+    "name": "Cyklistické tretry"
+   },
+   {
+    "slug": "cyklo-prislusenstvi",
+    "name": "Cyklo příslušenství"
+   },
+   {
+    "slug": "cyklo-dily",
+    "name": "Díly a pláště"
+   },
+   {
+    "slug": "cyklo-svetla",
+    "name": "Světla na kolo"
+   },
+   {
+    "slug": "cyklo-zamky",
+    "name": "Zámky na kolo"
+   },
+   {
+    "slug": "cyklo-pumpy-a-naradi",
+    "name": "Pumpy a nářadí"
+   },
+   {
+    "slug": "cyklo-tasky-a-nosice",
+    "name": "Brašny, nosiče a košíky"
+   },
+   {
+    "slug": "cyklo-sedacky-a-voziky",
+    "name": "Dětské sedačky a vozíky za kolo"
+   },
+   {
+    "slug": "cyklo-udrzba",
+    "name": "Údržba kola: mazadla a čističe"
+   },
+   {
+    "slug": "cyklo-nosice-na-auto",
+    "name": "Nosiče kol na auto a stojany"
+   },
+   {
+    "slug": "cyklo-computery",
+    "name": "Cyklopočítače a navigace"
+   }
+  ]
+ },
+ {
+  "slug": "zimni-sporty",
+  "name": "Zimní sporty",
+  "kids": [
+   {
+    "slug": "sjezdove-lyze",
+    "name": "Sjezdové lyže"
+   },
+   {
+    "slug": "lyzarske-boty",
+    "name": "Lyžařské boty"
+   },
+   {
+    "slug": "lyzarske-helmy",
+    "name": "Lyžařské helmy"
+   },
+   {
+    "slug": "lyzarske-bryle",
+    "name": "Lyžařské brýle"
+   },
+   {
+    "slug": "bezecke-lyzovani",
+    "name": "Běžecké lyžování"
+   },
+   {
+    "slug": "snowboarding",
+    "name": "Snowboarding"
+   },
+   {
+    "slug": "brusle",
+    "name": "Zimní brusle"
+   },
+   {
+    "slug": "sane-a-boby",
+    "name": "Sáně a boby"
+   },
+   {
+    "slug": "lyzarske-doplnky",
+    "name": "Lyžařské hůlky a doplňky"
+   },
+   {
+    "slug": "skialpinismus",
+    "name": "Skialpinismus"
+   },
+   {
+    "slug": "lyzarske-hole",
+    "name": "Lyžařské hole"
+   }
+  ]
+ },
+ {
+  "slug": "fitness",
+  "name": "Fitness a posilování",
+  "kids": [
+   {
+    "slug": "cinky-a-kotouce",
+    "name": "Činky a kotouče"
+   },
+   {
+    "slug": "posilovaci-stroje",
+    "name": "Posilovací stroje a lavice"
+   },
+   {
+    "slug": "kardio-trenazery",
+    "name": "Rotopedy a trenažéry"
+   },
+   {
+    "slug": "fitness-pomucky",
+    "name": "Fitness pomůcky"
+   },
+   {
+    "slug": "funkcni-trenink",
+    "name": "Funkční trénink a hrazdy"
+   },
+   {
+    "slug": "masazni-pomucky",
+    "name": "Masážní pomůcky"
+   },
+   {
+    "slug": "bandaze-a-ortezy",
+    "name": "Bandáže a ortézy"
+   }
+  ]
+ },
+ {
+  "slug": "sportovni-vyziva",
+  "name": "Sportovní výživa",
+  "kids": [
+   {
+    "slug": "proteiny",
+    "name": "Proteiny"
+   },
+   {
+    "slug": "aminokyseliny-bcaa",
+    "name": "Aminokyseliny a BCAA"
+   },
+   {
+    "slug": "kreatin",
+    "name": "Kreatin"
+   },
+   {
+    "slug": "gainery",
+    "name": "Gainery"
+   },
+   {
+    "slug": "predtreninkove-boostery",
+    "name": "Předtréninkové boostery"
+   },
+   {
+    "slug": "spalovace-tuku",
+    "name": "Spalovače tuků"
+   },
+   {
+    "slug": "vitaminy-a-mineraly",
+    "name": "Vitamíny, minerály a omega-3"
+   },
+   {
+    "slug": "energeticke-gely-a-tycinky",
+    "name": "Energetické gely a tyčinky"
+   },
+   {
+    "slug": "proteinove-tycinky-a-snacky",
+    "name": "Proteinové tyčinky a snacky"
+   },
+   {
+    "slug": "iontove-napoje",
+    "name": "Iontové nápoje a hydratace"
+   },
+   {
+    "slug": "kolagen-a-klouby",
+    "name": "Kolagen a kloubní výživa"
+   },
+   {
+    "slug": "ostatni-doplnky-stravy",
+    "name": "Další doplňky stravy"
+   }
+  ]
+ },
+ {
+  "slug": "micove-sporty",
+  "name": "Míčové a raketové sporty",
+  "kids": [
+   {
+    "slug": "fotbal",
+    "name": "Fotbal"
+   },
+   {
+    "slug": "hokej",
+    "name": "Hokej"
+   },
+   {
+    "slug": "florbal",
+    "name": "Florbal"
+   },
+   {
+    "slug": "basketbal",
+    "name": "Basketbal"
+   },
+   {
+    "slug": "volejbal",
+    "name": "Volejbal"
+   },
+   {
+    "slug": "tenis",
+    "name": "Tenis"
+   },
+   {
+    "slug": "badminton",
+    "name": "Badminton"
+   },
+   {
+    "slug": "stolni-tenis",
+    "name": "Stolní tenis"
+   },
+   {
+    "slug": "ostatni-micove-sporty",
+    "name": "Další míčové sporty"
+   },
+   {
+    "slug": "padel",
+    "name": "Padel"
+   },
+   {
+    "slug": "squash",
+    "name": "Squash"
+   },
+   {
+    "slug": "ragby-a-americky-fotbal",
+    "name": "Ragby a americký fotbal"
+   },
+   {
+    "slug": "baseball-a-softball",
+    "name": "Baseball a softball"
+   },
+   {
+    "slug": "hazena",
+    "name": "Házená"
+   }
+  ]
+ },
+ {
+  "slug": "vodni-sporty",
+  "name": "Vodní sporty a plavání",
+  "kids": [
+   {
+    "slug": "plavecke-bryle",
+    "name": "Plavecké brýle"
+   },
+   {
+    "slug": "plavecke-cepice",
+    "name": "Plavecké čepice"
+   },
+   {
+    "slug": "plavecke-pomucky",
+    "name": "Plavecké pomůcky"
+   },
+   {
+    "slug": "neopreny",
+    "name": "Neopreny"
+   },
+   {
+    "slug": "paddleboardy",
+    "name": "Paddleboardy a kajaky"
+   },
+   {
+    "slug": "snorchlovani",
+    "name": "Šnorchlování a potápění"
+   },
+   {
+    "slug": "plazove-doplnky",
+    "name": "Plážové doplňky a osušky"
+   },
+   {
+    "slug": "lycra-a-uv-tricka",
+    "name": "Lycra a UV trička do vody"
+   },
+   {
+    "slug": "bazeny",
+    "name": "Bazény a nafukovadla"
+   }
+  ]
+ },
+ {
+  "slug": "rybareni",
+  "name": "Rybaření",
+  "kids": [
+   {
+    "slug": "rybarske-pruty",
+    "name": "Rybářské pruty"
+   },
+   {
+    "slug": "rybarske-navijaky",
+    "name": "Navijáky"
+   },
+   {
+    "slug": "nastrahy-a-navnady",
+    "name": "Nástrahy a návnady"
+   },
+   {
+    "slug": "vlasce-a-snury",
+    "name": "Vlasce a šňůry"
+   },
+   {
+    "slug": "rybarske-doplnky",
+    "name": "Rybářské doplňky"
+   },
+   {
+    "slug": "rybarske-tasky",
+    "name": "Tašky, pouzdra a krabičky"
+   },
+   {
+    "slug": "rybarske-obleceni",
+    "name": "Rybářské oblečení a obuv"
+   },
+   {
+    "slug": "bivaky-a-kresla",
+    "name": "Bivaky, lehátka a křesla"
+   },
+   {
+    "slug": "muskareni",
+    "name": "Muškaření"
+   },
+   {
+    "slug": "rybarske-lode-a-elektronika",
+    "name": "Rybářské lodě, motory a echolóty"
+   }
+  ]
+ },
+ {
+  "slug": "bojove-sporty",
+  "name": "Bojové sporty",
+  "kids": [
+   {
+    "slug": "boxerske-rukavice",
+    "name": "Boxerské rukavice"
+   },
+   {
+    "slug": "boxovaci-pytle",
+    "name": "Boxovací pytle a hrušky"
+   },
+   {
+    "slug": "chranice-bojove-sporty",
+    "name": "Chrániče"
+   },
+   {
+    "slug": "obleceni-bojove-sporty",
+    "name": "Kimona a oblečení"
+   }
+  ]
+ },
+ {
+  "slug": "kolobezky-a-brusle",
+  "name": "Koloběžky, brusle a skateboardy",
+  "kids": [
+   {
+    "slug": "inline-brusle",
+    "name": "Inline brusle"
+   },
+   {
+    "slug": "kolobezky",
+    "name": "Koloběžky"
+   },
+   {
+    "slug": "skateboardy",
+    "name": "Skateboardy a longboardy"
+   },
+   {
+    "slug": "chranice-a-helmy",
+    "name": "Chrániče a helmy"
+   }
+  ]
+ },
+ {
+  "slug": "volny-cas",
+  "name": "Hry a volný čas",
+  "kids": [
+   {
+    "slug": "trampoliny",
+    "name": "Trampolíny"
+   },
+   {
+    "slug": "sipky",
+    "name": "Šipky"
+   },
+   {
+    "slug": "hry-na-zahradu",
+    "name": "Hry na zahradu a pláž"
+   },
+   {
+    "slug": "lukostrelba",
+    "name": "Lukostřelba"
+   },
+   {
+    "slug": "discgolf",
+    "name": "Discgolf a frisbee"
+   }
+  ]
+ },
+ {
+  "slug": "joga-a-pilates",
+  "name": "Jóga, pilates a meditace",
+  "kids": [
+   {
+    "slug": "joga-a-podlozky",
+    "name": "Jógové podložky"
+   },
+   {
+    "slug": "jogove-pomucky",
+    "name": "Jógové bloky, popruhy a bolstery"
+   },
+   {
+    "slug": "meditace",
+    "name": "Meditační polštáře a pomůcky"
+   },
+   {
+    "slug": "pilates-pomucky",
+    "name": "Pilates pomůcky"
+   }
+  ]
+ },
+ {
+  "slug": "tanec-a-gymnastika",
+  "name": "Tanec, balet a gymnastika",
+  "kids": [
+   {
+    "slug": "baletni-obuv",
+    "name": "Baletní obuv a piškoty"
+   },
+   {
+    "slug": "tanecni-obuv",
+    "name": "Taneční obuv"
+   },
+   {
+    "slug": "tanecni-obleceni",
+    "name": "Taneční a baletní oblečení"
+   },
+   {
+    "slug": "gymnasticke-pomucky",
+    "name": "Gymnastické pomůcky"
+   }
+  ]
+ },
+ {
+  "slug": "jezdectvi",
+  "name": "Jezdectví",
+  "kids": [
+   {
+    "slug": "jezdecka-obuv",
+    "name": "Jezdecká obuv a chapsy"
+   },
+   {
+    "slug": "jezdecke-kalhoty",
+    "name": "Jezdecké kalhoty a rajtky"
+   },
+   {
+    "slug": "jezdecke-helmy",
+    "name": "Jezdecké helmy"
+   },
+   {
+    "slug": "jezdecke-obleceni",
+    "name": "Jezdecké oblečení"
+   },
+   {
+    "slug": "vybaveni-pro-kone",
+    "name": "Vybavení pro koně"
+   },
+   {
+    "slug": "jezdecke-doplnky",
+    "name": "Jezdecké doplňky"
+   }
+  ]
+ },
+ {
+  "slug": "golf",
+  "name": "Golf",
+  "kids": [
+   {
+    "slug": "golfove-hole",
+    "name": "Golfové hole"
+   },
+   {
+    "slug": "golfove-micky",
+    "name": "Golfové míčky"
+   },
+   {
+    "slug": "golfove-tasky-a-voziky",
+    "name": "Golfové tašky a vozíky"
+   },
+   {
+    "slug": "golfove-obleceni-a-obuv",
+    "name": "Golfové oblečení a obuv"
+   },
+   {
+    "slug": "golfove-doplnky",
+    "name": "Golfové doplňky"
+   }
+  ]
+ },
+ {
+  "slug": "lov-a-priroda",
+  "name": "Lov a příroda",
+  "kids": [
+   {
+    "slug": "lovecke-obleceni",
+    "name": "Lovecké oblečení a obuv"
+   },
+   {
+    "slug": "lovecke-vybaveni",
+    "name": "Lovecké vybavení"
+   }
+  ]
+ },
+ {
+  "slug": "beh",
+  "name": "Běh, triatlon a atletika",
+  "kids": [
+   {
+    "slug": "bezecke-vesty-a-batohy",
+    "name": "Běžecké vesty a batohy"
+   },
+   {
+    "slug": "bezecke-opasky",
+    "name": "Běžecké opasky a pouzdra"
+   },
+   {
+    "slug": "triatlon",
+    "name": "Triatlon"
+   },
+   {
+    "slug": "atletika",
+    "name": "Atletika"
+   }
+  ]
+ },
+ {
+  "slug": "merino",
+  "name": "Merino oblečení",
+  "kids": [
+   {
+    "slug": "merino-tricka",
+    "name": "Merino trička a tílka"
+   },
+   {
+    "slug": "merino-ponozky",
+    "name": "Merino ponožky"
+   },
+   {
+    "slug": "merino-pradlo",
+    "name": "Merino spodní prádlo a legíny"
+   },
+   {
+    "slug": "merino-mikiny",
+    "name": "Merino mikiny a svetry"
+   },
+   {
+    "slug": "merino-doplnky",
+    "name": "Merino čepice, nákrčníky a rukavice"
+   }
+  ]
+ }
+]

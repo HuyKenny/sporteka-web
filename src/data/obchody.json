@@ -1,0 +1,558 @@
+{
+ "_note": "CJ inzerenti pro sporteka (cs feedy). adIds = feedy v CZK.",
+ "shops": [
+  {
+   "advertiserId": "5603344",
+   "name": "Hs-sport.cz",
+   "domain": "hs-sport.cz",
+   "adIds": [
+    "14353947"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "4754417",
+   "name": "inSPORTline.cz",
+   "domain": "insportline.cz",
+   "adIds": [
+    "13754668"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "6404612",
+   "name": "Swimaholic Eastern Europe",
+   "domain": "swimaholic.cz",
+   "adIds": [
+    "15481846"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "7443558",
+   "name": "2sport CZ/SK",
+   "domain": "2sport.cz",
+   "adIds": [
+    "17049394"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "6215286",
+   "name": "E-sportshop CZ/SK",
+   "domain": "e-sportshop.cz",
+   "adIds": [
+    "15394263"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "4917328",
+   "name": "D-SPORT Europe",
+   "domain": "d-sport.cz",
+   "adIds": [
+    "13585347"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "5949527",
+   "name": "AZfishing.cz",
+   "domain": "azfishing.cz",
+   "adIds": [
+    "15199674"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "5177969",
+   "name": "Sportisimo Europe",
+   "domain": "sportisimo.cz",
+   "adIds": [
+    "13625327"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "5277391",
+   "name": "Bezvasport cz/sk",
+   "domain": "bezvasport.cz",
+   "adIds": [
+    "14341702"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "4327375",
+   "name": "Answear.cz",
+   "domain": "answear.cz",
+   "adIds": [
+    "13735003"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "6892836",
+   "name": "Skinners Europe",
+   "domain": "skinners.cz",
+   "adIds": [
+    "15783180"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "4352963",
+   "name": "Footshop.cz",
+   "domain": "footshop.cz",
+   "adIds": [
+    "13497547"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "4786110",
+   "name": "4camping.cz/sk",
+   "domain": "4camping.cz",
+   "adIds": [
+    "13681317"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "decathlon",
+   "name": "Decathlon.cz",
+   "domain": "decathlon.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "decathlon"
+  },
+  {
+   "advertiserId": "eh-0dc894ef",
+   "name": "E-šipky.cz",
+   "domain": "e-sipky.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-99b11db8",
+   "name": "Fanda-NHL.cz",
+   "domain": "fanda-nhl.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-99f3c6e9",
+   "name": "Acrasport.cz",
+   "domain": "acrasport.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-5e0d5f14",
+   "name": "FootballTime.cz",
+   "domain": "footballtime.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-38763478",
+   "name": "Gigamat.cz",
+   "domain": "gigamat.cz",
+   "adIds": [],
+   "enabled": false,
+   "source": "xml",
+   "_note": "Gigamat: tools/hardware"
+  },
+  {
+   "advertiserId": "eh-c0824462",
+   "name": "Shopcom.cz",
+   "domain": "shopcom.cz",
+   "adIds": [],
+   "enabled": false,
+   "source": "xml",
+   "_note": "Shopcom: DIY/general goods"
+  },
+  {
+   "advertiserId": "eh-07c569fe",
+   "name": "M1sport.cz",
+   "domain": "m1sport.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-6bb9cb0e",
+   "name": "Marrko.cz",
+   "domain": "marrko.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-8322fad9",
+   "name": "Sunshop.cz",
+   "domain": "sunshop.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-12c17550",
+   "name": "Merinoobchod.cz",
+   "domain": "merinoobchod.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-c6d68e01",
+   "name": "ST-potapeni.cz",
+   "domain": "st-potapeni.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-927377bb",
+   "name": "Olpran.cz",
+   "domain": "olpran.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-ab0db44a",
+   "name": "Springos.cz",
+   "domain": "springos.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-ead11da6",
+   "name": "Relaxworld.cz",
+   "domain": "relaxworld.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-e10016e1",
+   "name": "TrailStore.cz",
+   "domain": "trailstore.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-181e212a",
+   "name": "Nejoutdoor.cz",
+   "domain": "nejoutdoor.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-e4029028",
+   "name": "ppb-pohary.cz",
+   "domain": "ppb-pohary.cz",
+   "adIds": [],
+   "enabled": false,
+   "source": "xml",
+   "_note": "ppb-pohary: trophies"
+  },
+  {
+   "advertiserId": "eh-3380760e",
+   "name": "Merinoshop.cz",
+   "domain": "merinoshop.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-b454f836",
+   "name": "Bscom.cz",
+   "domain": "bscom.cz",
+   "adIds": [],
+   "enabled": false,
+   "source": "xml",
+   "_note": "IT/elektro, not sport"
+  },
+  {
+   "advertiserId": "eh-327e2f33",
+   "name": "Sachasport.cz",
+   "domain": "sachasport.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-4849fec3",
+   "name": "Kokiskashop.cz",
+   "domain": "kokiskashop.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-77e9c6e5",
+   "name": "OutdoorMarket.cz",
+   "domain": "outdoormarket.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-a2414a96",
+   "name": "Stretchfit.cz",
+   "domain": "stretchfit.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-7a5b324e",
+   "name": "Swix.cz",
+   "domain": "swix.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-ede487dc",
+   "name": "SorryGravity.cz",
+   "domain": "sorrygravity.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-d9198ffd",
+   "name": "Pepebike.cz",
+   "domain": "pepebike.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-da793162",
+   "name": "Eleven-sportswear.cz",
+   "domain": "eleven-sportswear.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-8f40ae60",
+   "name": "Honzovy-longboardy.cz",
+   "domain": "honzovy-longboardy.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-d51b0ac7",
+   "name": "Procamping.cz",
+   "domain": "procamping.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-6247086b",
+   "name": "Spartoo.cz",
+   "domain": "spartoo.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "ap-1596",
+   "name": "Isostar.cz",
+   "domain": "isostar.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "ap-1438",
+   "name": "Outdoorshops.cz",
+   "domain": "outdoorshops.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "6659563",
+   "name": "Shapenbarefoot.com",
+   "domain": "shapenbarefoot.com",
+   "adIds": [
+    "15596694"
+   ],
+   "enabled": true
+  },
+  {
+   "advertiserId": "eh-164b413c",
+   "name": "NaturalProtein.cz",
+   "domain": "naturalprotein.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-4bbba868",
+   "name": "Nejlevnějšíprotein.cz",
+   "domain": "nejlevnejsiprotein.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-9f0facf5",
+   "name": "Nutriheads.cz",
+   "domain": "nutriheads.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-790f74e3",
+   "name": "FightStore.cz",
+   "domain": "fighter-shop.cz",
+   "adIds": [],
+   "enabled": false,
+   "source": "xml",
+   "_note": "feed has no IMGURL/CATEGORYTEXT (1. 11.): needs another export"
+  },
+  {
+   "advertiserId": "eh-ab774691",
+   "name": "Forsize.cz",
+   "domain": "forsize.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-7ce2d72f",
+   "name": "Militarysklad.cz",
+   "domain": "militarysklad.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-5524bb1d",
+   "name": "NaBOSo.cz",
+   "domain": "naboso.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "ap-1122",
+   "name": "New Balance",
+   "domain": "newbalance.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "ap-799",
+   "name": "Benu.cz",
+   "domain": "benu.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "5154182",
+   "name": "Lekarna.cz",
+   "domain": "lekarna.cz",
+   "adIds": [],
+   "enabled": true
+  },
+  {
+   "advertiserId": "5725783",
+   "name": "Bauerhockey.cz",
+   "domain": "bauerhockey.cz",
+   "adIds": [],
+   "enabled": true
+  },
+  {
+   "advertiserId": "6464420",
+   "name": "Allegro.cz",
+   "domain": "allegro.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "allegro"
+  },
+  {
+   "advertiserId": "dn-skisports",
+   "name": "Skisports.cz",
+   "domain": "skisports.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "dn-mastersport",
+   "name": "Mastersport.cz",
+   "domain": "mastersport.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "dn-sportago",
+   "name": "Sportago.cz",
+   "domain": "sportago.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "dn-sport365",
+   "name": "Sport365.cz",
+   "domain": "sport365.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "dn-sportby",
+   "name": "Sportby.cz",
+   "domain": "sportby.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "dn-ironaesthetics",
+   "name": "IronAesthetics",
+   "domain": "ironaesthetics.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "dn-gymbeam",
+   "name": "GymBeam.cz",
+   "domain": "gymbeam.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "dn-extraleginy",
+   "name": "Extra legíny",
+   "domain": "extraleginy.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  }
+ ]
+}

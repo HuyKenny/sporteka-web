@@ -15,6 +15,6 @@ test-results/
 backups/
 reports/*.local.json
 worker-configuration.d.ts
-data/
+/data/
 /tmp-static/
 /data/static-state.db
