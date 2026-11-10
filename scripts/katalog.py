@@ -539,11 +539,13 @@ def build(env):
                 return True
             if old is None:
                 return False
-            if slug not in self.cache:
-                self.cache[slug] = old.execute('SELECT 1 FROM slugs WHERE slug = ?', (slug,)).fetchone() is not None
-                if len(self.cache) > 50_000:
+            hit = self.cache.get(slug)
+            if hit is None:
+                hit = old.execute('SELECT 1 FROM slugs WHERE slug = ?', (slug,)).fetchone() is not None
+                if len(self.cache) >= 50_000:   # bounded cache; clear BEFORE storing (clearing after lost the entry → KeyError, 10. 11.)
                     self.cache.clear()
-            return self.cache[slug]
+                self.cache[slug] = hit
+            return hit
 
         def __ior__(self, other):
             self.extra = getattr(self, 'extra', set()) | set(other)

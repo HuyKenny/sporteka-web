@@ -137,6 +137,12 @@ def main():
     only = {a for a in sys.argv[1:] if not a.startswith("--")}
     shops = [s for s in json.load(open(APP / "src/data/obchody.json"))["shops"]
              if s.get("enabled") and not s.get("source") and (not only or s["advertiserId"] in only or set(s["adIds"]) & only)]
+    # stalest file first: when a run is cut short (GitHub Actions step limit), the next run continues with the shops
+    # that were not refreshed, instead of always redoing the same ones (a shop without a file goes first)
+    def age(s):
+        f = OUT / f"{s['advertiserId']}.jsonl.gz"
+        return f.stat().st_mtime if f.exists() else 0
+    shops.sort(key=age)
     summary = []
     for s in shops:
         try:

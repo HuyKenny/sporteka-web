@@ -95,10 +95,10 @@ jobs:
           printf '%s\n' "$S1" > "$SPT_ROOT/credentials/.sporteka-credentials.env"
           printf '%s\n' "$S2" > "$SPT_ROOT/credentials/.affiliateport-credentials.env"
           printf '%s\n' "$S3" > data/feedy.json
-      # each source on its own clock (10. 11.: CJ ~2 h, Decathlon ~1 min, XML feeds ~10 min, Allegro ~20 min); a source that
+      # each source on its own clock (10. 11. in Actions: CJ 2–3 h+, Decathlon 3 min, XML feeds 8 min, Allegro 45 min+); a source that
       # fails or runs out of time keeps its previous files (restored above) and the gate checks every shop has one
       - name: Download feeds — CJ
-        timeout-minutes: 170
+        timeout-minutes: 200
         continue-on-error: true
         run: python3 -I scripts/cj-stahni.py
       - name: Download feeds — Decathlon
@@ -110,11 +110,16 @@ jobs:
         continue-on-error: true
         run: python3 -I scripts/xml-feedy-stahni.py
       - name: Download feeds — Allegro
-        timeout-minutes: 45
+        timeout-minutes: 60
         continue-on-error: true
         run: python3 -I scripts/cj-allegro.py
       - name: Gate (every enabled shop has a feed file)
         run: python3 -I scripts/feedy-kontrola.py
+      - name: Save the feeds at once (encrypted; a failed build then does not cost the 3 h download again)
+        env:
+          STATE_KEY: ${{ secrets.STATE_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/state.sh push feeds
       - name: Build the catalogue
         env:
           SPT_MAX: '900000'
@@ -132,7 +137,6 @@ jobs:
         run: |
           rm -f data/feedy.json
           scripts/state.sh push catalog
-          scripts/state.sh push feeds
       - name: Tell Kenny when it failed
         if: failure()
         env:
