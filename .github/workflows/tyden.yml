@@ -10,8 +10,8 @@
 name: tyden
 on:
   schedule:
-    - cron: '0 0 * * 1'        # Monday 01:00 CET: data + web
-    - cron: '30 3 * * *'       # daily 04:30 CET: continue the web part when it did not finish
+    - cron: '0 1 * * 1'        # Monday 02:00 CET: data + web
+    - cron: '30 2 * * *'       # daily 03:30 CET: continue the web part when it did not finish
   workflow_dispatch:
     inputs:
       data:
@@ -57,7 +57,7 @@ jobs:
 
   data:
     needs: scan
-    if: github.event.schedule == '0 0 * * 1' || (github.event_name == 'workflow_dispatch' && inputs.data)
+    if: github.event.schedule == '0 1 * * 1' || (github.event_name == 'workflow_dispatch' && inputs.data)
     runs-on: ubuntu-latest
     timeout-minutes: 355
     permissions:
@@ -170,7 +170,7 @@ jobs:
       - name: Anything to do?
         id: gate
         run: |
-          if [ "${{ github.event.schedule }}" = '30 3 * * *' ] && [ ! -f data/state/web-pending ]; then
+          if [ "${{ github.event.schedule }}" = '30 2 * * *' ] && [ ! -f data/state/web-pending ]; then
             echo "daily run: nothing pending"; echo "go=false" >> "$GITHUB_OUTPUT"
           else
             echo "go=true" >> "$GITHUB_OUTPUT"
@@ -235,7 +235,7 @@ jobs:
           SPT_FEEDY_JSON: ${{ secrets.SPT_FEEDY_JSON }}
         run: python3 -I scripts/verify_no_secrets.py --out
       - name: IndexNow
-        if: steps.gate.outputs.go == 'true' && github.event.schedule == '0 0 * * 1'
+        if: steps.gate.outputs.go == 'true' && github.event.schedule == '0 1 * * 1'
         continue-on-error: true
         env:
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
