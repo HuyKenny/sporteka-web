@@ -1,7 +1,7 @@
 """sporteka.cz — static pages (posts table, type 'page'), written by scripts/katalog.py on every build.
 Edit the text here and run `katalog.py build` + `push`; ids are fixed (slugs table kind 'page')."""
 
-OPERATOR = 'Ha Duy Huy, IČO 07876823'
+OPERATOR = 'Ha Duy Huy, se sídlem Bartáková 36, 140 00 Praha, IČO 07876823, datová schránka dxmsrdt (fyzická osoba podnikající dle živnostenského zákona, není plátcem DPH)'
 EMAIL = 'info@sporteka.cz'
 
 PAGES = [
@@ -50,7 +50,7 @@ PAGES = [
     (4, 'o-nas', 'O Sporteka.cz a redakční zásady', 'Kdo za Sporteka.cz stojí, jak vybíráme obchody a značky a čím se řídíme při popisu produktů a kategorií.', f'''
 <p>Sporteka.cz je nezávislý srovnávač sportovního vybavení, oblečení a obuvi. Pomáháme vám zorientovat se v nabídce českých e-shopů: ukážeme stejné zboží od více prodejců vedle sebe, velikosti skladem a vývoj ceny. Rozhodnutí ale zůstává na vás, a proto k nabídkám přidáváme i průvodce výběrem.</p>
 <h2>Kdo web provozuje</h2>
-<p>Provozovatelem je {OPERATOR}. Sporteka.cz nic neprodává, objednávku vždy dokončíte v e-shopu prodejce. Kontakt: <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>
+<p>Provozovatelem je {OPERATOR}. Sporteka.cz nic neprodává, objednávku vždy dokončíte v e-shopu prodejce. Kontakt: <a href="mailto:{EMAIL}">{EMAIL}</a>. Provozovatel je také autorem webu <a href="https://huy.cz/">huy.cz</a>.</p>
 <h2>Kdo za webem stojí</h2>
 <p>Sporteku postavil a provozuje Ha Duy Huy (Kenny). Živí se jako SEO konzultant a srovnávače cen si staví sám. Jak Sporteka vznikala, popsal v <a href="https://huy.cz/projekty/sporteka/" rel="nofollow">případové studii na huy.cz</a>.</p>
 <h2>Jak vybíráme obchody</h2>
