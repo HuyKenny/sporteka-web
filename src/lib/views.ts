@@ -48,6 +48,8 @@ function collection(url: string, title: string) {
 
 // ---------- category ----------
 import facetTexts from '../texts/fasety.json';
+import brandTexts from '../texts/znacky.json';
+const BRAND_TEXTS = brandTexts as unknown as Record<string, { seo_title?: string; seo_desc?: string; description_html?: string; guide_html?: string; faq_json?: string }>;
 const FACET_TEXTS = facetTexts as unknown as Record<string, { seo_title?: string; seo_desc?: string; description_html?: string; guide_html?: string; faq_json?: string }>;
 export interface FacetPage {
   id: number; slug: string; base_slug: string; qs: string; h1: string; seo_title: string; seo_desc: string; intro_html: string; second_html: string;
@@ -143,8 +145,11 @@ function only(f: ReturnType<typeof parseFilters>): string | null {
 
 // ---------- brand ----------
 export async function brandView(db: D1Database, slug: string, page: number, sp: URLSearchParams) {
-  const [b, tree, brands] = await Promise.all([loadBrand(db, slug), catTree(db), brandList(db)]);
-  if (!b) return null;
+  const [b0, tree, brands] = await Promise.all([loadBrand(db, slug), catTree(db), brandList(db)]);
+  if (!b0) return null;
+  // hand-written brand texts (src/texts/znacky.json) win over the generic ones
+  const bt = BRAND_TEXTS[b0.slug];
+  const b = bt ? { ...b0, seo_title: bt.seo_title ?? b0.seo_title, seo_desc: bt.seo_desc ?? b0.seo_desc, description_html: bt.description_html ?? b0.description_html, second_html: bt.guide_html ?? b0.second_html, faq_json: bt.faq_json ?? b0.faq_json } : b0;
   const fc = await facets(db, `fb:${b.id}`);
   const f = parseFilters(sp);
   f.znacka = [];
