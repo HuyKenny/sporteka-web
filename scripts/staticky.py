@@ -21,6 +21,7 @@ the home page, tiny prefixes — lives in the main Worker.
   staticky.py rollback backups/<file>     # the old routes back (SSR Worker sporteka)
   staticky.py status [--discord]          # deployed / left per shard (one Discord message when complete)
   staticky.py weekly [--noindex] [--only s01,s02]   # gsc → prepare → build → local SSR → search/filters → render changed + deploy per shard
+  staticky.py weekly --texts              # only page 1 of every listing (texts in src/texts/ changed) — minutes, not hours
 
 State (data/static-state.db): shard map, and per path its shard + the asset hash Cloudflare holds, so a deploy can name
 unchanged files by hash without keeping 36 GB of HTML on the SD card. Rendered files live in tmp-static/out/ only until
@@ -191,6 +192,7 @@ def prepare(db):
     if subprocess.run(['pgrep', '-f', 'port 879[9]'], capture_output=True).returncode == 0:
         raise SystemExit('stop the local SSR (wrangler dev) first: it holds the render copy')
     tmp = CATALOG.with_suffix('.tmp')
+    CATALOG.parent.mkdir(parents=True, exist_ok=True)   # a fresh GitHub runner has no tmp-static/state yet (10. 11.)
     shutil.copyfile(LIVE, tmp)
     for suf in ('-wal', '-shm'):
         Path(str(CATALOG) + suf).unlink(missing_ok=True)
@@ -555,12 +557,14 @@ def write_out(path, body):
     f.write_bytes(body)
 
 
-def render(db, shard, limit=None, threads=8, only_missing=False, kind=None, changed=False, sync=True):
+def render(db, shard, limit=None, threads=8, only_missing=False, kind=None, changed=False, sync=True, first_page=False):
     if sync:
         sync_paths(db)
     sql = "SELECT path, kind, src FROM files WHERE (shard = ? OR ? = 'ALL') AND kind != 'data'" + (" AND hash = ''" if only_missing else '') \
         + (' AND kind = ?' if kind else '') + ' ORDER BY path'
     rows = db.execute(sql, (shard, shard) + ((kind,) if kind else ())).fetchall()
+    if first_page:   # texts only show on page 1 of a listing
+        rows = [r for r in rows if '/page/' not in r[0]]
     src = {}
     if changed:
         # products only when their data (or the build / month) changed; every other page is rendered (listings show prices)
@@ -812,7 +816,9 @@ def worker_name(shard, prefix):
     return f'{prefix}-{"s00" if shard == MAIN else shard}'
 
 
-def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=False, until=''):
+def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=False, until='', texts=False):
+    """texts=True: only the first page of every listing (category, facet landing, brand, /slevy/) — new or changed
+    texts in src/texts/ go live in minutes instead of the full render; search / filter data stay as they are."""
     global DEADLINE
     t0 = time.time()
     if until:   # HH:MM today, or tomorrow when already past
@@ -834,6 +840,9 @@ def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=F
         r = subprocess.run(['npx', 'astro', 'build'], cwd=APP, env={**os.environ, 'BUILD_ID': 'static'}, capture_output=True, text=True)
         if r.returncode:
             raise SystemExit(f'astro build failed: {r.stderr[-500:]}')
+    if texts:
+        skip_data = True
+    (APP / 'tmp-static').mkdir(exist_ok=True)
     log = open(APP / 'tmp-static' / f'wrangler-{PORT}.log', 'w')
     # wrangler dev keeps a local trace of every request (~27 kB each, 2 GB a day filled the SD card on 9. 11.) unless
     # X_LOCAL_OBSERVABILITY=false (the config's observability switch does not stop it); drop any old trace store
@@ -873,7 +882,7 @@ def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=F
             if DEADLINE and time.time() > DEADLINE:
                 print(f'deadline: {sh} and later shards wait for the next run')
                 break
-            while render(db, sh, threads=threads, changed=True, sync=False) == 'disk':
+            while render(db, sh, threads=threads, changed=not texts, sync=False, kind='listing' if texts else None, first_page=texts) == 'disk':
                 deploy(db, sh, worker_name(sh, prefix), noindex)   # frees the rendered files, then render the rest
             deploy(db, sh, worker_name(sh, prefix), noindex)
     finally:
@@ -1068,6 +1077,7 @@ def main():
     ap.add_argument('--until', help='weekly: HH:MM — stop starting new pages / shards after it')
     ap.add_argument('--only', help='weekly: only these shards (comma list)')
     ap.add_argument('--changed', action='store_true', help='products only when their source data changed')
+    ap.add_argument('--texts', action='store_true', help='weekly: only the first page of every listing (texts changed)')
     ap.add_argument('--kind', help='render only this kind (product, listing, page, home, sitemap)')
     a = ap.parse_args()
     db = state()
@@ -1108,7 +1118,7 @@ def main():
     elif a.cmd == 'status':
         status(db, a.discord)
     elif a.cmd == 'weekly':
-        weekly(db, a.threads, a.prefix, a.noindex, a.only.split(',') if a.only else None, a.skip_prep, a.skip_data, a.until or '')
+        weekly(db, a.threads, a.prefix, a.noindex, a.only.split(',') if a.only else None, a.skip_prep, a.skip_data, a.until or '', a.texts)
 
 
 if __name__ == '__main__':

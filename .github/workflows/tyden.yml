@@ -6,14 +6,22 @@
 # hit its time limit (marker data/state/web-pending) — rendering then continues where it stopped.
 #
 # PUBLIC repository: secrets only as step env (never job-wide, never echoed); state between runs is encrypted
-# (scripts/state.sh, STATE_KEY); triggers are schedule + manual only (no pull_request); actions pinned to commits.
+# (scripts/state.sh, STATE_KEY); triggers are schedule, manual and push to main of src/texts/** (no pull_request); actions pinned to commits.
 name: tyden
 on:
   schedule:
     - cron: '0 1 * * 1'        # Monday 02:00 CET: data + web
     - cron: '30 2 * * *'       # daily 03:30 CET: continue the web part when it did not finish
+  # new / changed texts (categories, facet landings, brands): only those pages, live in minutes
+  push:
+    branches: [main]
+    paths: ['src/texts/**']
   workflow_dispatch:
     inputs:
+      texts:
+        description: 'Texts only: render + deploy the first page of every category / landing / brand (minutes)'
+        type: boolean
+        default: false
       data:
         description: 'Data: download feeds + build the catalogue'
         type: boolean
@@ -55,6 +63,7 @@ jobs:
           SPT_FEEDY_JSON: ${{ secrets.SPT_FEEDY_JSON }}
         run: python3 -I scripts/verify_no_secrets.py
 
+  # data = download the feeds (own job), catalog = build + mirror update (own job)
   data:
     needs: scan
     if: github.event.schedule == '0 1 * * 1' || (github.event_name == 'workflow_dispatch' && inputs.data)
@@ -120,6 +129,51 @@ jobs:
           STATE_KEY: ${{ secrets.STATE_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: scripts/state.sh push feeds
+      - name: Clean up credentials
+        if: always()
+        run: rm -rf "$SPT_ROOT/credentials" data/feedy.json
+
+  # own job = own 6 h limit (10. 11.: download 3 h + build 2.3 h + update did not fit into one job)
+  catalog:
+    needs: [scan, data]
+    if: needs.data.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    permissions:
+      contents: write          # release "state" (encrypted)
+    env:
+      SPT_ROOT: ${{ github.workspace }}/../spt-root
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with: { python-version: '3.13' }
+      - name: Disk + swap (the build peaks around 5 GB of RAM)
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo fallocate -l 8G /mnt/swapfile && sudo chmod 600 /mnt/swapfile && sudo mkswap /mnt/swapfile >/dev/null && sudo swapon /mnt/swapfile
+          free -m; df -h . | tail -1
+      - name: Restore state (encrypted)
+        env:
+          STATE_KEY: ${{ secrets.STATE_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          scripts/state.sh pull catalog
+          scripts/state.sh pull feeds
+          ls -l data
+      - name: Credentials and feed list (from secrets, written outside the checkout, never printed)
+        env:
+          S1: ${{ secrets.SPT_CRED_SPORTEKA }}
+          S2: ${{ secrets.SPT_CRED_AFFILIATEPORT }}
+          S3: ${{ secrets.SPT_FEEDY_JSON }}
+        run: |
+          mkdir -p "$SPT_ROOT/credentials" "$SPT_ROOT/reports" data
+          umask 077
+          printf '%s\n' "$S1" > "$SPT_ROOT/credentials/.sporteka-credentials.env"
+          printf '%s\n' "$S2" > "$SPT_ROOT/credentials/.affiliateport-credentials.env"
+          printf '%s\n' "$S3" > data/feedy.json
       - name: Build the catalogue
         env:
           SPT_MAX: '900000'
@@ -149,8 +203,8 @@ jobs:
         run: rm -rf "$SPT_ROOT/credentials" data/feedy.json
 
   web:
-    needs: [scan, data]
-    if: always() && needs.scan.result == 'success' && (needs.data.result == 'success' || needs.data.result == 'skipped') && (github.event_name == 'schedule' || inputs.web)
+    needs: [scan, data, catalog]
+    if: always() && needs.scan.result == 'success' && (needs.catalog.result == 'success' || (needs.data.result == 'skipped' && needs.catalog.result == 'skipped')) && (github.event_name == 'schedule' || github.event_name == 'push' || inputs.web || inputs.texts)
     runs-on: ubuntu-latest
     timeout-minutes: 350
     permissions:
@@ -211,10 +265,14 @@ jobs:
           # Search Console numbers come from Malina (data/gsc.json, encrypted state); no Google key here
           if [ -f data/gsc.json ]; then export GSC_FILE=data/gsc.json; fi
           # new pages stop starting after ~4.5 h (deploy of the current shard + state save must fit into the job)
-          python3 -I scripts/staticky.py weekly --threads 4 --until "$(date -d '+270 minutes' +%H:%M)" 2>&1 | tee "$RUNNER_TEMP/weekly.log"
+          # texts only (push of src/texts/**, or the texts input): first page of every listing, no search / filter data
+          MODE=""
+          if [ "${{ github.event_name }}" = push ] || [ "${{ inputs.texts }}" = true ]; then MODE="--texts"; fi
+          python3 -I scripts/staticky.py weekly $MODE --threads 4 --until "$(date -d '+270 minutes' +%H:%M)" 2>&1 | tee "$RUNNER_TEMP/weekly.log"
           rc=${PIPESTATUS[0]}
           mkdir -p data/state
-          if grep -q 'deadline' "$RUNNER_TEMP/weekly.log"; then touch data/state/web-pending; else rm -f data/state/web-pending; fi
+          # a texts run never clears the marker of an unfinished full run
+          if grep -q 'deadline' "$RUNNER_TEMP/weekly.log"; then touch data/state/web-pending; elif [ -z "$MODE" ]; then rm -f data/state/web-pending; fi
           exit $rc
       - name: Save state (encrypted)
         if: always() && steps.gate.outputs.go == 'true'
