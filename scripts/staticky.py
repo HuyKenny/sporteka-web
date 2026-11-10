@@ -777,7 +777,7 @@ def deploy(db, shard, worker=None, noindex=False):
         db.executemany("UPDATE files SET hash = '', src = '' WHERE path IN (?, ?)",
                        [(p, p[:-len('index.html')] if p.endswith('/index.html') else p) for p in miss])
         db.commit()
-        raise SystemExit(f'{len(miss)} blobs missing on Cloudflare: render --only-missing and deploy again')
+        raise MissingBlobs(f'{len(miss)} blobs missing on Cloudflare: render --only-missing and deploy again')
     if r.returncode != 0:
         raise SystemExit(f'cf-assets failed: {r.stderr.strip()[-600:]}')
     res = json.loads(r.stdout.strip().splitlines()[-1])
@@ -791,6 +791,21 @@ def deploy(db, shard, worker=None, noindex=False):
     for p in pending:
         (OUT / file_of(p).lstrip('/')).unlink(missing_ok=True)
     print(f'{worker}: {res["total"]} files, {res["uploaded"]} uploaded ({res["bytes"] / 1e6:.1f} MB)')
+
+
+class MissingBlobs(SystemExit):
+    """The state names a file hash Cloudflare no longer holds (those rows are reset to hash ''); weekly re-renders them."""
+
+
+def deploy_retry(db, sh, worker, noindex, threads):
+    """deploy; when Cloudflare misses blobs, render exactly those pages (hash reset by deploy) and deploy again."""
+    for attempt in range(3):
+        try:
+            return deploy(db, sh, worker, noindex)
+        except MissingBlobs as e:
+            print(f'{sh}: {e} — re-rendering them (attempt {attempt + 1})', flush=True)
+            render(db, sh, threads=threads, only_missing=True, sync=False)
+    deploy(db, sh, worker, noindex)
 
 
 # ---------- the whole weekly run ----------
@@ -883,8 +898,8 @@ def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=F
                 print(f'deadline: {sh} and later shards wait for the next run')
                 break
             while render(db, sh, threads=threads, changed=not texts, sync=False, kind='listing' if texts else None, first_page=texts) == 'disk':
-                deploy(db, sh, worker_name(sh, prefix), noindex)   # frees the rendered files, then render the rest
-            deploy(db, sh, worker_name(sh, prefix), noindex)
+                deploy_retry(db, sh, worker_name(sh, prefix), noindex, threads)   # frees the rendered files, then render the rest
+            deploy_retry(db, sh, worker_name(sh, prefix), noindex, threads)
     finally:
         os.killpg(srv.pid, 15)
     print(f'weekly done in {(time.time() - t0) / 3600:.1f} h')
