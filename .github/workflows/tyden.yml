@@ -11,6 +11,7 @@ name: tyden
 on:
   schedule:
     - cron: '0 1 * * 1'        # Monday 02:00 CET: data + web
+    - cron: '0 0 * * 0,2,3,4,5,6'   # Tue–Sun 01:00 CET: prices only (fast feeds + the stalest CJ shops) → render the changed pages
     - cron: '30 2 * * *'       # daily 03:30 CET: continue the web part when it did not finish
   # new / changed texts (categories, facet landings, brands): only those pages, live in minutes
   push:
@@ -18,6 +19,10 @@ on:
     paths: ['src/texts/**']
   workflow_dispatch:
     inputs:
+      daily:
+        description: 'Daily prices run (fast feeds + stalest CJ shops → prices → render changed pages)'
+        type: boolean
+        default: false
       texts:
         description: 'Texts only: render + deploy the first page of every category / landing / brand (minutes)'
         type: boolean
@@ -133,6 +138,81 @@ jobs:
         if: always()
         run: rm -rf "$SPT_ROOT/credentials" data/feedy.json
 
+  # Tue–Sun: only prices (Kenny 11. 11.). New / gone products, categories and the full CJ + Allegro download stay in the Monday run above.
+  daily:
+    needs: scan
+    if: github.event.schedule == '0 0 * * 0,2,3,4,5,6' || (github.event_name == 'workflow_dispatch' && inputs.daily)
+    runs-on: ubuntu-latest
+    timeout-minutes: 170
+    permissions:
+      contents: write          # release "state" (encrypted)
+    env:
+      SPT_ROOT: ${{ github.workspace }}/../spt-root
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with: { python-version: '3.13' }
+      - name: Restore state (encrypted)
+        env:
+          STATE_KEY: ${{ secrets.STATE_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          scripts/state.sh pull catalog
+          scripts/state.sh pull feeds
+          test -f data/live-production.db
+          echo "SINCE=$(date +%s)" >> "$GITHUB_ENV"
+      - name: Credentials and feed list (from secrets, written outside the checkout, never printed)
+        env:
+          S1: ${{ secrets.SPT_CRED_SPORTEKA }}
+          S2: ${{ secrets.SPT_CRED_AFFILIATEPORT }}
+          S3: ${{ secrets.SPT_FEEDY_JSON }}
+        run: |
+          mkdir -p "$SPT_ROOT/credentials" "$SPT_ROOT/reports" data
+          umask 077
+          printf '%s\n' "$S1" > "$SPT_ROOT/credentials/.sporteka-credentials.env"
+          printf '%s\n' "$S2" > "$SPT_ROOT/credentials/.affiliateport-credentials.env"
+          printf '%s\n' "$S3" > data/feedy.json
+      # a failed source keeps its previous file (an older mtime), so only freshly refreshed shops are repriced
+      - name: Download feeds — Decathlon
+        timeout-minutes: 20
+        continue-on-error: true
+        run: python3 -I scripts/decathlon-stahni.py
+      - name: Download feeds — XML feeds
+        timeout-minutes: 30
+        continue-on-error: true
+        run: python3 -I scripts/xml-feedy-stahni.py
+      - name: Download feeds — CJ (stalest shops first, no new shop after 90 min)
+        timeout-minutes: 110
+        continue-on-error: true
+        run: python3 -I scripts/cj-stahni.py --max-minutes 90
+      - name: Prices into the catalogue mirror (no D1, nothing billed)
+        env:
+          SPT_PRODUCTION_APPROVED: 'yes'
+          SPT_MIRROR_ONLY: 'yes'
+          SPT_WEEK_WRITES: '50000000'
+        run: python3 -I scripts/katalog.py daily --env production --since "$SINCE"
+      - name: Save state (encrypted)
+        env:
+          STATE_KEY: ${{ secrets.STATE_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -f data/feedy.json
+          scripts/state.sh push catalog
+          scripts/state.sh push feeds
+      - name: Tell Kenny when it failed
+        if: failure()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 -c "import sys,os; sys.path.insert(0,'scripts'); import staticky; staticky.discord('⚠️ sporteka: denní aktualizace cen v GitHub Actions spadla — ' + os.environ['RUN'])"
+      - name: Clean up credentials
+        if: always()
+        run: rm -rf "$SPT_ROOT/credentials" data/feedy.json
+
   # own job = own 6 h limit (10. 11.: download 3 h + build 2.3 h + update did not fit into one job)
   catalog:
     needs: [scan, data]
@@ -203,8 +283,8 @@ jobs:
         run: rm -rf "$SPT_ROOT/credentials" data/feedy.json
 
   web:
-    needs: [scan, data, catalog]
-    if: always() && needs.scan.result == 'success' && (needs.catalog.result == 'success' || (needs.data.result == 'skipped' && needs.catalog.result == 'skipped')) && (github.event_name == 'schedule' || github.event_name == 'push' || inputs.web || inputs.texts)
+    needs: [scan, data, catalog, daily]
+    if: always() && needs.scan.result == 'success' && (needs.catalog.result == 'success' || needs.daily.result == 'success' || (needs.data.result == 'skipped' && needs.catalog.result == 'skipped' && needs.daily.result == 'skipped')) && (github.event_name == 'schedule' || github.event_name == 'push' || inputs.web || inputs.texts || inputs.daily)
     runs-on: ubuntu-latest
     timeout-minutes: 350
     permissions:
@@ -268,6 +348,8 @@ jobs:
           # texts only (push of src/texts/**, or the texts input): first page of every listing, no search / filter data
           MODE=""
           if [ "${{ github.event_name }}" = push ] || [ "${{ inputs.texts }}" = true ]; then MODE="--texts"; fi
+          # daily prices run: render only the products whose price / offers changed + the listings (no search / filter data, no new paths)
+          if [ "${{ github.event.schedule }}" = '0 0 * * 0,2,3,4,5,6' ] || [ "${{ inputs.daily }}" = true ]; then MODE="--daily"; fi
           python3 -I scripts/staticky.py weekly $MODE --threads 4 --until "$(date -d '+270 minutes' +%H:%M)" 2>&1 | tee "$RUNNER_TEMP/weekly.log"
           rc=${PIPESTATUS[0]}
           mkdir -p data/state

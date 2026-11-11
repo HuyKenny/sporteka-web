@@ -557,7 +557,7 @@ def write_out(path, body):
     f.write_bytes(body)
 
 
-def render(db, shard, limit=None, threads=8, only_missing=False, kind=None, changed=False, sync=True, first_page=False):
+def render(db, shard, limit=None, threads=8, only_missing=False, kind=None, changed=False, sync=True, first_page=False, ignore_stamp=False):
     if sync:
         sync_paths(db)
     sql = "SELECT path, kind, src FROM files WHERE (shard = ? OR ? = 'ALL') AND kind != 'data'" + (" AND hash = ''" if only_missing else '') \
@@ -570,7 +570,10 @@ def render(db, shard, limit=None, threads=8, only_missing=False, kind=None, chan
         # products only when their data (or the build / month) changed; every other page is rendered (listings show prices)
         stamp = build_stamp()
         src = {p: f'{stamp}:{h}' for p, h in cached_hashes().items()}
-        rows = [r for r in rows if r[1] != 'product' or src.get(r[0]) != r[2]]
+        if ignore_stamp:   # daily: only a changed product row / offer / price history re-renders a product, not a new build (that is the weekly run's job)
+            rows = [r for r in rows if r[1] != 'product' or src.get(r[0], '').split(':')[-1] != (r[2] or '').split(':')[-1]]
+        else:
+            rows = [r for r in rows if r[1] != 'product' or src.get(r[0]) != r[2]]
     stubs = redirect_plan(shard_map(db))[1]
     stamp0 = time.strftime('%Y-%m-%dT%H:%M:%S')
     for r in [r for r in rows if r[1] == 'stub']:
@@ -831,7 +834,7 @@ def worker_name(shard, prefix):
     return f'{prefix}-{"s00" if shard == MAIN else shard}'
 
 
-def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=False, until='', texts=False):
+def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=False, until='', texts=False, daily=False):
     """texts=True: only the first page of every listing (category, facet landing, brand, /slevy/) — new or changed
     texts in src/texts/ go live in minutes instead of the full render; search / filter data stay as they are."""
     global DEADLINE
@@ -855,7 +858,7 @@ def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=F
         r = subprocess.run(['npx', 'astro', 'build'], cwd=APP, env={**os.environ, 'BUILD_ID': 'static'}, capture_output=True, text=True)
         if r.returncode:
             raise SystemExit(f'astro build failed: {r.stderr[-500:]}')
-    if texts:
+    if texts or daily:
         skip_data = True
     (APP / 'tmp-static').mkdir(exist_ok=True)
     log = open(APP / 'tmp-static' / f'wrangler-{PORT}.log', 'w')
@@ -897,7 +900,7 @@ def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=F
             if DEADLINE and time.time() > DEADLINE:
                 print(f'deadline: {sh} and later shards wait for the next run')
                 break
-            while render(db, sh, threads=threads, changed=not texts, sync=False, kind='listing' if texts else None, first_page=texts) == 'disk':
+            while render(db, sh, threads=threads, changed=not texts, sync=False, kind='listing' if texts else None, first_page=texts, ignore_stamp=daily) == 'disk':
                 deploy_retry(db, sh, worker_name(sh, prefix), noindex, threads)   # frees the rendered files, then render the rest
             deploy_retry(db, sh, worker_name(sh, prefix), noindex, threads)
     finally:
@@ -1092,6 +1095,7 @@ def main():
     ap.add_argument('--until', help='weekly: HH:MM — stop starting new pages / shards after it')
     ap.add_argument('--only', help='weekly: only these shards (comma list)')
     ap.add_argument('--changed', action='store_true', help='products only when their source data changed')
+    ap.add_argument('--daily', action='store_true', help='weekly: the daily price run (no new paths, no search / filter data, a new build alone does not re-render products)')
     ap.add_argument('--texts', action='store_true', help='weekly: only the first page of every listing (texts changed)')
     ap.add_argument('--kind', help='render only this kind (product, listing, page, home, sitemap)')
     a = ap.parse_args()
@@ -1133,7 +1137,7 @@ def main():
     elif a.cmd == 'status':
         status(db, a.discord)
     elif a.cmd == 'weekly':
-        weekly(db, a.threads, a.prefix, a.noindex, a.only.split(',') if a.only else None, a.skip_prep, a.skip_data, a.until or '', a.texts)
+        weekly(db, a.threads, a.prefix, a.noindex, a.only.split(',') if a.only else None, a.skip_prep, a.skip_data, a.until or '', a.texts, a.daily)
 
 
 if __name__ == '__main__':

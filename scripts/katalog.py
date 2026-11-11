@@ -316,6 +316,41 @@ def load_groups():
     return groups, stats, unmapped
 
 
+def load_prices(since):
+    """Daily update, light pass: (feed, group key) → (price, old price) of the shops whose feed file was refreshed at or after
+    `since` (epoch seconds). Same group key and price rule as load_groups()/summarize() (cheapest variant, old price only when
+    higher) but no categorising, no clustering and no rows kept in memory — groups that are not live are ignored later anyway.
+    Returns (prices, files, counts): counts[feed] = number of groups, used to refuse a feed that shrank."""
+    shops = json.load(open(APP / 'src/data/obchody.json'))['shops']
+    prices, counts, used = {}, collections.Counter(), []
+    for sh in shops:
+        f = DATA / 'cj' / f"{sh['advertiserId']}.jsonl.gz"
+        if not sh.get('enabled') or not f.exists() or f.stat().st_mtime < since:
+            continue
+        feed = f"{({'decathlon': 'dec', 'xml': 'xml', 'allegro': 'alg'})[sh['source']]}:{sh['advertiserId']}" if sh.get('source') else f"cj:{sh['advertiserId']}"
+        used.append(sh['name'])
+        for line in gzip.open(f, 'rt', encoding='utf-8'):
+            r = json.loads(line)
+            if (r.get('cur') or 'CZK') != 'CZK':
+                continue
+            price, list_price = num(r.get('sp')), num(r.get('p'))
+            if not price or price >= list_price:
+                price, old = list_price, 0.0
+            else:
+                old = list_price
+            if price <= 0 or not r.get('go') or not r.get('img'):
+                continue
+            url = r.get('url') or ''
+            gk = r.get('g') or re.sub(r'[?#].*$', '', url) or r['id']
+            k = (feed, gk)
+            cur = prices.get(k)
+            if cur is None:
+                counts[feed] += 1
+            if cur is None or price < cur[0]:
+                prices[k] = (price, old)
+    return prices, used, counts
+
+
 def summarize(g):
     rows = g['rows']
     most = lambda xs: collections.Counter(x for x in xs if x).most_common(1)[0][0] if any(xs) else ''
@@ -986,7 +1021,7 @@ def push(env, dry):
 WCOST = dict(offer_upd=3, offer_gone=3, offer_new=4, prod_upd=2, cp_upd=5, hist=1, prod=3, cp=5, bp=2, pp=2, key=2, slug=1, fts=4, redirect=1)
 
 
-def prices_sql(env):
+def prices_sql(env, daily_since=None):
     """Weekly incremental update (Kenny 3. 11.: new products in, products nobody sells out, prices + availability — all within
     the Workers Paid D1 write allowance). Compares a fresh, uncapped build (next.db) with the live mirror and emits small
     UPDATE/INSERT/DELETE statements, cheapest and most important first:
@@ -1000,22 +1035,40 @@ def prices_sql(env):
         sys.exit(f'{live} missing — run a full push first')
     budget = int(os.environ.get('SPT_WEEK_WRITES') or 4_000_000)
     live_max = int(os.environ.get('SPT_LIVE_MAX') or 800_000)
-    db = sqlite3.connect(NEXT)
+    daily = daily_since is not None
+    if daily:   # Kenny 11. 11.: every day only prices of the feeds refreshed in this run; new / gone offers and products wait for the weekly build
+        prices, used, counts = load_prices(daily_since)
+        log(f'  daily: {len(prices):,} offer groups from {len(used)} refreshed shops')
+        db = sqlite3.connect(':memory:')
+        db.execute('CREATE TABLE offers (feed TEXT, unique_id TEXT, price REAL, price_old REAL)')
+        db.executemany('INSERT INTO offers VALUES (?, ?, ?, ?)', [(f, g, p, o) for (f, g), (p, o) in prices.items()])
+        db.execute('CREATE INDEX offers_k ON offers (feed, unique_id)')
+        del prices
+    else:
+        db = sqlite3.connect(NEXT)
     db.execute('ATTACH ? AS l', (str(live),))
     stmts, est = [], 0
     offer_new = {}                                  # live offer id → (product id, price, old, active) after the update
     added = collections.defaultdict(list)           # live product id → new offers [(price, old, oid, domain)]
-    for oid, pid, price, old in db.execute(
-            '''SELECT lo.id, lo.product_id, n.price, n.price_old FROM l.offers lo JOIN main.offers n ON n.feed = lo.feed AND n.unique_id = lo.unique_id
-               WHERE n.price <> lo.price OR n.price_old IS NOT lo.price_old OR lo.active <> 1'''):
+    skip_feeds = set()
+    if daily:   # a feed that came back with < 50 % of its live offers is broken: leave its prices alone
+        live_cnt = dict(db.execute('SELECT feed, COUNT(*) FROM l.offers WHERE active = 1 GROUP BY feed'))
+        skip_feeds = {f for f, n in live_cnt.items() if f in counts and counts[f] < 0.5 * n}
+        if skip_feeds:
+            log('  daily: feeds skipped (< 50 % of live): ' + ', '.join(f'{f} {counts[f]}/{live_cnt[f]}' for f in sorted(skip_feeds)))
+    for oid, pid, price, old, feed_ in db.execute(
+            '''SELECT lo.id, lo.product_id, n.price, n.price_old, lo.feed FROM l.offers lo JOIN main.offers n ON n.feed = lo.feed AND n.unique_id = lo.unique_id
+               WHERE n.price <> lo.price OR n.price_old IS NOT lo.price_old OR lo.active <> 1''').fetchall():
+        if feed_ in skip_feeds:
+            continue
         stmts.append(f'UPDATE offers SET price = {lit(price)}, price_old = {lit(old)}, stock = 1, active = 1, updated_at = {lit(NOW)} WHERE id = {oid};')
         offer_new[oid] = (pid, price, old, 1)
     n_price = len(stmts)
     est += n_price * WCOST['offer_upd']
     live_n = dict(db.execute('SELECT feed, COUNT(*) FROM l.offers WHERE active = 1 GROUP BY feed'))
     next_n = dict(db.execute('SELECT feed, COUNT(*) FROM main.offers GROUP BY feed'))
-    broken = {f for f, n in live_n.items() if next_n.get(f, 0) < 0.5 * n}
-    if broken:
+    broken = {f for f, n in live_n.items() if next_n.get(f, 0) < 0.5 * n} if not daily else set(live_n)   # daily: nothing is ever "gone"
+    if broken and not daily:
         log('  update: feeds skipped for "gone" (missing or < 50 % of live): ' + ', '.join(f'{f} {next_n.get(f, 0)}/{live_n[f]}' for f in sorted(broken)))
     for oid, pid, lprice, lold, feed in db.execute(
             '''SELECT lo.id, lo.product_id, lo.price, lo.price_old, lo.feed FROM l.offers lo WHERE lo.active = 1
@@ -1028,9 +1081,10 @@ def prices_sql(env):
     est += n_gone * WCOST['offer_gone']
     # offers that are new in the feeds, grouped by the product the build put them in
     live_status = dict(db.execute('SELECT id, status FROM l.products'))
-    ocols = [r[1] for r in db.execute('PRAGMA main.table_info(offers)')]
+    ocols = [] if daily else [r[1] for r in db.execute('PRAGMA main.table_info(offers)')]
     new_by_pid = collections.defaultdict(list)
-    for r in db.execute('''SELECT n.* FROM main.offers n WHERE NOT EXISTS
+    if not daily:
+      for r in db.execute('''SELECT n.* FROM main.offers n WHERE NOT EXISTS
                             (SELECT 1 FROM l.offers lo WHERE lo.feed = n.feed AND lo.unique_id = n.unique_id)'''):
         new_by_pid[r[1]].append(r)
     ins_offer = f'INSERT OR IGNORE INTO offers ({", ".join(ocols)}) VALUES '
@@ -1092,6 +1146,11 @@ def prices_sql(env):
         f'{n_prod} products repriced ({n_cp} in category lists), {n_ret} products retired — est. {est:,} rows written')
     if est > budget:
         sys.exit(f'update refused: price/availability alone ≈ {est:,} billed rows > budget {budget:,} (SPT_WEEK_WRITES) — check the feeds')
+    if daily:
+        db.close()
+        if stmts:
+            stmts.append(f"UPDATE site_cache SET value = {lit(datetime.datetime.now().strftime('%Y%m%d%H%M%S'))}, updated_at = {lit(NOW)} WHERE key = 'data_version';")
+        return stmts
     # new products (or retired ones that are back): whole product from next.db, best first, while budget + size allow
     n_live = sum(1 for s_ in live_status.values() if s_ == 'publish') - n_ret
     live_slugs = {r[0] for r in db.execute('SELECT slug FROM l.slugs')}
@@ -1158,10 +1217,10 @@ def prices_sql(env):
     return stmts
 
 
-def push_prices(env, dry):
+def push_prices(env, dry, daily_since=None):
     if env == 'production' and os.environ.get('SPT_PRODUCTION_APPROVED') != 'yes':
         sys.exit('production needs SPT_PRODUCTION_APPROVED=yes')
-    stmts = prices_sql(env)
+    stmts = prices_sql(env, daily_since)
     if not stmts:
         log('nothing to push')
         return
@@ -1228,7 +1287,8 @@ def report(unmapped=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('cmd', choices=['build', 'report', 'push', 'update', 'prices', 'all'])
+    ap.add_argument('cmd', choices=['build', 'report', 'push', 'update', 'prices', 'daily', 'all'])
+    ap.add_argument('--since', type=float, default=0, help='daily: epoch seconds — only feed files refreshed at or after it count (default: the last 20 h)')
     ap.add_argument('--env', default='production', choices=['local', 'staging', 'production'])
     ap.add_argument('--dry', action='store_true')
     a = ap.parse_args()
@@ -1241,6 +1301,8 @@ def main():
         push(a.env, a.dry)
     if a.cmd in ('update', 'prices'):   # weekly cron: incremental update within the D1 write budget (needs a fresh, uncapped build in next.db)
         push_prices(a.env, a.dry)
+    if a.cmd == 'daily':   # daily cron: prices + availability of the refreshed feeds only (no build, no new / gone products)
+        push_prices(a.env, a.dry, a.since or time.time() - 20 * 3600)
 
 
 if __name__ == '__main__':

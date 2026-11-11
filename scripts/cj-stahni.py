@@ -10,6 +10,7 @@ A band that cannot be split further (many items at one price) is paged twice to 
     scripts/cj-stahni.py              # all enabled shops
     scripts/cj-stahni.py 14341702     # only these advertiserIds (or adIds)
     scripts/cj-stahni.py --dry        # only counts per shop, nothing written
+    scripts/cj-stahni.py --max-minutes 90   # daily run: stalest shops first, no NEW shop starts after 90 min (a running one finishes)
 
 The API key and tracking URLs are never printed.
 """
@@ -134,7 +135,9 @@ def fetch_shop(shop, dry):
 
 def main():
     dry = "--dry" in sys.argv
-    only = {a for a in sys.argv[1:] if not a.startswith("--")}
+    mm = sys.argv.index("--max-minutes") if "--max-minutes" in sys.argv else -1
+    deadline = time.time() + float(sys.argv[mm + 1]) * 60 if mm >= 0 else 0
+    only = {a for i, a in enumerate(sys.argv[1:], 1) if not a.startswith("--") and not (mm >= 0 and i == mm + 1)}
     shops = [s for s in json.load(open(APP / "src/data/obchody.json"))["shops"]
              if s.get("enabled") and not s.get("source") and (not only or s["advertiserId"] in only or set(s["adIds"]) & only)]
     # stalest file first: when a run is cut short (GitHub Actions step limit), the next run continues with the shops
@@ -145,6 +148,9 @@ def main():
     shops.sort(key=age)
     summary = []
     for s in shops:
+        if deadline and time.time() > deadline:
+            print(f"deadline: {s['name']} and the shops after it wait for the next run", file=sys.stderr)
+            break
         try:
             summary.append((s["name"], *fetch_shop(s, dry)))
         except Exception as e:
