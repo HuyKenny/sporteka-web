@@ -69,6 +69,7 @@ TREE = [
     (209, 'sandaly', 'Sportovní sandály', 'sportovni-obuv'),
     (210, 'pantofle-a-zabky', 'Pantofle a žabky', 'sportovni-obuv'),
     (211, 'barefoot-obuv', 'Barefoot boty', 'sportovni-obuv'),
+    (2111, 'ponozkoboty', 'Ponožkoboty', 'barefoot-obuv'),
     (212, 'obuv-do-vody', 'Boty do vody', 'sportovni-obuv'),
     (213, 'holinky', 'Holínky', 'sportovni-obuv'),
     (214, 'basketbalova-obuv', 'Basketbalové boty', 'sportovni-obuv'),
@@ -86,6 +87,7 @@ TREE = [
     (307, 'horolezectvi', 'Horolezectví a ferraty', 'outdoor'),
     (308, 'outdoor-doplnky', 'Outdoorové doplňky', 'outdoor'),
     (309, 'sportovni-hodinky', 'Sportovní hodinky a elektronika', 'outdoor'),
+    (3091, 'chytre-hodinky', 'Chytré hodinky a fitness náramky', 'sportovni-hodinky'),
     # ---------- camping ----------
     (400, 'kemping', 'Kemping', None),
     (401, 'stany', 'Stany', 'kemping'),
@@ -148,6 +150,7 @@ TREE = [
     (503, 'cyklisticke-obleceni', 'Cyklistické oblečení', 'cyklistika'),
     (504, 'cyklisticka-obuv', 'Cyklistické tretry', 'cyklistika'),
     (505, 'cyklo-prislusenstvi', 'Cyklo příslušenství', 'cyklistika'),
+    (5055, 'cyklo-stojany-a-drzaky', 'Stojany a držáky na kola', 'cyklo-prislusenstvi'),
     (506, 'cyklo-dily', 'Díly a pláště', 'cyklistika'),
     # ---------- winter ----------
     (600, 'zimni-sporty', 'Zimní sporty', None),
@@ -191,11 +194,17 @@ TREE = [
     (700, 'fitness', 'Fitness a posilování', None),
     (701, 'cinky-a-kotouce', 'Činky a kotouče', 'fitness'),
     (702, 'posilovaci-stroje', 'Posilovací stroje a lavice', 'fitness'),
+    (7021, 'posilovaci-lavice', 'Posilovací lavice', 'posilovaci-stroje'),
     (703, 'kardio-trenazery', 'Rotopedy a trenažéry', 'fitness'),
+    (7031, 'rotopedy', 'Rotopedy a spinning kola', 'kardio-trenazery'),
+    (7032, 'behaci-pasy', 'Běžecké a chodicí pásy', 'kardio-trenazery'),
+    (7033, 'elipticke-trenazery', 'Eliptické trenažéry', 'kardio-trenazery'),
+    (7034, 'veslovaci-trenazery', 'Veslovací trenažéry', 'kardio-trenazery'),
     (704, 'joga-a-podlozky', 'Jógové podložky', 'joga-a-pilates'),
     (705, 'fitness-pomucky', 'Fitness pomůcky', 'fitness'),
     (706, 'funkcni-trenink', 'Funkční trénink a hrazdy', 'fitness'),
     (707, 'masazni-pomucky', 'Masážní pomůcky', 'fitness'),
+    (7071, 'masazni-pistole', 'Masážní pistole', 'masazni-pomucky'),
     (708, 'sportovni-vyziva', 'Sportovní výživa', None),
     (709, 'bandaze-a-ortezy', 'Bandáže a ortézy', 'fitness'),
     # ---------- ball & racket ----------
@@ -235,6 +244,7 @@ TREE = [
     (11002, 'boxovaci-pytle', 'Boxovací pytle a hrušky', 'bojove-sporty'),
     (11003, 'chranice-bojove-sporty', 'Chrániče', 'bojove-sporty'),
     (11004, 'obleceni-bojove-sporty', 'Kimona a oblečení', 'bojove-sporty'),
+    (110041, 'kimona', 'Kimona a bojová oblečení', 'obleceni-bojove-sporty'),
     # ---------- wheels ----------
     (1200, 'kolobezky-a-brusle', 'Koloběžky, brusle a skateboardy', None),
     (12001, 'inline-brusle', 'Inline brusle', 'kolobezky-a-brusle'),
@@ -255,11 +265,14 @@ TREE = [
     (70805, 'predtreninkove-boostery', 'Předtréninkové boostery', 'sportovni-vyziva'),
     (70806, 'spalovace-tuku', 'Spalovače tuků', 'sportovni-vyziva'),
     (70807, 'vitaminy-a-mineraly', 'Vitamíny, minerály a omega-3', 'sportovni-vyziva'),
+    (708071, 'omega-3', 'Omega-3 a rybí olej', 'vitaminy-a-mineraly'),
+    (708072, 'horcik', 'Hořčík (magnesium)', 'vitaminy-a-mineraly'),
     (70808, 'energeticke-gely-a-tycinky', 'Energetické gely a tyčinky', 'sportovni-vyziva'),
     (70812, 'proteinove-tycinky-a-snacky', 'Proteinové tyčinky a snacky', 'sportovni-vyziva'),
     (70809, 'iontove-napoje', 'Iontové nápoje a hydratace', 'sportovni-vyziva'),
     (70810, 'kolagen-a-klouby', 'Kolagen a kloubní výživa', 'sportovni-vyziva'),
     (70811, 'ostatni-doplnky-stravy', 'Další doplňky stravy', 'sportovni-vyziva'),
+    (708111, 'ashwagandha', 'Ashwagandha', 'ostatni-doplnky-stravy'),
     (1800, 'joga-a-pilates', 'Jóga, pilates a meditace', None),
     (18001, 'jogove-pomucky', 'Jógové bloky, popruhy a bolstery', 'joga-a-pilates'),
     (18002, 'meditace', 'Meditační polštáře a pomůcky', 'joga-a-pilates'),
@@ -1226,6 +1239,20 @@ REFINE['spaci-pytle'] = [
     ('dekove-spacaky', r'dekov|(^|\W)deka(\W|$)|spacak s prehozem'),
 ]
 REFINE['jizdni-kola'][0:0] = [('cyklo-dily', _PARTS), ('cyklo-prislusenstvi', _ACC)]
+# ---- 11. 11. 2026 content gap (reports/sporteka/content-gap-2026-11.md): demand that had no category of its own ----
+for _parent, _rules in {
+    'kardio-trenazery': [('rotopedy', r'rotoped|spinning|ergometr|air ?bike|cyklotrenazer'), ('behaci-pasy', r'bezeck\w* pas|chodic\w* pas|treadmill|walking ?pad'),
+                         ('elipticke-trenazery', r'eliptick|crosstrainer|cross trainer'), ('veslovaci-trenazery', r'veslovac|(^|\W)rower(\W|$)')],
+    'masazni-pomucky': [('masazni-pistole', r'masazn\w* pistol|massage gun')],
+    'vitaminy-a-mineraly': [('omega-3', r'omega.?3|rybi olej|rybi tuk'), ('horcik', r'horcik|magnesium|magnesia|magnezium')],
+    'ostatni-doplnky-stravy': [('ashwagandha', r'ashwagandh')],
+    'barefoot-obuv': [('ponozkoboty', r'ponozkobot|skinners|fivefingers|five fingers')],
+    'posilovaci-stroje': [('posilovaci-lavice', r'lavic|(^|\W)bench(\W|$)')],
+    'sportovni-hodinky': [('chytre-hodinky', r'chytr\w* hodink|smart ?watch|fitness naramek|chytry naramek|(^|\W)(apple watch|amazfit|huawei watch|fitbit|galaxy watch)')],
+    'obleceni-bojove-sporty': [('kimona', r'kimono|judogi|karategi|dobok|(^|\W)gi (pro|bjj)|bjj gi')],
+}.items():
+    REFINE.setdefault(_parent, [])[0:0] = _rules
+REFINE['cyklo-prislusenstvi'].append(('cyklo-stojany-a-drzaky', r'stojan|drzak\w* (na )?(kol|bicykl)|nastenn|zavesn\w* (na )?kol|zavesen\w* na kolo'))
 REFINE = {k: [(c, re.compile(r)) for c, r in v] for k, v in REFINE.items()}
 
 

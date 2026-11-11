@@ -2,6 +2,7 @@
 // import refreshes them). Product files are id ranges (primary-key range scans, never OFFSET): product-sitemap<n>.xml
 // = ids ((n-1)·PER_FILE, n·PER_FILE].
 import { BASE } from './site';
+import { hasFacetText } from './facet-texts';
 
 export const PER_FILE = 5000;
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -42,7 +43,7 @@ export async function sitemapFile(db: D1Database, name: string): Promise<string 
   if (name === 'category-sitemap') {
     const cats = await all<{ slug: string }>('SELECT slug FROM categories WHERE noindex = 0 AND count_total > 0 ORDER BY menu_order');
     const fps = await all<{ slug: string; u: string }>('SELECT slug, updated_at AS u FROM facet_pages WHERE noindex = 0 AND total >= min_products');
-    return urlset([[`${BASE}/`, ''], ...cats.map((c): [string, string] => [`${BASE}/${c.slug}/`, '']), ...fps.map((f): [string, string] => [`${BASE}/${f.slug}/`, day(f.u)])]);
+    return urlset([[`${BASE}/`, ''], ...cats.map((c): [string, string] => [`${BASE}/${c.slug}/`, '']), ...fps.filter((f) => hasFacetText(f.slug)).map((f): [string, string] => [`${BASE}/${f.slug}/`, day(f.u)])]);
   }
   if (name === 'brand-sitemap') {
     const rows = await all<{ slug: string }>('SELECT slug FROM brands WHERE noindex = 0 ORDER BY count DESC');

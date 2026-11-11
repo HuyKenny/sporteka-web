@@ -3,6 +3,7 @@
 
     scripts/kw-harvest.py                 # seeds = every category name + EXTRA seeds, cached in reports/sporteka/kw/<seed>.json
     scripts/kw-harvest.py --only slug     # one category
+    scripts/kw-harvest.py --seeds-file F  # seeds from a file (one per line) instead of the category names
     scripts/kw-harvest.py --report        # merge the cache → reports/sporteka/kw/kw-all.json (keyword, volume, seed) sorted by volume
 
 Uses bin/mm.py's session (keyword_suggestions: related searches with monthly volume). Calls are cached per seed and run
@@ -87,12 +88,18 @@ def main():
                     allk[k] = {'keyword': k, 'volume': r['volume'], 'seed': d['seed']}
         out = sorted(allk.values(), key=lambda r: -r['volume'])
         (KW / 'kw-all.json').write_text(json.dumps(out, ensure_ascii=False))
+        tracked = Path(__file__).resolve().parent.parent / 'src/data/kw/kw-all.json'   # the repository copy that fasety.py reads (the Actions build has no workspace)
+        tracked.parent.mkdir(parents=True, exist_ok=True)
+        tracked.write_text(json.dumps(out, ensure_ascii=False))
         print(len(out), 'keywords')
         return
     only = sys.argv[sys.argv.index('--only') + 1] if '--only' in sys.argv else None
     url, h = mm.session()
     done = 0
-    for slug, s in seeds():
+    todo = seeds()
+    if '--seeds-file' in sys.argv:   # one seed per line (brand names, brand + product head, new category stems …)
+        todo = [('file', l.strip()) for l in open(sys.argv[sys.argv.index('--seeds-file') + 1], encoding='utf-8') if l.strip()]
+    for slug, s in todo:
         if only and slug != only:
             continue
         if cache_path(s).exists():

@@ -258,12 +258,8 @@ jobs:
         env:
           SPT_MAX: '900000'
         run: python3 -I scripts/katalog.py build
-      - name: Update the catalogue mirror (incremental, no D1 writes)
-        env:
-          SPT_PRODUCTION_APPROVED: 'yes'
-          SPT_MIRROR_ONLY: 'yes'
-          SPT_WEEK_WRITES: '50000000'
-        run: python3 -I scripts/katalog.py update --env production
+      - name: Adopt the new catalogue as the mirror (new / gone products, categories, landings; refuses a half-built one)
+        run: python3 -I scripts/katalog.py adopt --env production
       - name: Save state (encrypted)
         env:
           STATE_KEY: ${{ secrets.STATE_KEY }}

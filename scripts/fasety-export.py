@@ -11,10 +11,13 @@ sys.path.insert(0, str(HERE))
 ROOT = HERE.parent
 OUT = ROOT / 'src/texts/fasety.json'
 CHECK = '--check' in sys.argv
-db = sqlite3.connect(f'file:{ROOT}/data/live-production.db?mode=ro', uri=True)
-facets = {r[0]: r[1] for r in db.execute('SELECT slug, base_slug FROM facet_pages')}
-cslugs = {r[0] for r in db.execute('SELECT slug FROM categories')}
-bslugs = {r[0] for r in db.execute('SELECT slug FROM brands')}
+import kategorie as K  # noqa: E402
+# the catalogue DB is not in the repository any more (it lives in the encrypted release state): the landings come from the candidate list that
+# scripts/fasety.py produced on the last catalogue (src/data/kw/fasety-kandidati.json) + the texts that are already live
+facets = {r['slug']: r['base'] for r in json.loads((ROOT / 'src/data/kw/fasety-kandidati.json').read_text(encoding='utf-8'))}
+facets.update({s_: '' for s_ in json.loads((ROOT / 'src/texts/fasety.json').read_text(encoding='utf-8'))})
+cslugs = {t[1] for t in K.TREE}
+bslugs = set((HERE / 'znacky_slugy.txt').read_text().split())
 key = lambda n: (int(re.search(r'vlna(\d+)', n).group(1)), n)
 new = {}
 for mod in sorted((p.stem for p in HERE.glob('fasety_vlna[0-9]*.py')), key=key):

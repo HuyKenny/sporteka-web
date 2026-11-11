@@ -47,10 +47,9 @@ function collection(url: string, title: string) {
 }
 
 // ---------- category ----------
-import facetTexts from '../texts/fasety.json';
+import { FACET_TEXTS, hasFacetText } from './facet-texts';
 import brandTexts from '../texts/znacky.json';
 const BRAND_TEXTS = brandTexts as unknown as Record<string, { seo_title?: string; seo_desc?: string; description_html?: string; guide_html?: string; faq_json?: string }>;
-const FACET_TEXTS = facetTexts as unknown as Record<string, { seo_title?: string; seo_desc?: string; description_html?: string; guide_html?: string; faq_json?: string }>;
 export interface FacetPage {
   id: number; slug: string; base_slug: string; qs: string; h1: string; seo_title: string; seo_desc: string; intro_html: string; second_html: string;
   faq_json: string; keyword: string; volume: number; min_products: number; total: number; noindex: number;
@@ -69,7 +68,7 @@ export async function facetView(db: D1Database, id: number, page: number, sp: UR
 
 export async function categoryView(db: D1Database, catId: number, page: number, sp: URLSearchParams, facet?: { fp: FacetPage; user: URLSearchParams }) {
   const [cat0, tree, fc, brands, imgs, lands] = await Promise.all([loadCategory(db, catId), catTree(db), facets(db, `f:${catId}`), brandList(db), catImages(db),
-    facet ? Promise.resolve([] as FacetPage[]) : db.prepare('SELECT * FROM facet_pages WHERE noindex = 0 AND total >= min_products AND base_slug = (SELECT slug FROM categories WHERE id = ?)').bind(catId).all<FacetPage>().then((r) => r.results).catch(() => [] as FacetPage[])]);
+    facet ? Promise.resolve([] as FacetPage[]) : db.prepare('SELECT * FROM facet_pages WHERE noindex = 0 AND total >= min_products AND base_slug = (SELECT slug FROM categories WHERE id = ?)').bind(catId).all<FacetPage>().then((r) => r.results.filter((x) => hasFacetText(x.slug))).catch(() => [] as FacetPage[])]);
   if (!cat0) return null;
   const fp = facet?.fp;
   // a facet shows its own texts instead of the category's; the icon and the tree position stay the base category's
@@ -106,7 +105,7 @@ export async function categoryView(db: D1Database, catId: number, page: number, 
   const crumbs: Crumb[] = [{ name: 'Domů', url: '/' }, ...chain.map((c) => ({ name: decode(c.name), url: `/${c.slug}/` })), ...(fp ? [{ name: fp.h1, url: base }] : [])];
   // robots as on WordPress (live snapshot at the migration: thin categories outside the priority list are noindex),
   // plus an emptied category
-  const noindex = fp ? fp.noindex === 1 || total < fp.min_products : cat.noindex === 1 || cat.seo_robots.includes('noindex') || cat.count_total === 0;
+  const noindex = fp ? fp.noindex === 1 || total < fp.min_products || !hasFacetText(fp.slug) : cat.noindex === 1 || cat.seo_robots.includes('noindex') || cat.count_total === 0;
   let faq: Array<{ q: string; a: string }> = [];
   try { faq = page === 1 && cat.faq_json ? JSON.parse(cat.faq_json) : []; } catch { /* broken JSON = no FAQ */ }
   const meta: Meta = {

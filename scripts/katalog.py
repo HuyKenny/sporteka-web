@@ -1217,6 +1217,50 @@ def prices_sql(env, daily_since=None):
     return stmts
 
 
+def adopt(env, dry=False):
+    """Weekly, after `build` (Kenny 11. 11.: new / gone products AND new categories + landings once a week, prices daily).
+    The static site renders from the mirror data/live-production.db; since D1 is gone nothing has to be diffed into small writes any
+    more: the freshly built next.db (stable ids, retired products kept as 301s, categories, facet landings, sitemaps …) simply BECOMES
+    the mirror — after sanity checks that refuse a half-built catalogue (a feed outage must not wipe the site)."""
+    live = live_path(env)
+    if not NEXT.exists():
+        sys.exit(f'{NEXT} missing — run build first')
+    n = sqlite3.connect(f'file:{NEXT}?mode=ro', uri=True)
+    q = lambda c, sql: c.execute(sql).fetchone()[0]
+    new = dict(products=q(n, "SELECT COUNT(*) FROM products WHERE status = 'publish'"), offers=q(n, 'SELECT COUNT(*) FROM offers'),
+               categories=q(n, 'SELECT COUNT(*) FROM categories'), brands=q(n, 'SELECT COUNT(*) FROM brands WHERE noindex = 0'),
+               landings=q(n, 'SELECT COUNT(*) FROM facet_pages'))
+    old = {}
+    if live.exists():
+        o = sqlite3.connect(f'file:{live}?mode=ro', uri=True)
+        old = dict(products=q(o, "SELECT COUNT(*) FROM products WHERE status = 'publish'"), offers=q(o, 'SELECT COUNT(*) FROM offers'),
+                   categories=q(o, 'SELECT COUNT(*) FROM categories'), brands=q(o, 'SELECT COUNT(*) FROM brands WHERE noindex = 0'),
+                   landings=q(o, 'SELECT COUNT(*) FROM facet_pages'))
+        gone_cats = [r[0] for r in o.execute('SELECT slug FROM categories') if r[0] not in {x[0] for x in n.execute('SELECT slug FROM categories')}]
+        o.close()
+    else:
+        gone_cats = []
+    n.close()
+    log(f'adopt: new {new} / live {old or "none"}')
+    problems = []
+    for k, floor in (('products', 0.9), ('offers', 0.85), ('brands', 0.9), ('landings', 0.9)):
+        if old.get(k) and new[k] < floor * old[k]:
+            problems.append(f'{k}: {new[k]:,} < {int(floor * 100)} % of {old[k]:,}')
+    if old.get('categories') and new['categories'] < old['categories']:
+        problems.append(f'categories: {new["categories"]} < {old["categories"]} (lost: {", ".join(gone_cats[:8])})')
+    if problems:
+        sys.exit('adopt refused: ' + '; '.join(problems) + ' — check the feeds / the build log (the old mirror stays)')
+    if dry:
+        log('adopt --dry: checks passed, nothing replaced')
+        return
+    tmp = live.with_suffix('.adopting')
+    shutil.copyfile(NEXT, tmp)
+    for suf in ('-wal', '-shm'):
+        Path(str(live) + suf).unlink(missing_ok=True)
+    os.replace(tmp, live)
+    log(f'adopt: {live.name} replaced by the new catalogue')
+
+
 def push_prices(env, dry, daily_since=None):
     if env == 'production' and os.environ.get('SPT_PRODUCTION_APPROVED') != 'yes':
         sys.exit('production needs SPT_PRODUCTION_APPROVED=yes')
@@ -1287,7 +1331,7 @@ def report(unmapped=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('cmd', choices=['build', 'report', 'push', 'update', 'prices', 'daily', 'all'])
+    ap.add_argument('cmd', choices=['build', 'report', 'push', 'update', 'prices', 'daily', 'adopt', 'all'])
     ap.add_argument('--since', type=float, default=0, help='daily: epoch seconds — only feed files refreshed at or after it count (default: the last 20 h)')
     ap.add_argument('--env', default='production', choices=['local', 'staging', 'production'])
     ap.add_argument('--dry', action='store_true')
@@ -1301,6 +1345,8 @@ def main():
         push(a.env, a.dry)
     if a.cmd in ('update', 'prices'):   # weekly cron: incremental update within the D1 write budget (needs a fresh, uncapped build in next.db)
         push_prices(a.env, a.dry)
+    if a.cmd == 'adopt':   # weekly: the new build replaces the mirror (new / gone products, categories, landings)
+        adopt(a.env, a.dry)
     if a.cmd == 'daily':   # daily cron: prices + availability of the refreshed feeds only (no build, no new / gone products)
         push_prices(a.env, a.dry, a.since or time.time() - 20 * 3600)
 

@@ -24,10 +24,15 @@ import sys
 import unicodedata
 from pathlib import Path
 
-KW_FILE = Path(__file__).resolve().parent.parent / 'seo/kw-all.json'   # tracked copy (the GitHub Actions build has no workspace)
-MIN_PRODUCTS = 8
-MIN_VOL = {'gender': 250, 'brand': 250, 'color': 250, 'sale': 300}
-MAX_LANDINGS = 700
+# tracked copies (the GitHub Actions build has no workspace): kw-all.json = suggestions of our own category / brand names, kw-gap.json = what
+# competitors rank for and we do not (scripts/gap-harvest.py); both are {keyword, volume}
+KW_FILES = [Path(__file__).resolve().parent.parent / 'src/data/kw/kw-all.json', Path(__file__).resolve().parent.parent / 'src/data/kw/kw-gap.json']
+MIN_PRODUCTS = 6
+# 11. 11. 2026: from 250 down to 50 searches a month — a landing only becomes indexable with its hand-written text (src/lib/facet-texts.ts)
+MIN_VOL = {'gender': 50, 'brand': 50, 'color': 50, 'sale': 100}
+MAX_LANDINGS = 1500
+HAND_TEXTS = Path(__file__).resolve().parent.parent / 'src/texts/fasety.json'
+MIN_RESULT = 150      # fewer landings than this means the keyword files are missing / broken: keep the old table
 GENDERS = [('Pánské', 'panske', 'pansk', 'muži'), ('Dámské', 'damske', 'damsk', 'ženy'), ('Dětské', 'detske', 'detsk', 'děti')]
 # category name as people type it, when ours differs
 ALT = {
@@ -63,15 +68,19 @@ def num(n):
 
 
 def load_kw():
+    exact = {}    # the same spelling in several files (own suggestions + competitor gap) is one demand, not two: the larger volume wins
+    for f in KW_FILES:
+        if f.exists():
+            for r in json.load(open(f)):
+                k = r['keyword'].lower().strip()
+                exact[k] = max(exact.get(k, 0), r['volume'] or 0)
     idx, orig = collections.defaultdict(int), {}
-    if not KW_FILE.exists():
-        return idx, orig
-    for r in json.load(open(KW_FILE)):
-        k = fold(r['keyword'])
-        idx[k] += r['volume']
-        diac = r['keyword'].lower() != k             # the spelling with diacritics wins for the H1, whatever its own volume
-        if k not in orig or (diac and not orig[k][2]) or (diac == orig[k][2] and r['volume'] > orig[k][1]):
-            orig[k] = (r['keyword'], r['volume'], diac)
+    for kw, vol in exact.items():
+        k = fold(kw)
+        idx[k] += vol                                # spellings with / without diacritics of one phrase add up
+        diac = kw != k                               # the spelling with diacritics wins for the H1, whatever its own volume
+        if k not in orig or (diac and not orig[k][2]) or (diac == orig[k][2] and vol > orig[k][1]):
+            orig[k] = (kw, vol, diac)
     return idx, orig
 
 
@@ -106,8 +115,11 @@ def best(idx, orig, phrases):
 def generate(db, show=0):
     idx, orig = load_kw()
     if not idx:
-        print('fasety: no keyword file, skipping', file=sys.stderr)
-        return 0
+        raise SystemExit('fasety: no keyword file — refusing to rebuild the landings from nothing')
+    # landings that already have a hand-written text keep their slug and H1 (the text was written for them, the page is indexed)
+    hand = set(json.load(open(HAND_TEXTS))) if HAND_TEXTS.exists() else set()
+    prev = {(r[1], r[2]): (r[0], r[3]) for r in db.execute('SELECT slug, base_slug, qs, h1 FROM facet_pages') if r[0] in hand}
+    prev_rows = {r[1]: r for r in db.execute('SELECT * FROM facet_pages') if r[1] in hand}
     taken = {r[0] for r in db.execute('SELECT slug FROM slugs')} | {r[0] for r in db.execute('SELECT slug FROM categories')} | {r[0] for r in db.execute('SELECT slug FROM brands')}
     cats = db.execute('SELECT id, slug, name, count_total FROM categories WHERE count_total >= ? ORDER BY count_total DESC', (MIN_PRODUCTS,)).fetchall()
     out, used = [], set()
@@ -130,6 +142,8 @@ def generate(db, show=0):
         if kind == 'brand':          # brand written the way the brand writes it
             h1 = re.sub(re.escape(fold(label)), label, h1, flags=re.I)
         slug = slugify(h1)
+        if (cslug, qs) in prev:
+            slug, h1 = prev[(cslug, qs)]
         if not slug or slug in taken or slug in used:
             return
         sql, args = extra_filter
@@ -165,9 +179,12 @@ def generate(db, show=0):
 
     out.sort(key=lambda r: -r['vol'])
     out = out[:MAX_LANDINGS]
+    if len(out) < MIN_RESULT:   # never replace the table by (almost) nothing: the keyword files are missing or broken
+        raise SystemExit(f'fasety: only {len(out)} landings (< {MIN_RESULT}) — keyword files {[str(f) for f in KW_FILES]} missing?')
     db.execute('DELETE FROM facet_pages')
     rows = []
     ids = set()
+    new_slugs = {r['slug'] for r in out}
     for r in out:
         t = texts(db, r)
         fid = 1_000_000 + int(hashlib.md5(r['slug'].encode()).hexdigest()[:6], 16)
@@ -175,7 +192,10 @@ def generate(db, show=0):
             fid += 1
         ids.add(fid)
         rows.append((fid, r['slug'], r['cslug'], r['qs'], r['h1'], t['title'], t['desc'], t['intro'], t['second'], json.dumps(t['faq'], ensure_ascii=False), r['h1'].lower(), r['vol'], MIN_PRODUCTS, r['n'], 0, '2026-11-01'))
-    db.executemany('INSERT INTO facet_pages (id, slug, base_slug, qs, h1, seo_title, seo_desc, intro_html, second_html, faq_json, keyword, volume, min_products, total, noindex, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', rows)
+    kept = [tuple(r) for sl, r in prev_rows.items() if sl not in new_slugs and sl not in {x[1] for x in rows}]
+    if kept:   # a text landing whose demand / products fell below the thresholds this week is not dropped (its page is live and indexed)
+        print(f'fasety: keeping {len(kept)} landings with hand texts that no longer pass the thresholds', file=sys.stderr)
+    db.executemany('INSERT INTO facet_pages (id, slug, base_slug, qs, h1, seo_title, seo_desc, intro_html, second_html, faq_json, keyword, volume, min_products, total, noindex, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', rows + kept)
     kinds = collections.Counter(r['kind'] for r in out)
     print(f'fasety: {len(out)} landings {dict(kinds)}', file=sys.stderr)
     if show:
