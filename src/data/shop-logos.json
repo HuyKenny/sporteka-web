@@ -59,6 +59,10 @@
   240,
   91
  ],
+ "extraleginy.cz": [
+  480,
+  135
+ ],
  "fanda-nhl.cz": [
   240,
   192
@@ -75,6 +79,10 @@
   240,
   112
  ],
+ "gymbeam.cz": [
+  480,
+  119
+ ],
  "honzovy-longboardy.cz": [
   240,
   198
@@ -86,6 +94,10 @@
  "insportline.cz": [
   480,
   78
+ ],
+ "ironaesthetics.cz": [
+  360,
+  94
  ],
  "isostar.cz": [
   480,
@@ -106,6 +118,10 @@
  "marrko.cz": [
   240,
   102
+ ],
+ "mastersport.cz": [
+  270,
+  57
  ],
  "merinoobchod.cz": [
   240,
@@ -187,6 +203,10 @@
   480,
   111
  ],
+ "skisports.cz": [
+  370,
+  106
+ ],
  "sorrygravity.cz": [
   240,
   69
@@ -194,6 +214,18 @@
  "spartoo.cz": [
   240,
   77
+ ],
+ "sport365.cz": [
+  480,
+  111
+ ],
+ "sportago.cz": [
+  480,
+  86
+ ],
+ "sportby.cz": [
+  478,
+  132
  ],
  "sportisimo.cz": [
   420,
@@ -226,33 +258,5 @@
  "trailstore.cz": [
   240,
   96
- ],
- "sport365.cz": [
-  480,
-  111
- ],
- "extraleginy.cz": [
-  480,
-  135
- ],
- "sportago.cz": [
-  480,
-  86
- ],
- "skisports.cz": [
-  370,
-  106
- ],
- "sportby.cz": [
-  478,
-  132
- ],
- "mastersport.cz": [
-  270,
-  57
- ],
- "gymbeam.cz": [
-  480,
-  119
  ]
 }
