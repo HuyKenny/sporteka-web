@@ -61,6 +61,11 @@ JUNK_PART_EXEMPT = {'sipkove-doplnky', 'sipky', 'sportovni-vyziva', 'energeticke
                     'muskareni', 'stanove-kolky', 'trampoliny', 'rybarske-doplnky', 'rybarske-pruty', 'posilovaci-gumy', 'fitness-pomucky', 'posilovaci-stroje'}
 CHEAP_FLOOR = 100   # Kč
 CHEAP_OK = {'sportovni-ponozky', 'lyzarske-ponozky', 'cyklisticke-ponozky', 'lahve-a-termosky'}
+# weak cheap add-ons (Kenny 13. 11.): one shop + under WEAK_FLOOR Kč + an accessory / parts / bait category → not on the site,
+# unless Google already shows the page (data/gsc.json impressions); a live one leaves as 'retired' with a 301 to its category
+WEAK_FLOOR = 300   # Kč
+WEAK_CATS = {t[1] for t in K.TREE if re.search(r'doplnk|prislusenstvi|dily|udrzba|pasky|gripy|sedla|nastrahy|vlasce|tkanick|plaste-a|brzdy|pohon|zvonky|blatnik|pumpy|kolik|nahradni', t[1])} \
+    - {'ostatni-doplnky-stravy', 'bezecke-opasky'}   # nutrition and running belts are products, not add-ons
 # tent repair bits and everyday/baby food that is not sport (owner's rule 2. 11.): dropped before clustering
 JUNK_TITLE2 = re.compile(r'stanove naradi|opravn\w+ objimk|coghlans? (airstop|nylon repair)|repair tape|zaplatov\w+ pask|(sada )?uvazk\w+ na stan|stanov\w+ zavesn\w+ system|(sada )?prislusenstvi (pro|ke) stan|tent set\b'
                          r'|nahradn\w+ (tycky|tyce|sada tyci|snur\w+|kolik\w+|patk\w+) (ke|k|pro) (stan|bivak)|^topnatur (?!.*protein)|probio\w* kase|nutrikase|^gerber (cereal|natural|junior|kapsick|krupk|hello|mlicko|nemlecn|mlecn|ovocn|zeleninov|bio )|kase na dobrou noc|nemlecna kase|mlecna kase')
@@ -645,6 +650,9 @@ def build(env):
         for l_ in (prod_rows, offer_rows, cp_rows, bp_rows, pp_rows, key_rows, slug_rows):
             l_.clear()
 
+    gsc_file = DATA / 'gsc.json'
+    gsc_seen = set(json.loads(gsc_file.read_text())['pages']) if gsc_file.exists() else None
+    weak_dropped = 0
     for ci, c in enumerate(clusters):
         lead = c[0]
         keys = [f"g:{g['feed']}:{g['gk']}" for g in c] + [f'ean:{e}' for g in c for e in sorted(g['eans'])]
@@ -665,6 +673,10 @@ def build(env):
             slug = slugify(name)
             if slug in used_slugs or (slug in taken_slug and not (op and op[1] == slug)):
                 slug = f'{slug[:80]}-{pid}'
+        if (lead['cat'] in WEAK_CATS and len({g['feed'] for g in c}) == 1 and min(g['price'] for g in c) < WEAK_FLOOR
+                and (gsc_seen is not None or not op) and f'/{slug}/' not in (gsc_seen or ())):
+            weak_dropped += 1   # without Search Console data only new products are skipped (a live page is never removed blind)
+            continue
         used_slugs.add(slug)
         created = op[2] if op else NOW
         bid = 0
@@ -768,7 +780,7 @@ def build(env):
     finalize(db)
     db.commit()
     db.close()
-    log(f'next.db: {n_prod} products, {n_off} offers, {len(brands)} brands in {time.time() - t0:.0f} s')
+    log(f'next.db: {n_prod} products, {n_off} offers, {len(brands)} brands in {time.time() - t0:.0f} s; weak cheap add-ons skipped: {weak_dropped}')
     return unmapped
 
 

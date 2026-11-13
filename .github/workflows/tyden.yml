@@ -246,6 +246,7 @@ jobs:
         run: |
           scripts/state.sh pull catalog
           scripts/state.sh pull feeds
+          scripts/state.sh pull gsc   # weak cheap add-ons with Google impressions stay (katalog.py WEAK_*)
           ls -l data
       - name: Credentials and feed list (from secrets, written outside the checkout, never printed)
         env:
