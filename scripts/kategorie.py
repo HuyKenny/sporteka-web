@@ -1272,8 +1272,17 @@ def refine(slug, title):
     return slug
 
 
+# A shop path that says footwear ("Dámské > Boty > Tenisky") keeps the item in footwear: a title word must not turn a shoe into a polo shirt
+# ("Polo Ralph Lauren Sayer" → polokosile, 3 200 Spartoo rows). Only when the path alone also resolves to footwear.
+FOOT_PATH = re.compile(r'(^|\W)(boty|obuv|tenisky|sandaly|pantofle|kopacky|sneakers|bota)(\W|$)')
+
+
 def categorize(path, title, gpc=''):
     slug, fashion = _categorize(path, title, gpc)
+    if slug and section(slug) == 'sportovni-obleceni' and FOOT_PATH.search(fold(path)):
+        alt, alt_fashion = _categorize(path, '', gpc)
+        if alt and section(alt) == 'sportovni-obuv':
+            slug, fashion = alt, alt_fashion
     return (refine(slug, title) if slug else slug), fashion
 
 
