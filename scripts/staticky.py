@@ -738,6 +738,13 @@ def redirects_for(db, shard, m):
         lines.append(f'{path} {loc} 301')
     if shard in (MAIN, 'ALL'):
         lines.append('/produkt/:slug/ /:slug/ 301')
+    seen, uniq = set(), []   # Cloudflare refuses a _redirects file with two rules for one path (a retired product is in the catalogue table AND renders as a 301)
+    for ln in lines:
+        k = ln.split(' ', 1)[0]
+        if k not in seen:
+            seen.add(k)
+            uniq.append(ln)
+    lines = uniq
     if len(lines) > 2000:
         print(f'  !! {len(lines)} redirects > 2000: keeping the first 2000', file=sys.stderr)
         lines = lines[:2000]
