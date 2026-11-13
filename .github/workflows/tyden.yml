@@ -11,7 +11,6 @@ name: tyden
 on:
   schedule:
     - cron: '0 1 * * 1'        # Monday 02:00 CET: data + web
-    - cron: '30 23 12 11 *'    # ONE-OFF 13. 11. 00:30 CET: full data run with `adopt` (new categories + facet landings); remove afterwards
     - cron: '0 0 * * 0,2,3,4,5,6'   # Tue–Sun 01:00 CET: prices only (fast feeds + the stalest CJ shops) → render the changed pages
     - cron: '30 2 * * *'       # daily 03:30 CET: continue the web part when it did not finish
   # new / changed texts (categories, facet landings, brands): only those pages, live in minutes
@@ -76,7 +75,7 @@ jobs:
   # data = download the feeds (own job), catalog = build + mirror update (own job)
   data:
     needs: scan
-    if: (github.event.schedule == '0 1 * * 1' || github.event.schedule == '30 23 12 11 *') || github.event.schedule == '30 23 12 11 *' || (github.event_name == 'workflow_dispatch' && inputs.data)
+    if: github.event.schedule == '0 1 * * 1' || (github.event_name == 'workflow_dispatch' && inputs.data)
     runs-on: ubuntu-latest
     timeout-minutes: 355
     permissions:
@@ -378,7 +377,7 @@ jobs:
           SPT_FEEDY_JSON: ${{ secrets.SPT_FEEDY_JSON }}
         run: python3 -I scripts/verify_no_secrets.py --out
       - name: IndexNow
-        if: steps.gate.outputs.go == 'true' && (github.event.schedule == '0 1 * * 1' || github.event.schedule == '30 23 12 11 *')
+        if: steps.gate.outputs.go == 'true' && github.event.schedule == '0 1 * * 1'
         continue-on-error: true
         env:
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
