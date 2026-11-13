@@ -72,8 +72,9 @@ const missing = need.filter((h) => !local.has(h));
 if (missing.length) {
   // Cloudflare lost (or never had) a blob we thought was there: the caller must re-render these paths
   const byHash = new Map(Object.entries(manifest).map(([p, e]) => [e.hash, p]));
-  console.log(JSON.stringify({ error: 'missing', paths: missing.map((h) => byHash.get(h)) }));
-  process.exit(3);
+  // process.exit() right after console.log() cut a big list at 256 kB when stdout is a pipe: exit from the write callback
+  process.stdout.write(JSON.stringify({ error: 'missing', paths: missing.map((h) => byHash.get(h)) }) + '\n', () => process.exit(3));
+  await new Promise(() => {});
 }
 // buckets as Cloudflare grouped them, 3 in flight (wrangler's BULK_UPLOAD_CONCURRENCY)
 const queue = [...session.buckets ?? []];

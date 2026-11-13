@@ -20,6 +20,10 @@ on:
     paths: ['src/texts/**']
   workflow_dispatch:
     inputs:
+      only:
+        description: 'Web: only these shards, comma list (e.g. s15,s16 after scripts/reshard.py); implies no search / filter rebuild'
+        type: string
+        default: ''
       daily:
         description: 'Daily prices run (fast feeds + stalest CJ shops → prices → render changed pages)'
         type: boolean
@@ -338,6 +342,7 @@ jobs:
           IMG_SECRET: ${{ secrets.IMG_SECRET }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ONLY_SHARDS: ${{ inputs.only }}
         run: |
           # Search Console numbers come from Malina (data/gsc.json, encrypted state); no Google key here
           if [ -f data/gsc.json ]; then export GSC_FILE=data/gsc.json; fi
@@ -347,6 +352,7 @@ jobs:
           if [ "${{ github.event_name }}" = push ] || [ "${{ inputs.texts }}" = true ]; then MODE="--texts"; fi
           # daily prices run: render only the products whose price / offers changed + the listings (no search / filter data, no new paths)
           if [ "${{ github.event.schedule }}" = '0 0 * * 0,2,3,4,5,6' ] || [ "${{ inputs.daily }}" = true ]; then MODE="--daily"; fi
+          if [ -n "$ONLY_SHARDS" ]; then MODE="$MODE --only $ONLY_SHARDS --skip-data"; fi
           python3 -I scripts/staticky.py weekly $MODE --threads 4 --until "$(date -d '+270 minutes' +%H:%M)" 2>&1 | tee "$RUNNER_TEMP/weekly.log"
           rc=${PIPESTATUS[0]}
           mkdir -p data/state
