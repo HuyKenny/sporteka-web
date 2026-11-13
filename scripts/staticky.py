@@ -560,7 +560,7 @@ def write_out(path, body):
 def render(db, shard, limit=None, threads=8, only_missing=False, kind=None, changed=False, sync=True, first_page=False, ignore_stamp=False):
     if sync:
         sync_paths(db)
-    sql = "SELECT path, kind, src FROM files WHERE (shard = ? OR ? = 'ALL') AND kind != 'data'" + (" AND hash = ''" if only_missing else '') \
+    sql = "SELECT path, kind, src, hash FROM files WHERE (shard = ? OR ? = 'ALL') AND kind != 'data'" + (" AND hash = ''" if only_missing else '') \
         + (' AND kind = ?' if kind else '') + ' ORDER BY path'
     rows = db.execute(sql, (shard, shard) + ((kind,) if kind else ())).fetchall()
     if first_page:   # texts only show on page 1 of a listing
@@ -571,9 +571,9 @@ def render(db, shard, limit=None, threads=8, only_missing=False, kind=None, chan
         stamp = build_stamp()
         src = {p: f'{stamp}:{h}' for p, h in cached_hashes().items()}
         if ignore_stamp:   # daily: only a changed product row / offer / price history re-renders a product, not a new build (that is the weekly run's job)
-            rows = [r for r in rows if r[1] != 'product' or src.get(r[0], '').split(':')[-1] != (r[2] or '').split(':')[-1]]
+            rows = [r for r in rows if r[1] != 'product' or not r[3] or src.get(r[0], '').split(':')[-1] != (r[2] or '').split(':')[-1]]
         else:
-            rows = [r for r in rows if r[1] != 'product' or src.get(r[0]) != r[2]]
+            rows = [r for r in rows if r[1] != 'product' or not r[3] or src.get(r[0]) != r[2]]   # no hash = never deployed (a failed deploy): render again
     stubs = redirect_plan(shard_map(db))[1]
     stamp0 = time.strftime('%Y-%m-%dT%H:%M:%S')
     for r in [r for r in rows if r[1] == 'stub']:
