@@ -177,8 +177,50 @@ def generate(db, show=0):
             ph = [k for k in idx if idx[k] >= 100 and any(re.search(rf'(^| ){re.escape(n)}( |$)', k) for n in ns) and re.search(rf'(^| ){re.escape(stem)}\w{{0,3}}( |$)', k)]
             add('color', cid, cslug, cname, f'p_barva={slugify(cv)}', ph, ("AND EXISTS (SELECT 1 FROM product_params q WHERE q.product_id = p.id AND q.key = 'barva' AND q.value = ?)", (cv,)), cv)
 
-    out.sort(key=lambda r: -r['vol'])
+    # a hand-written text was written for a candidate of scripts/fasety-export.py (src/data/kw/fasety-kandidati.json: slug, h1,
+    # base category, qs, volume). Some of them the demand matching above never finds (brand × parent category: "Alpine Pro
+    # bunda" in sportovni-bundy) — such a text still gets its page when the base category has enough products for the filter.
+    cand_file = Path(__file__).resolve().parent.parent / 'src/data/kw/fasety-kandidati.json'
+    cands = json.load(open(cand_file)) if cand_file.exists() else []
+    cat_by_slug = {r[1]: r for r in db.execute('SELECT id, slug, name FROM categories')}
+    gender = {gs: gl for gl, gs, _, _ in GENDERS}
+    for x in cands:
+        slug = x['slug']
+        if slug not in hand or slug in used or slug in taken or x.get('base') not in cat_by_slug:
+            continue
+        cid, cslug, cname = cat_by_slug[x['base']]
+        key, _, val = x['qs'].partition('=')
+        if key == 'znacka':
+            b = db.execute('SELECT id, name FROM brands WHERE slug = ?', (val,)).fetchone()
+            if not b:
+                continue
+            kind, flt, label = 'brand', ('AND p.brand_id = ?', (b[0],)), b[1]
+        elif key == 'p_pro' and val in gender:
+            kind, label = 'gender', gender[val]
+            flt = ("AND EXISTS (SELECT 1 FROM product_params q WHERE q.product_id = p.id AND q.key = 'pro' AND q.value = ?)", (label,))
+        elif key == 'p_barva':
+            cv = next((v for (v,) in db.execute("SELECT DISTINCT q.value FROM product_params q WHERE q.key = 'barva' AND q.product_id IN "
+                                                 "(SELECT product_id FROM cat_products WHERE cat_id = ?)", (cid,)) if slugify(v) == val), None)
+            if not cv:
+                continue
+            kind, label = 'color', cv
+            flt = ("AND EXISTS (SELECT 1 FROM product_params q WHERE q.product_id = p.id AND q.key = 'barva' AND q.value = ?)", (cv,))
+        elif key == 'sleva':
+            kind, flt, label = 'sale', ('AND p.disc_pct >= 10', ()), 've slevě'
+        else:
+            continue
+        n = db.execute(f"SELECT COUNT(*) FROM cat_products cp JOIN products p ON p.id = cp.product_id WHERE cp.cat_id = ? AND p.status = 'publish' {flt[0]}",
+                       (cid, *flt[1])).fetchone()[0]
+        if n < MIN_PRODUCTS:
+            continue
+        h1 = prev_rows[slug][4] if slug in prev_rows else x['h1']
+        used.add(slug)
+        out.append(dict(slug=slug, cid=cid, cslug=cslug, cname=cname, qs=x['qs'], h1=cap(h1), vol=int(x.get('vol') or 0), n=n, kind=kind, label=label, sql=flt[0], args=flt[1]))
+
+    out.sort(key=lambda r: (r['slug'] not in hand, -r['vol']))   # landings with a text never fall off the cap
     out = out[:MAX_LANDINGS]
+    missing = sorted(hand - {r['slug'] for r in out} - set(prev_rows))
+    print(f'fasety: hand-text landings without a page: {len(missing)} {missing[:20]}', file=sys.stderr)
     if len(out) < MIN_RESULT:   # never replace the table by (almost) nothing: the keyword files are missing or broken
         raise SystemExit(f'fasety: only {len(out)} landings (< {MIN_RESULT}) — keyword files {[str(f) for f in KW_FILES]} missing?')
     db.execute('DELETE FROM facet_pages')
