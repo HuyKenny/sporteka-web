@@ -620,6 +620,12 @@ def build(env):
         db.execute("INSERT INTO slugs (slug, kind, ref_id) VALUES (?, 'page', ?)", (slug, pid_))
         cat_slugs.add(slug)
     taken_slug |= cat_slugs
+    # slugs of facet landings with a hand-written text belong to the landing: a product named just "Dámská mikina" must not
+    # hold /damska-mikina/ (84 written texts had no page on 13. 11.); such a product moves to slug-<id>
+    ft = APP / 'src' / 'texts' / 'fasety.json'
+    facet_slugs = set(json.load(open(ft))) if ft.exists() else set()
+    taken_slug |= facet_slugs
+    moved_for_facets = 0
 
     def ancestors(slug):
         out = []
@@ -667,11 +673,12 @@ def build(env):
         name = typed_name(brand_case(lead['title'], brand), lead['cat'])
         if lead['color'] and K.fold(lead['color'])[:4] not in K.fold(name) and lead['domain'] == 'd-sport.cz':
             name = f"{name} {lead['color'].lower()}"
-        if op and op[1] not in used_slugs:
+        if op and op[1] not in used_slugs and op[1] not in facet_slugs:
             slug = op[1]
         else:
+            moved_for_facets += bool(op and op[1] in facet_slugs)
             slug = slugify(name)
-            if slug in used_slugs or (slug in taken_slug and not (op and op[1] == slug)):
+            if slug in used_slugs or slug in facet_slugs or (slug in taken_slug and not (op and op[1] == slug)):
                 slug = f'{slug[:80]}-{pid}'
         if (lead['cat'] in WEAK_CATS and len({g['feed'] for g in c}) == 1 and min(g['price'] for g in c) < WEAK_FLOOR
                 and (gsc_seen is not None or not op) and f'/{slug}/' not in (gsc_seen or ())):
@@ -782,7 +789,7 @@ def build(env):
     finalize(db)
     db.commit()
     db.close()
-    log(f'next.db: {n_prod} products, {n_off} offers, {len(brands)} brands in {time.time() - t0:.0f} s; weak cheap add-ons skipped: {weak_dropped}')
+    log(f'next.db: {n_prod} products, {n_off} offers, {len(brands)} brands in {time.time() - t0:.0f} s; weak cheap add-ons skipped: {weak_dropped}; products moved off facet slugs: {moved_for_facets}')
     return unmapped
 
 

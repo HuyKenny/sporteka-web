@@ -225,7 +225,8 @@ def redirect_plan(m):
     since = dict(st.execute('SELECT path, since FROM retired'))
     cut = time.strftime('%Y-%m-%d', time.gmtime(time.time() - STUB_DAYS * 86400))
     # a product back on sale keeps its old row in the catalogue redirects table: its page must win over the 301 / stub
-    live = {f'/{s}/' for (s,) in c.execute("SELECT slug FROM products WHERE status = 'publish' AND offer_count > 0")}
+    live = {f'/{s}/' for (s,) in c.execute("SELECT slug FROM products WHERE status = 'publish' AND offer_count > 0 "
+                                           "UNION SELECT slug FROM facet_pages UNION SELECT slug FROM categories")}
     per = {}
     for frm, to, code in c.execute('SELECT from_path, to_path, status FROM redirects'):
         if frm != to and frm not in live:
