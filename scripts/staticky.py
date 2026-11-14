@@ -224,9 +224,11 @@ def redirect_plan(m):
     imp = dict(st.execute('SELECT path, impressions + 100 * clicks FROM gsc'))
     since = dict(st.execute('SELECT path, since FROM retired'))
     cut = time.strftime('%Y-%m-%d', time.gmtime(time.time() - STUB_DAYS * 86400))
+    # a product back on sale keeps its old row in the catalogue redirects table: its page must win over the 301 / stub
+    live = {f'/{s}/' for (s,) in c.execute("SELECT slug FROM products WHERE status = 'publish' AND offer_count > 0")}
     per = {}
     for frm, to, code in c.execute('SELECT from_path, to_path, status FROM redirects'):
-        if frm != to:
+        if frm != to and frm not in live:
             per.setdefault(shard_of(frm, m), []).append((frm, to, code if code in (301, 302) else 301))
     rules, stubs = {}, {}
     for sh, lst in per.items():
@@ -448,6 +450,18 @@ def shard_of(path, m):
     return MAIN
 
 
+def reconcile_kinds(db, now=None):
+    """A path whose kind changed (product retired → stub, stub back on sale → product) is rendered again: its old file
+    (a 301 the _redirects limit may drop → 404, or a "no longer sold" stub over a live product) must not stay."""
+    now = now if now is not None else {p: k for p, k in all_paths()}
+    flip = [(k, p) for p, cur in db.execute('SELECT path, kind FROM files').fetchall() if (k := now.get(p)) and k != cur]
+    db.executemany("UPDATE files SET kind = ?, hash = '', src = '', status = 0, location = '' WHERE path = ?", flip)
+    db.commit()
+    if flip:
+        print(f'paths with a new kind: {len(flip)}', flush=True)
+    return len(flip)
+
+
 def sync_paths(db):
     """Insert new paths into files, drop paths that no longer exist (their files leave with the next deploy)."""
     m = shard_map(db)
@@ -455,6 +469,7 @@ def sync_paths(db):
     old = {p for (p,) in db.execute('SELECT path FROM files')}
     db.executemany('INSERT INTO files (path, kind, shard) VALUES (?, ?, ?)',
                    [(p, k, shard_of(p, m)) for p, k in now.items() if p not in old])
+    reconcile_kinds(db, now)
     gone = old - now.keys()
     db.executemany('DELETE FROM files WHERE path = ?', [(p,) for p in gone])
     # after plan --force: move paths to their new shard (their hash stays valid, blobs are per account)
@@ -745,7 +760,7 @@ def redirects_for(db, shard, m):
             seen.add(k)
             uniq.append(ln)
     lines = uniq
-    if len(lines) > 2000:
+    if len(lines) > 2000:   # the stub rule of redirect_plan should keep this rare: a dropped rule is a 404
         print(f'  !! {len(lines)} redirects > 2000: keeping the first 2000', file=sys.stderr)
         lines = lines[:2000]
     return '\n'.join(lines) + '\n'
@@ -892,6 +907,8 @@ def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=F
             time.sleep(3)
         else:
             raise SystemExit('local SSR did not start (tmp-static/wrangler.log)')
+        if skip_data and not texts:
+            reconcile_kinds(db)   # daily: no new paths (search / filter data stay), but retired ↔ back on sale is fixed every night
         if not skip_data:
             new, gone = sync_paths(db)
             print(f'paths +{new} -{gone}')

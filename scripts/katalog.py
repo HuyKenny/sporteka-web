@@ -768,6 +768,8 @@ def build(env):
         db.execute('''INSERT OR IGNORE INTO products SELECT * FROM l.products lp WHERE lp.id NOT IN (SELECT id FROM main.products)''')
         db.execute("UPDATE products SET status = 'retired', offer_count = 0, shop_count = 0, best_offer_id = 0 WHERE id NOT IN (SELECT product_id FROM offers)")
         db.execute("INSERT OR IGNORE INTO redirects (from_path, to_path, status) SELECT '/' || p.slug || '/', '/' || c.slug || '/', 301 FROM products p JOIN categories c ON c.id = p.primary_cat WHERE p.status = 'retired' AND p.slug NOT IN (SELECT slug FROM slugs)")
+        # a product back on sale loses its old 301 (else the rule / stub hides the live page)
+        db.execute("DELETE FROM redirects WHERE from_path IN (SELECT '/' || slug || '/' FROM products WHERE status != 'retired')")
         # brand pages that were merged (adidas-performance → adidas, dare-2b → dare2b …): the old URL answers with a 301
         new_brands = {r[0] for r in db.execute('SELECT slug FROM main.brands')}
         for bname, bslug in db.execute('SELECT name, slug FROM l.brands').fetchall():
