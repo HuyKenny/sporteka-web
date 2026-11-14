@@ -66,10 +66,10 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           STATE_KEY: ${{ secrets.STATE_KEY }}
           IMG_SECRET: ${{ secrets.IMG_SECRET }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           SPT_CRED_SPORTEKA: ${{ secrets.SPT_CRED_SPORTEKA }}
           SPT_CRED_AFFILIATEPORT: ${{ secrets.SPT_CRED_AFFILIATEPORT }}
           SPT_FEEDY_JSON: ${{ secrets.SPT_FEEDY_JSON }}
+          GSC_SA_JSON: ${{ secrets.GSC_SA_JSON }}
         run: python3 -I scripts/verify_no_secrets.py
 
   # data = download the feeds (own job), catalog = build + mirror update (own job)
@@ -206,13 +206,6 @@ jobs:
           rm -f data/feedy.json
           scripts/state.sh push catalog
           scripts/state.sh push feeds
-      - name: Tell Kenny when it failed
-        if: failure()
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          python3 -c "import sys,os; sys.path.insert(0,'scripts'); import staticky; staticky.discord('⚠️ sporteka: denní aktualizace cen v GitHub Actions spadla — ' + os.environ['RUN'])"
       - name: Clean up credentials
         if: always()
         run: rm -rf "$SPT_ROOT/credentials" data/feedy.json
@@ -259,6 +252,21 @@ jobs:
           printf '%s\n' "$S1" > "$SPT_ROOT/credentials/.sporteka-credentials.env"
           printf '%s\n' "$S2" > "$SPT_ROOT/credentials/.affiliateport-credentials.env"
           printf '%s\n' "$S3" > data/feedy.json
+      - name: Search Console impressions (last 90 days; the old numbers stay when Google fails)
+        env:
+          GSC_SA_JSON: ${{ secrets.GSC_SA_JSON }}
+          STATE_KEY: ${{ secrets.STATE_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          umask 077
+          printf '%s' "$GSC_SA_JSON" > "$RUNNER_TEMP/gsc-sa.json"
+          pip install -q 'pyjwt[crypto]' requests
+          if GSC_SA_FILE="$RUNNER_TEMP/gsc-sa.json" python3 -I scripts/staticky.py gsc --out data/gsc.json; then
+            scripts/state.sh push gsc
+          else
+            echo '::warning::GSC fetch failed, the build uses the previous numbers'
+          fi
+          rm -f "$RUNNER_TEMP/gsc-sa.json"
       - name: Build the catalogue
         env:
           SPT_MAX: '900000'
@@ -272,16 +280,9 @@ jobs:
         run: |
           rm -f data/feedy.json
           scripts/state.sh push catalog
-      - name: Tell Kenny when it failed
-        if: failure()
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          python3 -c "import sys,os; sys.path.insert(0,'scripts'); import staticky; staticky.discord('⚠️ sporteka: stažení feedů / katalog v GitHub Actions spadl — ' + os.environ['RUN'])"
       - name: Clean up credentials
         if: always()
-        run: rm -rf "$SPT_ROOT/credentials" data/feedy.json
+        run: rm -rf "$SPT_ROOT/credentials" data/feedy.json "$RUNNER_TEMP/gsc-sa.json"
 
   web:
     needs: [scan, data, catalog, daily]
@@ -344,7 +345,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           ONLY_SHARDS: ${{ inputs.only }}
         run: |
-          # Search Console numbers come from Malina (data/gsc.json, encrypted state); no Google key here
+          # Search Console numbers: fetched by the Monday catalog job (data/gsc.json, encrypted state)
           if [ -f data/gsc.json ]; then export GSC_FILE=data/gsc.json; fi
           # new pages stop starting after ~4.5 h (deploy of the current shard + state save must fit into the job)
           # texts only (push of src/texts/**, or the texts input): first page of every listing, no search / filter data
@@ -372,10 +373,10 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           STATE_KEY: ${{ secrets.STATE_KEY }}
           IMG_SECRET: ${{ secrets.IMG_SECRET }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           SPT_CRED_SPORTEKA: ${{ secrets.SPT_CRED_SPORTEKA }}
           SPT_CRED_AFFILIATEPORT: ${{ secrets.SPT_CRED_AFFILIATEPORT }}
           SPT_FEEDY_JSON: ${{ secrets.SPT_FEEDY_JSON }}
+          GSC_SA_JSON: ${{ secrets.GSC_SA_JSON }}
         run: python3 -I scripts/verify_no_secrets.py --out
       - name: IndexNow
         if: steps.gate.outputs.go == 'true' && github.event.schedule == '0 1 * * 1'
@@ -392,27 +393,12 @@ jobs:
         if: steps.gate.outputs.go == 'true' && hashFiles('data/state/web-pending') == ''
         continue-on-error: true
         run: python3 -I scripts/staticky_audit.py --sample 1000 --links 2000 2>&1 | tee "$RUNNER_TEMP/audit.log"; exit ${PIPESTATUS[0]}
-      - name: Report
+      - name: Report (a failed audit makes the run red, GitHub e-mails Kenny; no Discord, Kenny 14. 11.)
         if: always() && steps.gate.outputs.go == 'true'
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          JOB: ${{ job.status }}
           AUDIT: ${{ steps.audit.outcome }}
         run: |
           { echo '### Render + deploy'; echo '```'; grep -E '^(s[0-9]+|main):|^sporteka-s|deadline|weekly done' "$RUNNER_TEMP/weekly.log" 2>/dev/null | tail -40; echo '```'
             echo '### Audit'; echo '```'; tail -25 "$RUNNER_TEMP/audit.log" 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-          python3 - <<'PY'
-          import os, sys
-          sys.path.insert(0, 'scripts'); import staticky
-          job, audit, run = os.environ['JOB'], os.environ['AUDIT'], os.environ['RUN']
-          pending = os.path.exists('data/state/web-pending')
-          if job != 'success':
-              staticky.discord(f'⚠️ sporteka: vykreslení / nasazení webu v GitHub Actions spadlo — {run}')
-          elif audit == 'failure':
-              staticky.discord(f'⚠️ sporteka: web nasazený, ale audit živého webu našel chyby — {run}')
-          elif pending:
-              print('not finished yet, continues tomorrow')
-          elif os.environ.get('GITHUB_EVENT_NAME') == 'schedule':
-              staticky.discord(f'✅ sporteka: týdenní aktualizace hotová, audit živého webu čistý — {run}')
-          PY
+          if [ -f data/state/web-pending ]; then echo 'not finished yet, continues tomorrow'; fi
+          if [ "$AUDIT" = failure ]; then echo '::error::audit of the live site found errors (see the summary)'; exit 1; fi
