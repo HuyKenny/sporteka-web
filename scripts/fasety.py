@@ -164,7 +164,7 @@ def generate(db, show=0):
         # brands present in this category
         if cnt >= 20:
             for bid, bname, bslug, bn in db.execute("""SELECT b.id, b.name, b.slug, COUNT(*) FROM cat_products cp JOIN products p ON p.id = cp.product_id JOIN brands b ON b.id = p.brand_id
-                                                       WHERE cp.cat_id = ? AND p.status = 'publish' AND b.slug != 'ostatni' GROUP BY b.id HAVING COUNT(*) >= ? ORDER BY 4 DESC LIMIT 25""", (cid, MIN_PRODUCTS)):
+                                                       WHERE cp.cat_id = ? AND p.status = 'publish' AND b.slug != 'ostatni' GROUP BY b.id HAVING COUNT(*) >= ? ORDER BY 4 DESC LIMIT 40""", (cid, MIN_PRODUCTS)):
                 bf = fold(bname)
                 ph = [f'{bf} {n}' for n in ns] + [f'{n} {bf}' for n in ns]
                 add('brand', cid, cslug, cname, f'znacka={bslug}', ph, ('AND p.brand_id = ?', (bid,)), bname)
