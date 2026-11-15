@@ -570,7 +570,7 @@ def rules():
         # --- footwear (path or title says shoes) ---
         ('barefoot-obuv', None, R(r'barefoot|ponozkobot'), None),
         ('barefoot-obuv', R(r'barefoot'), None, None),
-        ('kopacky', None, R(r'kopack|lisovk|lisokolik|turf(y|\W|$)|(^|\W)fg(\W|$).*bot|(^|\W)(fg|ag|sg|mg|tf)(\W|$)'), R(r'^$|obuv|bot')),
+        ('kopacky', None, R(r'kopack|lisovk|lisokolik|turf(y|\W|$)|(^|\W)fg(\W|$).*bot|(?<!\d)(^|\W)(fg|ag|sg|mg|tf)(\W|$)'), R(r'^$|obuv|bot')),   # not after a number: '500 mg' is a supplement (15. 11.)
         ('kopacky', R(r'kopacky'), None, None),
         ('salova-obuv', R(r'salov|halov|sálov|indoor'), None, None),
         ('salova-obuv', None, R(r'salov\w* (bot|obuv)|halov\w* (bot|obuv)|sálovk|salovk|indoor (bot|obuv)|futsal\w* (bot|obuv)|volejbalov\w* (bot|obuv)|hazenk'), None),
