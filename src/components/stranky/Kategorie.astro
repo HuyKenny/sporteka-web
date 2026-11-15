@@ -23,6 +23,9 @@ const lcp = picture(v.items[0]?.image, 240);   // the first card photo is the LC
 	<Vypis crumbs={v.crumbs} h1={name} icon={catIcon(v.cat.slug, v.tree)} introHtml={first ? v.cat.description_html : undefined} tiles={tiles} tilesTitle={v.kidsTitle}
 		f={v.f} fc={v.fc} brands={v.brands} landings={v.landings} popular={first ? v.popular : []} items={v.items} total={v.total} page={v.page} pages={v.pages} base={v.base} qs={v.qs}
 		empty="V této kategorii teď nejsou žádné produkty.">
+		{(v.guides?.length ?? 0) > 0 && (
+			<aside class="kg-pv"><b>Průvodce:</b>{v.guides!.map((g) => <a href={`/${g.slug}/`}>{g.name}</a>)}</aside>
+		)}
 		{top.length >= 3 && (
 			<section class="sek ah-ctable">
 				<h2>TOP {name} – srovnání cen</h2>

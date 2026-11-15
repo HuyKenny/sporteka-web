@@ -1,0 +1,45 @@
+---
+// Seasonal buying guide (src/texts/pruvodce.json, views.ts guideView): text sections, each with the most popular
+// products of its category, and an FAQ. Server-rendered like everything else (static export).
+import Base from '../../layouts/Base.astro';
+import Drobky from '../Drobky.astro';
+import Mrizka from '../Mrizka.astro';
+import type { guideView } from '../../lib/views';
+import { datum, texturize } from '../../lib/format';
+
+interface Props { v: NonNullable<Awaited<ReturnType<typeof guideView>>> }
+const { v } = Astro.props;
+const m = v.meta;
+const g = v.g;
+---
+<Base title={m.title} description={m.description} canonical={m.canonical} robots={m.robots} graph={m.graph} jsonLd={m.jsonLd} ogType={m.ogType} pageType="page">
+	<div class="w">
+		<Drobky items={v.crumbs} />
+		<article class="cl pv">
+			<h1>{texturize(g.h1)}</h1>
+			<p class="cl__m">Sporteka.cz · aktualizováno <time datetime={g.updated}>{datum(g.updated)}</time></p>
+			<div class="obsah" set:html={g.intro_html} />
+			{v.sections.length > 2 && (
+				<nav class="pv__toc" aria-label="Obsah"><b>V průvodci</b><ol>{v.sections.map((s, i) => <li><a href={`#s${i + 1}`}>{s.h2}</a></li>)}</ol></nav>
+			)}
+			{v.sections.map((s, i) => (
+				<section class="pv__s" id={`s${i + 1}`}>
+					<h2>{texturize(s.h2)}</h2>
+					<div class="obsah" set:html={s.html} />
+					{s.items.length > 0 && (
+						<div class="pv__p">
+							<Mrizka items={s.items} eager={false} />
+							<a class="btn btn--g" href={`/${s.cat}/`}>Všechny {s.catName.toLowerCase()} a jejich ceny</a>
+						</div>
+					)}
+				</section>
+			))}
+		</article>
+		{v.faq.length > 0 && (
+			<section class="sek faq">
+				<h2>Často kladené dotazy</h2>
+				{v.faq.map((f) => <details><summary>{f.q}</summary><div set:html={f.a} /></details>)}
+			</section>
+		)}
+	</div>
+</Base>

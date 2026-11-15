@@ -6,12 +6,14 @@
 //                             relevant category/brand by its words (guess.ts), else 404; scanner junk stays 404
 import { guessSlug, resolveSlug } from './db';
 import { guessListing } from './guess';
+import { GUIDES } from './guides';
 
 const JUNK = /\.[a-z0-9]{2,5}$|^\/(\.|wp-|cgi-bin|admin|administrator|phpmyadmin|xmlrpc|vendor|api\/|_)/i;
 
 export type Route =
   | { kind: 'product' | 'category' | 'facet' | 'post' | 'page' | 'postcat'; id: number; page: number }
   | { kind: 'blog'; page: number }
+  | { kind: 'guide'; slug: string }
   | { kind: 'search'; page: number }
   | { kind: 'redirect'; to: string }
   | { kind: 'notfound' };
@@ -43,6 +45,8 @@ export async function dispatch(db: D1Database, pathname: string, sp: URLSearchPa
   }
   const slug = seg[0]!.toLowerCase();
   if (slug !== seg[0]) return { kind: 'redirect', to: `/${encodeURIComponent(slug)}/` };
+  // seasonal guides (src/texts/pruvodce.json): their slugs are reserved in the catalogue build
+  if (Object.hasOwn(GUIDES, slug)) return page > 1 ? { kind: 'notfound' } : { kind: 'guide', slug };
   const r = await resolveSlug(db, slug);
   if (r) {
     if (r.kind === 'page' && slug === 'blog') return { kind: 'blog', page };

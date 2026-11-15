@@ -69,7 +69,9 @@ def cred(name, file='.sporteka-credentials.env'):
         pass
     return ''
 GSC_SITE = 'sc-domain:sporteka.cz'
-GRACE_DAYS = 120      # a new product keeps an indexable page this long without any impression
+# 16. 11. (Kenny, after the November 2026 core update dropped 5 295 → 109 pages with impressions): no grace any more —
+# a product sold by one shop only and without an impression in 90 days is noindex from the start (thin feed copy)
+GRACE_DAYS = 0
 STUB_DAYS = 180       # a retired product without a 301 slot keeps a "no longer sold" stub this long
 RULES_PER_SHARD = 1800  # Cloudflare: 2 000 static _redirects rules per Worker version
 STATE = APP / 'data' / 'static-state.db'
@@ -207,6 +209,13 @@ def prepare(db):
     if have_gsc:
         hidden = c.execute(f"""UPDATE products SET noindex = 1 WHERE status = 'publish' AND noindex = 0 AND shop_count < 2
             AND created_at < date('now', '-{GRACE_DAYS} days') AND '/' || slug || '/' NOT IN (SELECT path FROM st.gsc)""").rowcount
+        # brands: indexable with a hand-written text (src/texts/znacky.json) or with impressions; the rest is a thin product list
+        texts = list(json.loads((APP / 'src/texts/znacky.json').read_text()))
+        c.execute('CREATE TEMP TABLE bt(slug TEXT PRIMARY KEY)')
+        c.executemany('INSERT OR IGNORE INTO bt VALUES (?)', [(t,) for t in texts])
+        hidden_brands = c.execute("""UPDATE brands SET noindex = 1 WHERE noindex = 0 AND slug NOT IN (SELECT slug FROM bt)
+            AND '/znacka/' || slug || '/' NOT IN (SELECT path FROM st.gsc)""").rowcount
+        print(f'{hidden_brands} brands without a text and without impressions → noindex')
         files = [r[0] for r in c.execute("SELECT DISTINCT (id - 1) / 5000 + 1 FROM products WHERE status = 'publish' AND noindex = 0 AND offer_count > 0 ORDER BY 1")]
         c.execute("UPDATE site_cache SET value = ? WHERE key = 'sitemap:files'", (json.dumps(files),))
     today = time.strftime('%Y-%m-%d')
@@ -355,6 +364,8 @@ def all_paths():
         for p in listing(f'/{slug}/', total):
             yield p, 'listing'
     for (slug,) in c.execute("SELECT slug FROM slugs WHERE kind IN ('page', 'post', 'postcat')"):
+        yield f'/{slug}/', 'page'
+    for slug in json.loads((APP / 'src/texts/pruvodce.json').read_text()):   # seasonal guides (src/lib/guides.ts)
         yield f'/{slug}/', 'page'
     for (slug,) in c.execute("SELECT slug FROM products WHERE status = 'publish' AND offer_count > 0"):
         yield f'/{slug}/', 'product'
@@ -510,7 +521,7 @@ def product_hashes():
         pid = r[0]
         acc[pid] = hashlib.sha1(repr(r).encode())
         rows[pid] = (r[cols.index('slug')], r[cols.index('primary_cat')], r[cols.index('created_at')], r[cols.index('name')],
-                     r[cols.index('image')], r[cols.index('shop_count')] or r[cols.index('offer_count')])
+                     r[cols.index('image')], r[cols.index('shop_count')] or r[cols.index('offer_count')], r[cols.index('noindex')])
     for r in c.execute('SELECT product_id, id, domain, price, price_old, stock, target_url, sizes, delivery_price, title, img, go_slug, variants, extra '
                        'FROM offers WHERE active = 1 ORDER BY product_id, id'):
         add(r[0], 'o', r[1:])
@@ -530,10 +541,19 @@ def product_hashes():
             neigh.setdefault(cid, []).append(pid)
     g = glob.hexdigest()
     out = {}
+    # neighbours = the 8 indexable products added before and after it (db.ts relatedProducts, static mode): link equity
+    # goes to pages Google may index, not to noindex ones (memory seo-dr0-sitemapa-neni-discovery)
     for cid, lst in neigh.items():
-        for i, pid in enumerate(lst):
-            rel = [rows[x][0:1] + rows[x][3:] for x in lst[max(0, i - 8):i + 9] if x != pid]
-            add(pid, 'r', rel)
+        ind = [x for x in lst if not rows[x][6]]
+        pos = {x: i for i, x in enumerate(ind)}
+        j = 0
+        for pid in lst:
+            if pid in pos:
+                i = pos[pid]
+                rel, j = ind[max(0, i - 8):i] + ind[i + 1:i + 9], i + 1
+            else:
+                rel = ind[max(0, j - 8):j] + ind[j:j + 8]
+            add(pid, 'r', [rows[x][0:1] + rows[x][3:6] for x in rel])
     for pid, h in acc.items():
         h.update(g.encode())
         out[f'/{rows[pid][0]}/'] = h.hexdigest()[:16]
@@ -954,6 +974,14 @@ def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=F
             raise SystemExit('local SSR did not start (tmp-static/wrangler.log)')
         if skip_data and not texts:
             reconcile_kinds(db)   # daily: no new paths (search / filter data stay), but retired ↔ back on sale is fixed every night
+        if texts:   # a new seasonal guide (src/texts/pruvodce.json) goes live with the texts push, not a week later
+            m = shard_map(db)
+            have = {p for (p,) in db.execute("SELECT path FROM files WHERE kind = 'page'")}
+            add = [f'/{g}/' for g in json.loads((APP / 'src/texts/pruvodce.json').read_text()) if f'/{g}/' not in have]
+            db.executemany('INSERT OR REPLACE INTO files (path, kind, shard) VALUES (?, ?, ?)', [(p, 'page', shard_of(p, m)) for p in add])
+            db.commit()
+            if add:
+                print(f'guides added: {add}')
         if not skip_data:
             new, gone = sync_paths(db)
             print(f'paths +{new} -{gone}')
@@ -971,6 +999,8 @@ def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=F
                 break
             while render(db, sh, threads=threads, changed=not texts, sync=False, kind='listing' if texts else None, first_page=texts, ignore_stamp=daily) == 'disk':
                 deploy_retry(db, sh, worker_name(sh, prefix), noindex, threads)   # frees the rendered files, then render the rest
+            if texts:   # pages (guides, static pages): a handful, rendered whole
+                render(db, sh, threads=threads, sync=False, kind='page')
             deploy_retry(db, sh, worker_name(sh, prefix), noindex, threads)
     finally:
         os.killpg(srv.pid, 15)

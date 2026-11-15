@@ -2,6 +2,7 @@
 // Homepage: search first (H1 + search + popular searches) with the signpost of sections, section tiles, today's biggest
 // discounts, the most compared products, brands, how the comparison works, shops, SEO text and FAQ (FAQPage).
 import Base from '../../layouts/Base.astro';
+import { GUIDES } from '../../lib/guides';
 import { isStatic } from '../../lib/server/env';
 import Ik from '../Ik.astro';
 import Sp from '../Sp.astro';
@@ -12,6 +13,7 @@ import { SECTIONS, TOP } from '../../lib/ikony';
 import { shopColor, shopLogo, shopName } from '../../lib/shops';
 import { BASE, OG_HOME } from '../../lib/site';
 import { robots } from '../../lib/seo';
+const guides = Object.entries(GUIDES);
 
 interface Props { v: Awaited<ReturnType<typeof homeView>> }
 const { v } = Astro.props;
@@ -85,6 +87,13 @@ const graph = [
 				{tiles.map((s) => <li><a href={`/${s.slug}/`}><span class={`zn-m m-${s.mark}`} aria-hidden="true"></span><Sp id={s.icon} size={54} /><b>{s.label}</b><small>{cislo(s.count)} produktů</small></a></li>)}
 			</ul>
 		</section>
+
+		{guides.length > 0 && (
+			<section class="sek" aria-labelledby="h-pv">
+				<div class="sek__h"><h2 id="h-pv"><Sp id="rozcestnik" size={36} />Průvodci na zimu a nový rok</h2></div>
+				<ul class="kt kt--pv">{guides.map(([slug, g]) => <li><a href={`/${slug}/`}><b>{g.name}</b><small>{g.seo_desc.slice(0, 90).replace(/\s\S*$/, '')}…</small></a></li>)}</ul>
+			</section>
+		)}
 
 		{v.deals.length > 0 && (
 			<section class="sek" aria-labelledby="h-sl">

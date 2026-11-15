@@ -188,6 +188,17 @@ TREE = [
     (6151, 'lyzarske-vosky', 'Vosky a mazání na lyže a snowboardy', 'lyzarske-doplnky'),
     (6152, 'lyzarske-vaky-a-tasky', 'Vaky a tašky na lyže a boty', 'lyzarske-doplnky'),
     (6161, 'snezky', 'Sněžnice', 'zimni-sporty'),
+    # ---- 16. 11. 2026 January wave (reports/sporteka/audit-2026-11-16.md, MM seasonality: January peak) ----
+    (6162, 'vyhrivane-obleceni', 'Vyhřívané oblečení a doplňky', 'zimni-sporty'),
+    (6081, 'kluzaky-na-snih', 'Kluzáky na sníh', 'sane-a-boby'),
+    (7022, 'posilovaci-veze', 'Posilovací věže a multistanice', 'posilovaci-stroje'),
+    (7054, 'gymnasticke-mice', 'Gymnastické a balanční míče', 'fitness-pomucky'),
+    (7062, 'zatezove-vesty', 'Zátěžové vesty', 'funkcni-trenink'),
+    (708021, 'glutamin', 'Glutamin', 'aminokyseliny-bcaa'),
+    (708073, 'vitamin-d', 'Vitamín D a D3', 'vitaminy-a-mineraly'),
+    (708074, 'vitamin-c', 'Vitamín C', 'vitaminy-a-mineraly'),
+    (708075, 'zinek', 'Zinek', 'vitaminy-a-mineraly'),
+    (70813, 'fit-potraviny', 'Fit potraviny a arašídová másla', 'sportovni-vyziva'),
     (6171, 'krasobruslarske-brusle', 'Krasobruslařské brusle', 'brusle'),
     (6172, 'rekreacni-brusle', 'Rekreační brusle na led', 'brusle'),
     # ---------- fitness ----------
@@ -730,6 +741,8 @@ TOP_RULES = [
     ('hrazdy-a-bradla', None, R(r'(^|\W)(hrazd\w*|bradla|zebrik na cvic)'), None),
     ('ploutve', None, R(r'ploutv'), None),
     ('nesmeky', None, R(r'nesmek|protiskluzov\w* (naslapn|retizk)|ledov\w* (hroty|racny)'), None),
+    # electrically heated clothing (16. 11.); "hřejivý" = only warm, stays in its clothing category
+    ('vyhrivane-obleceni', None, R(r'^(?!.*(masaz|bandaz|brusl|grip|deka|podlozk|sedak|sedadl|kreslo|lahev|hrnek)).*(vyhrivan|s vyhrivanim|heated|heat ?(glove|sock|bag)|(^|\W)heateo|ohrivac\w* (ruk|nohou|tela)|vyhrivac\w* (vlozk|ponozk|rukavic|vest))'), None),
     ('nafukovaci-hracky', None, R(r'nafukovac\w* (hrack|lehatk|kruh|mic|matrac|zvire|flamin|jednorozec|ostrov)|(lehatko|kruh|rukavky|kolo) do vody|plavac\w* kruh|plovouci ostrov'), None),
     ('bazeny', None, R(r'(^|\W)bazen(y|u|ek|ky)?(\W|$)|nafukovac\w* bazen'), None),
     ('plavky', None, R(r'(plavecke?|koupaci|plazove|aquashort)\w* ?(kratas\w*|sortk\w*)|(kratas\w*|sortk\w*) (do vody|na plavani|plavecke)'), None),
@@ -1240,6 +1253,8 @@ REFINE['spaci-pytle'] = [
 ]
 REFINE['jizdni-kola'][0:0] = [('cyklo-dily', _PARTS), ('cyklo-prislusenstvi', _ACC)]
 # ---- 11. 11. 2026 content gap (reports/sporteka/content-gap-2026-11.md): demand that had no category of its own ----
+_FIT_FOOD = (r'(arasidov|orisk|mandlov|kesu|liskooris|pistaciov)\w* (maslo|krem)|maslo z (arasidu|mandli|kesu)|proteinov\w* (kase|palacink|pudink|krem|pomazank|chlebic|testovin|wafl)|'
+             r'(palacink|pancake|wafl)\w*.*(mix|smes)|(ovesn|proteinov)\w* kase|sirup (bez|0|zero)|(zero|0 ?kcal|nizkokaloric)\w* sirup|rizov\w* (chlebic|plack)|fit (sirup|omack|dresink)')
 for _parent, _rules in {
     'kardio-trenazery': [('rotopedy', r'rotoped|spinning|ergometr|air ?bike|cyklotrenazer'), ('behaci-pasy', r'bezeck\w* pas|chodic\w* pas|treadmill|walking ?pad'),
                          ('elipticke-trenazery', r'eliptick|crosstrainer|cross trainer'), ('veslovaci-trenazery', r'veslovac|(^|\W)rower(\W|$)')],
@@ -1250,6 +1265,23 @@ for _parent, _rules in {
     'posilovaci-stroje': [('posilovaci-lavice', r'lavic|(^|\W)bench(\W|$)')],
     'sportovni-hodinky': [('chytre-hodinky', r'chytr\w* hodink|smart ?watch|fitness naramek|chytry naramek|(^|\W)(apple watch|amazfit|huawei watch|fitbit|galaxy watch)')],
     'obleceni-bojove-sporty': [('kimona', r'kimono|judogi|karategi|dobok|(^|\W)gi (pro|bjj)|bjj gi')],
+}.items():
+    REFINE.setdefault(_parent, [])[0:0] = _rules
+# ---- 16. 11. 2026 January wave: own loop, the parents above keep their rules (a repeated dict key would replace them) ----
+for _parent, _rules in {
+    'sane-a-boby': [('kluzaky-na-snih', r'kluzak|klouzak|snezn\w* talir|(^|\W)talir na snih|snow ?(rocket|tube)|lopat\w* (na|k) (sjezd|klouz)')],
+    'posilovaci-stroje': [('posilovaci-veze', r'^(?!.*(kladk|lank|madl|nahradn|prislusenstv|tyc k)).*(posilovac\w* vez|multistanic|multipos|posilovac\w* stanic|multifunkcni posilovac)')],
+    'pilates-pomucky': [('gymnasticke-mice', r'gymnast\w* mic|fit ?ball|gym ?ball|balancn\w* mic|rehabilitac\w* mic|overbal|(^|\W)mic (na|pro) (cviceni|sezeni)|sedaci mic|swiss ?ball')],
+    'fitness-pomucky': [('gymnasticke-mice', r'gymnast\w* mic|fit ?ball|gym ?ball|balancn\w* mic|rehabilitac\w* mic|overbal|sedaci mic|swiss ?ball')],
+    'gymnasticke-pomucky': [('gymnasticke-mice', r'gymnast\w* mic|fit ?ball|gym ?ball|balancn\w* mic|overbal')],
+    'cinky-a-kotouce': [('zatezove-vesty', r'zatez\w* vest|weight ?vest')],
+    'funkcni-trenink': [('zatezove-vesty', r'zatez\w* vest|weight ?vest')],
+    'aminokyseliny-bcaa': [('glutamin', r'^(?!.*(bcaa|eaa|2:1:1|4:1:1)).*glutamin')],
+    'vitaminy-a-mineraly': [('vitamin-d', r'^(?!.*(omega|rybi)).*(vitamin d(\d|\W|$)|(^|\W)d3(\W|$)|cholekalciferol)'), ('vitamin-c', r'vitamin c(\W|$)|kyselin\w* askorb'), ('zinek', r'^(?!.*(magnes|horcik|kolagen|multivit)).*(^|\W)(zinek|zinku|zinc)(\W|$)')],
+    'energeticke-gely-a-tycinky': [('fit-potraviny', _FIT_FOOD)],
+    'proteiny': [('fit-potraviny', _FIT_FOOD)],
+    'proteinove-tycinky-a-snacky': [('fit-potraviny', _FIT_FOOD)],
+    'sportovni-vyziva': [('fit-potraviny', _FIT_FOOD)],
 }.items():
     REFINE.setdefault(_parent, [])[0:0] = _rules
 REFINE['cyklo-prislusenstvi'].append(('cyklo-stojany-a-drzaky', r'stojan|drzak\w* (na )?(kol|bicykl)|nastenn|zavesn\w* (na )?kol|zavesen\w* na kolo'))

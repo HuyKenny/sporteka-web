@@ -128,6 +128,7 @@ export async function categoryView(db: D1Database, catId: number, page: number, 
     meta, cat, crumbs, items, total, page, pages, base, f, qs: toQuery(fp ? parseFilters(facet!.user) : f), kids, kidsTitle, tree, fc, brands, imgs, landings, faq,
     popular: [...lands].sort((x, y) => y.volume - x.volume).slice(0, 12).map((l) => ({ slug: l.slug, h1: l.h1 })),
     guide: page === 1 && !filtered ? cat.guide_html : '',
+    guides: page === 1 && !filtered ? guidesFor(chain.map((c) => c.slug)) : [],
     isFiltered: filtered,
   };
 }
@@ -140,6 +141,41 @@ function only(f: ReturnType<typeof parseFilters>): string | null {
   if (f.znacka.length === 1 && !ps.length) return `brand=${f.znacka[0]}`;
   if (!f.znacka.length && ps.length === 1 && ps[0]![1]!.length === 1) return `${ps[0]![0]}=${ps[0]![1]![0]}`;
   return null;
+}
+
+// ---------- seasonal guides (src/texts/pruvodce.json) ----------
+import { GUIDES, guidesFor } from './guides';
+
+export async function guideView(db: D1Database, slug: string) {
+  const g = GUIDES[slug];
+  if (!g) return null;
+  const tree = await catTree(db);
+  const url = abs(`/${slug}/`);
+  const q = { page: 1, sort: 'pop' as const, brands: [], shops: [], stock: true, disc: false, params: [] };
+  // the most popular products in stock of each section's category (indexable categories with products only)
+  const sections = await Promise.all(g.sections.map(async (s) => {
+    const c = s.cat ? tree.bySlug.get(s.cat) : undefined;
+    if (!c || c.noindex || c.count_total === 0) return { ...s, cat: undefined, catName: '', items: [] as Card[] };
+    const { items } = await listProducts(db, { cat: c.id }, q, c.count_total);
+    return { ...s, catName: decode(c.name), items: items.slice(0, s.n ?? 4) };
+  }));
+  let faq: Array<{ q: string; a: string }> = [];
+  try { faq = g.faq_json ? JSON.parse(g.faq_json) : []; } catch { /* broken JSON = no FAQ */ }
+  const crumbs: Crumb[] = [{ name: 'Domů', url: '/' }, { name: g.name, url: `/${slug}/` }];
+  const all = sections.flatMap((s) => s.items);
+  const meta: Meta = {
+    title: g.seo_title, description: g.seo_desc, canonical: url, robots: robots(false), ogType: 'article',
+    graph: [
+      { '@type': 'WebPage', '@id': url + '#webpage', url, name: g.seo_title, dateModified: g.updated, isPartOf: { '@id': BASE + '/#website' }, inLanguage: 'cs' },
+      { '@type': 'Article', '@id': url + '#article', headline: g.h1, description: g.seo_desc, dateModified: g.updated, author: { '@id': BASE + '/#organization' },
+        publisher: { '@id': BASE + '/#organization' }, mainEntityOfPage: { '@id': url + '#webpage' }, inLanguage: 'cs' },
+      ...(faq.length ? [{ '@type': 'FAQPage', '@id': url + '#faq', mainEntity: faq.map((x) => ({ '@type': 'Question', name: stripTags(x.q), acceptedAnswer: { '@type': 'Answer', text: stripTags(x.a) } })) }] : []),
+      { ...breadcrumbLd(crumbs), '@context': undefined, '@id': BASE + '/#breadcrumb' },
+      ...(all.length ? [{ ...itemListLd(url, g.h1, all)!, '@context': undefined }] : []),
+    ],
+    jsonLd: [],
+  };
+  return { meta, g, slug, crumbs, sections, faq };
 }
 
 // ---------- brand ----------

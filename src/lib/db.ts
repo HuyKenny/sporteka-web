@@ -237,11 +237,11 @@ export async function loadProduct(db: D1Database, id: number) {
 /** Similar products: same primary category, closest in price (two range scans on idx_cp_price), with offers. */
 export async function relatedProducts(db: D1Database, catId: number, exclude: number, price: number, n = 8, created = ''): Promise<Card[]> {
   if (!catId) return [];
-  // static export: neighbours in the PK order (date added, then id — the whole first import shares one date), not by price — a neighbour's price change must not change this
+  // static export: indexable neighbours only (16. 11.: links to pages Google may index), in the PK order (date added, then id — the whole first import shares one date), not by price — a neighbour's price change must not change this
   // page, so only really changed products are rendered and uploaded every week (the cards show no price there)
   const [older, newer] = await db.batch(isStatic() && created ? [
-    db.prepare(`SELECT ${CARD_COLS} FROM cat_products x JOIN products p ON p.id = x.product_id ${CARD_JOIN} WHERE x.cat_id = ? AND (x.created_at, x.product_id) < (?, ?) AND p.status = 'publish' ORDER BY x.created_at DESC, x.product_id DESC LIMIT ?`).bind(catId, created, exclude, n),
-    db.prepare(`SELECT ${CARD_COLS} FROM cat_products x JOIN products p ON p.id = x.product_id ${CARD_JOIN} WHERE x.cat_id = ? AND (x.created_at, x.product_id) > (?, ?) AND p.status = 'publish' ORDER BY x.created_at ASC, x.product_id ASC LIMIT ?`).bind(catId, created, exclude, n),
+    db.prepare(`SELECT ${CARD_COLS} FROM cat_products x JOIN products p ON p.id = x.product_id ${CARD_JOIN} WHERE x.cat_id = ? AND (x.created_at, x.product_id) < (?, ?) AND p.status = 'publish' AND p.noindex = 0 ORDER BY x.created_at DESC, x.product_id DESC LIMIT ?`).bind(catId, created, exclude, n),
+    db.prepare(`SELECT ${CARD_COLS} FROM cat_products x JOIN products p ON p.id = x.product_id ${CARD_JOIN} WHERE x.cat_id = ? AND (x.created_at, x.product_id) > (?, ?) AND p.status = 'publish' AND p.noindex = 0 ORDER BY x.created_at ASC, x.product_id ASC LIMIT ?`).bind(catId, created, exclude, n),
   ] : [
     db.prepare(`SELECT ${CARD_COLS} FROM cat_products x JOIN products p ON p.id = x.product_id ${CARD_JOIN} WHERE x.cat_id = ? AND x.min_price > 0 AND x.min_price < ? AND p.status = 'publish' ORDER BY x.min_price DESC LIMIT ?`).bind(catId, price, n),
     db.prepare(`SELECT ${CARD_COLS} FROM cat_products x JOIN products p ON p.id = x.product_id ${CARD_JOIN} WHERE x.cat_id = ? AND x.min_price >= ? AND p.status = 'publish' ORDER BY x.min_price ASC LIMIT ?`).bind(catId, price, n + 1),

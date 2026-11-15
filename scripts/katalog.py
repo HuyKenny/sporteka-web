@@ -622,8 +622,10 @@ def build(env):
     taken_slug |= cat_slugs
     # slugs of facet landings with a hand-written text belong to the landing: a product named just "Dámská mikina" must not
     # hold /damska-mikina/ (84 written texts had no page on 13. 11.); such a product moves to slug-<id>
-    ft = APP / 'src' / 'texts' / 'fasety.json'
-    facet_slugs = set(json.load(open(ft))) if ft.exists() else set()
+    # the same for the seasonal guides (src/texts/pruvodce.json, src/lib/guides.ts)
+    facet_slugs = set()
+    for ft in (APP / 'src' / 'texts' / 'fasety.json', APP / 'src' / 'texts' / 'pruvodce.json'):
+        facet_slugs |= set(json.load(open(ft))) if ft.exists() else set()
     taken_slug |= facet_slugs
     moved_for_facets = 0
 
