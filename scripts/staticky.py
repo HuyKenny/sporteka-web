@@ -767,7 +767,43 @@ def redirects_for(db, shard, m):
     return '\n'.join(lines) + '\n'
 
 
+LIVE_SITE = 'https://sporteka.cz'
+
+
+def refetch_data(db, shard):
+    """search / filter data (kind 'data') are built by the weekly run only. When Cloudflare asks for one of their blobs
+    again (15. 11.: 6 385 /_s/ files the live site still served), a daily run has no local copy and render cannot make
+    one: take the file back from the live site, so the deploy neither drops it nor fails."""
+    rows = [p for (p,) in db.execute("SELECT path FROM files WHERE shard = ? AND kind = 'data' AND status = 200 AND hash = ''", (shard,))
+            if not (OUT / file_of(p).lstrip('/')).exists()]
+    if not rows:
+        return
+
+    def get(p):
+        req = urllib.request.Request(LIVE_SITE + p, headers={'User-Agent': 'Mozilla/5.0 sporteka-static MalinaCron'})
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(req, timeout=60) as r:
+                    return p, r.read()
+            except urllib.error.HTTPError as e:
+                if e.code == 404:
+                    return p, None
+            except Exception:  # noqa: BLE001 — timeouts: retry
+                pass
+            time.sleep(2 + attempt * 3)
+        return p, None
+    with cf.ThreadPoolExecutor(8) as ex:
+        got = list(ex.map(get, rows))
+    lost = [p for p, b in got if b is None]
+    for p, b in got:
+        if b is not None:
+            write_out(p, b)
+    print(f'{shard}: {len(rows) - len(lost)} data files taken back from the live site'
+          + (f', {len(lost)} not there (dropped): {lost[:5]}' if lost else ''), flush=True)
+
+
 def deploy(db, shard, worker=None, noindex=False):
+    refetch_data(db, shard)
     m = shard_map(db)
     worker = worker or worker_name(shard, 'sporteka')
     # shard ALL = every rendered file in one Worker (test deploys of a sample only; ≤ 100 000 files)
@@ -819,6 +855,9 @@ def deploy(db, shard, worker=None, noindex=False):
     print(f'{worker}: {res["total"]} files, {res["uploaded"]} uploaded ({res["bytes"] / 1e6:.1f} MB)')
 
 
+FAILED = []   # shards whose deploy gave up (deploy_retry); weekly exits non-zero after the other shards
+
+
 class MissingBlobs(SystemExit):
     """The state names a file hash Cloudflare no longer holds (those rows are reset to hash ''); weekly re-renders them."""
 
@@ -830,8 +869,13 @@ def deploy_retry(db, sh, worker, noindex, threads):
             return deploy(db, sh, worker, noindex)
         except MissingBlobs as e:
             print(f'{sh}: {e} — re-rendering them (attempt {attempt + 1})', flush=True)
-            render(db, sh, threads=threads, only_missing=True, sync=False)
-    deploy(db, sh, worker, noindex)
+            render(db, sh, threads=threads, only_missing=True, sync=False)   # pages; data files come back in deploy
+    try:
+        deploy(db, sh, worker, noindex)
+    except MissingBlobs as e:
+        # the live version of this shard stays as it was; the other shards still deploy, the run ends red (weekly)
+        print(f'!! {sh}: {e} — not deployed', flush=True)
+        FAILED.append(sh)
 
 
 # ---------- the whole weekly run ----------
@@ -931,6 +975,8 @@ def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=F
     finally:
         os.killpg(srv.pid, 15)
     print(f'weekly done in {(time.time() - t0) / 3600:.1f} h')
+    if FAILED:
+        raise SystemExit(f'shards not deployed: {FAILED}')
 
 
 # ---------- cutover / rollback (Worker routes of the zone; rollback = the saved routes back) ----------

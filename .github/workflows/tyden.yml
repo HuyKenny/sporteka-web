@@ -399,6 +399,6 @@ jobs:
           AUDIT: ${{ steps.audit.outcome }}
         run: |
           { echo '### Render + deploy'; echo '```'; grep -E '^(s[0-9]+|main):|^sporteka-s|deadline|weekly done' "$RUNNER_TEMP/weekly.log" 2>/dev/null | tail -40; echo '```'
-            echo '### Audit'; echo '```'; tail -25 "$RUNNER_TEMP/audit.log" 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            echo '### Audit'; echo '```'; tail -25 "$RUNNER_TEMP/audit.log" 2>/dev/null || true; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           if [ -f data/state/web-pending ]; then echo 'not finished yet, continues tomorrow'; fi
           if [ "$AUDIT" = failure ]; then echo '::error::audit of the live site found errors (see the summary)'; exit 1; fi
