@@ -44,6 +44,7 @@ def creds():
 
 
 ENV = creds()
+REQ_MAX = 300   # seconds one GraphQL request may take in total (a 1 000-product page takes ~5–60 s)
 
 
 def gql(query):
@@ -51,8 +52,16 @@ def gql(query):
                                  headers={"Authorization": "Bearer " + ENV["CJ_API_KEY"], "Content-Type": "application/json"})
     for attempt in range(8):
         try:
-            with urllib.request.urlopen(req, timeout=180) as r:
-                x = json.load(r)
+            # timeout= only bounds the silence between two packets: on 15. 11. a reply trickling in kept one request
+            # (Bezvasport) open for 3 hours until GitHub killed the step. Read in pieces against a wall-clock limit.
+            end = time.time() + REQ_MAX
+            with urllib.request.urlopen(req, timeout=120) as r:
+                buf = bytearray()
+                while chunk := r.read1(65536):
+                    buf += chunk
+                    if time.time() > end:
+                        raise TimeoutError(f"reply not complete after {REQ_MAX} s")
+                x = json.loads(buf)
             if "errors" in x:
                 raise RuntimeError(x["errors"][0].get("message", "")[:200])
             return x["data"]["shoppingProducts"]
