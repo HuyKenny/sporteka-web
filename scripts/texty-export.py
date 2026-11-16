@@ -25,6 +25,8 @@ CHECK = '--check' in sys.argv
 MIN_INTRO, MAX_INTRO, MIN_GUIDE = 100, 200, 450
 
 slugs = {t[1] for t in K.TREE}
+# facet landings with a hand-written text (indexable, e.g. the shoe-model pages of 16. 11. 2026) may be linked from a category text too
+facet_texts = set(json.loads((HERE.parent / 'src/texts/fasety.json').read_text(encoding='utf-8')))
 new = {}
 _key = lambda n: (int(re.search(r'vlna(\d+)', n).group(1)), n)       # numeric wave order: later waves override earlier ones
 for mod in sorted((p.stem for p in HERE.glob('texty_vlna[0-9]*[a-wyz].py')), key=_key):
@@ -65,7 +67,7 @@ for slug, e in new.items():
         errors.append(f'{slug}: only {len(e["faq"])} FAQ')
     for html in (e['intro'], e['guide']):
         for href in re.findall(r'href="/([a-z0-9-]+)/"', html):
-            if href not in slugs:
+            if href not in slugs and href not in facet_texts:
                 errors.append(f'{slug}: link to unknown category /{href}/')
         if re.search(r'<(script|iframe|style)|on\w+=', html):
             errors.append(f'{slug}: forbidden HTML')

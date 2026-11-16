@@ -218,6 +218,30 @@ TREE = [
     (1141, 'kukly', 'Kukly (balaclavy)', 'nakrcniky-a-satky'),
     (6163, 'chranice-pater', 'Chrániče páteře', 'zimni-sporty'),
     (2151, 'impregnace', 'Impregnace a péče o boty a oblečení', 'doplnky-k-obuvi'),
+    # ---- 16. 11. 2026 November wave 3 (reports/sporteka/content-gap-2026-11d.md: searched product types without a page) ----
+    (1121, 'ksiltovky', 'Kšiltovky', 'cepice-a-celenky'),
+    (1071, 'teplakove-soupravy', 'Teplákové soupravy', 'soupravy'),
+    (10321, 'crop-topy', 'Crop topy', 'tilka'),
+    (30211, 'ledvinky', 'Ledvinky', 'tasky-pres-rameno'),
+    (3052, 'termohrnky', 'Termohrnky', 'lahve-a-termosky'),
+    (4031, 'nafukovaci-matrace', 'Nafukovací matrace a lehátka', 'karimatky-a-matrace'),
+    (4032, 'samonafukovaci-karimatky', 'Samonafukovací karimatky', 'karimatky-a-matrace'),
+    (7091, 'tejpy', 'Tejpy a kineziologické pásky', 'bandaze-a-ortezy'),
+    (10131, 'perove-bundy', 'Péřové bundy', 'zimni-bundy'),
+    (10421, 'softshellove-kalhoty', 'Softshellové kalhoty', 'outdoorove-kalhoty'),
+    (30121, 'batohy-na-notebook', 'Batohy na notebook', 'mestske-batohy'),
+    (11511, 'jednodilne-plavky', 'Jednodílné plavky', 'damske-plavky'),
+    (11512, 'dvoudilne-plavky', 'Dvoudílné plavky a bikiny', 'damske-plavky'),
+    (2041, 'turfy', 'Turfy', 'kopacky'),
+    (7035, 'steppery', 'Steppery', 'kardio-trenazery'),
+    (11105, 'kompresni-ponozky', 'Kompresní ponožky a podkolenky', 'sportovni-ponozky'),
+    (708022, 'arginin-a-citrulin', 'Arginin a citrulin', 'aminokyseliny-bcaa'),
+    (50531, 'drzaky-na-mobil-na-kolo', 'Držáky na mobil na kolo', 'cyklo-lahve-a-drzaky'),
+    (4081, 'piknikove-deky', 'Piknikové deky a koše', 'kempingove-doplnky'),
+    (4041, 'kempingove-zidle', 'Kempingové židle a křesla', 'kempingovy-nabytek'),
+    (4042, 'kempingove-stoly', 'Kempingové stoly', 'kempingovy-nabytek'),
+    (70532, 'balancni-desky', 'Balanční desky', 'balancni-pomucky'),
+    (110011, 'mma-rukavice', 'MMA rukavice', 'boxerske-rukavice'),
     # ---------- fitness ----------
     (700, 'fitness', 'Fitness a posilování', None),
     (701, 'cinky-a-kotouce', 'Činky a kotouče', 'fitness'),
@@ -1352,6 +1376,81 @@ for _parent, _rules in {
     'doplnky-k-obuvi': [('impregnace', _IMPREG)],
     'outdoor-doplnky': [('impregnace', _IMPREG)],
     'kempingove-doplnky': [('impregnace', _IMPREG)],
+}.items():
+    REFINE.setdefault(_parent, [])[0:0] = _rules
+# ---- 16. 11. 2026 November wave 3: own loop again ----
+_KSILT = r'^(?!.*(kulich|celenk|zimni cepic|beanie|stojan|drzak|swim|plavec|koupac)).*(ksilt|snapback|baseball ?cap|trucker|dad ?hat|(^|\W)(\w+ )?cap(\W|$)|(^|\W)(9fifty|9forty|59fifty|39thirty))'
+_SOUPR = r'^(?!.*(lyzar|termo|plavk|pyzam|spodn|nepromok|do deste|rybar|cyklo|dres|brankar|kimon|neopren|kridl|postroj|comfort light|chranic|track ?suit (trouser|pant|bottom|jacket|top))).*(teplakov\w* soupr|soupr\w* teplak|track ?suit|jogging ?suit|(teplakov|sportovn|bavlnen)\w* (komplet|set)(\W|$))'
+_SOUPR_ANY = _SOUPR[:-1] + r'|(^|\W)souprav[ay]?(\W|$))'
+_CROP = r'^(?!.*(legin|legging|kalhot|kratas|short|sukn)).*((^|\W)crop(ped)?(\W|$)|crop.?top)'
+_LEDV = r'ledvin|waist ?bag|belt ?bag|hip ?(bag|pack)|bum ?bag|fanny'
+_TERMOHRN = r'^(?!.*(vicko|nahradn|cistic)).*(termohrn|termo ?hrn|thermo ?mug|travel ?mug|(^|\W)tumbler|termo\w* (na kav|hrnek|pohar)|(hrnek|pohar)\w* (termo|thermo|s dvojit))'
+_SAMONAF = r'samonafuk|self.?inflat'
+_MATRAC = r'^(?!.*(chranic|pump|lepen|opravn|zaplat|samonafuk|self.?inflat|karimat)).*(nafukovac\w* (matrac|lehat|lehatk|postel|kreslo|sedack)|matrac\w* (nafuk|do vody|k vode|plazov)|(^|\W)air ?bed|velurov\w* matrac|lehatk\w* (do|na) vod|plazov\w* matrac|(^|\W)matrace(\W|$))'
+_TEJP = r'^(?!.*etape).*(kinesio|kinezio|kineziolog|tejp|(^|\W)(sport|athletic|kinesiology|k)[ -]?tape(\W|$)|leukotape)'
+_PEROV = r'^(?!.*(vest|kalhot|spacak|bot[ay]|rukavic|cepic|ponoz)).*(perov\w* (bund|kabat|parka|mikin)|(^|\W)perovk|(^|\W)down (jacket|hoody|hoodie|parka|coat)|(bund|kabat)\w* (s )?(perov|perim|z peri))'
+_SOFTKAL = r'softshell\w* (kalhot|nohavic|pants)|kalhot\w* (z )?softshell'
+_NOTEBOOK = r'notebook|laptop|macbook'
+_JEDNOD = r'^(?!.*(divc|detsk|chlapec|pansk|junior|kids|girl|boy|panove|zebrovan)).*(jednodiln|one.?piece|(^|\W)swimsuit|celoplav|plavky celo)'
+_DVOUD = r'^(?!.*(divc|detsk|chlapec|pansk|junior|kids|girl|boy)).*(dvoudiln|bikin|tankin|two.?piece|(^|\W)(plavk\w* )?(horni|spodni) dil|plavkov\w* (podprsenk|kalhotk))'
+_TURF = r'^(?!.*(kratas|short|shrt|tric|tee|dres|ponoz|chranic|mikin|kalhot|bund)).*(^|\W)(turf\w*|tf|tt)(\W|$)'
+_STEPPER = r'stepper|(^|\W)stepr'
+_KOMPRES = r'^(?!.*((^|\W)(ruc|paz|arm)\w*(\W|$)|kryo|reboot|pneumat)).*(kompresn\w* (ponoz|podkol|navlek|stulp|lytk|nadkol)|compression (sock|sleeve|calf)|(ponoz|podkolen|navlek)\w* kompres)'
+_ARGININ = r'^(?!.*(pre.?workout|predtrenink|(^|\W)pump)).*(arginin|citrulin|citrullin|(^|\W)aakg(\W|$))'
+_DRZMOB = r'(drzak|uchyt|pouzdr|obal|brasn|kryt)\w* (na |pro )?(mobil|telefon|smartphone|iphone)|(phone|mobile|smartphone) ?(mount|holder|case|bag)|quad ?lock|sp ?connect|(^|\W)fidlock vacuum'
+_PIKNIK = r'piknik|picnic'
+_ZIDLE = r'^(?!.*(stul|stol(ek|ky|y)?(\W|$)|table)).*(zidl|kresl|stolick|sedatk|sedak|chair|stool|lehatk|lehatk)'
+_STUL = r'(^|\W)(stul|stol|stolek|stolky|stoly|table)(\W|$)'
+_KEMPNAB = r'kempingov|campingov|camping|skladac|turistick|outdoorov'
+_BALDESKA = r'balancn\w* desk|balance ?board|wobble ?board|(^|\W)(rola ?bola|rolla ?bolla)|indo ?board|surf ?trainer|(^|\W)rocker ?board'
+_MMA = r'(^|\W)(mma|ufc|grappling)(\W|$)'
+for _parent, _rules in {
+    'cepice-a-celenky': [('ksiltovky', _KSILT)],
+    'teplaky': [('teplakove-soupravy', _SOUPR_ANY)],
+    'mikiny': [('teplakove-soupravy', _SOUPR)],
+    'soupravy': [('teplakove-soupravy', _SOUPR_ANY)],
+    'tilka': [('crop-topy', _CROP)],
+    'sportovni-tricka': [('crop-topy', _CROP)],
+    'tasky-pres-rameno': [('ledvinky', _LEDV)],
+    'sportovni-tasky': [('ledvinky', _LEDV)],
+    'skolni-batohy': [('ledvinky', _LEDV)],
+    'vareni-v-prirode': [('termohrnky', _TERMOHRN)],
+    'kempingove-nadobi': [('termohrnky', _TERMOHRN)],
+    'lahve-a-termosky': [('termohrnky', _TERMOHRN)],
+    'outdoor-doplnky': [('termohrnky', _TERMOHRN), ('piknikove-deky', _PIKNIK)],
+    'karimatky-a-matrace': [('samonafukovaci-karimatky', _SAMONAF), ('nafukovaci-matrace', _MATRAC)],
+    'nafukovaci-hracky': [('samonafukovaci-karimatky', _SAMONAF), ('nafukovaci-matrace', _MATRAC)],
+    'plavecke-pomucky': [('nafukovaci-matrace', _MATRAC)],
+    'bandaze-a-ortezy': [('kompresni-ponozky', _KOMPRES), ('tejpy', _TEJP)],
+    'prvni-pomoc': [('tejpy', _TEJP)],
+    'zimni-bundy': [('perove-bundy', _PEROV)],
+    'sportovni-bundy-jaro-podzim': [('perove-bundy', _PEROV)],
+    'sportovni-bundy': [('perove-bundy', _PEROV)],
+    'outdoorove-kalhoty': [('softshellove-kalhoty', _SOFTKAL)],
+    'sportovni-kalhoty': [('softshellove-kalhoty', _SOFTKAL)],
+    'mestske-batohy': [('batohy-na-notebook', _NOTEBOOK)],
+    'batohy': [('batohy-na-notebook', _NOTEBOOK)],
+    'plavky': [('jednodilne-plavky', _JEDNOD), ('dvoudilne-plavky', _DVOUD)],
+    'damske-plavky': [('jednodilne-plavky', _JEDNOD), ('dvoudilne-plavky', _DVOUD)],
+    'kopacky': [('turfy', _TURF)],
+    'kardio-trenazery': [('steppery', _STEPPER)],
+    'sportovni-ponozky': [('kompresni-ponozky', _KOMPRES)],
+    'merino-ponozky': [('kompresni-ponozky', _KOMPRES)],
+    'aminokyseliny-bcaa': [('arginin-a-citrulin', _ARGININ)],
+    'ostatni-doplnky-stravy': [('arginin-a-citrulin', _ARGININ)],
+    'sportovni-vyziva': [('arginin-a-citrulin', _ARGININ)],
+    'cyklo-lahve-a-drzaky': [('drzaky-na-mobil-na-kolo', _DRZMOB)],
+    'cyklo-riditka': [('drzaky-na-mobil-na-kolo', _DRZMOB)],
+    'cyklo-tasky-a-nosice': [('drzaky-na-mobil-na-kolo', _DRZMOB)],
+    'cyklo-prislusenstvi': [('drzaky-na-mobil-na-kolo', _DRZMOB)],
+    'kempingove-doplnky': [('piknikove-deky', _PIKNIK), ('kempingove-zidle', rf'^(?=.*({_KEMPNAB})).*' + _ZIDLE[_ZIDLE.index('(zidl'):]),
+                           ('kempingove-stoly', rf'^(?=.*({_KEMPNAB})).*{_STUL}')],
+    'kempingovy-nabytek': [('kempingove-stoly', _STUL), ('kempingove-zidle', _ZIDLE)],
+    'balancni-pomucky': [('balancni-desky', _BALDESKA)],
+    'fitness-pomucky': [('balancni-desky', _BALDESKA)],
+    'boxerske-rukavice': [('mma-rukavice', _MMA)],
+    'sportovni-rukavice': [('mma-rukavice', rf'^(?=.*(rukav|glove)).*{_MMA}')],
+    'obleceni-bojove-sporty': [('mma-rukavice', rf'^(?=.*(rukav|glove)).*{_MMA}')],
 }.items():
     REFINE.setdefault(_parent, [])[0:0] = _rules
 REFINE['cyklo-prislusenstvi'].append(('cyklo-stojany-a-drzaky', r'stojan|drzak\w* (na )?(kol|bicykl)|nastenn|zavesn\w* (na )?kol|zavesen\w* na kolo'))

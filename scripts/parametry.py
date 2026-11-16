@@ -200,6 +200,64 @@ def desc_text(html, n=1400):
     return K.fold(re.sub(r'<[^>]+>', ' ', html or ''))[:n]
 
 
+# 16. 11. 2026: sneaker / shoe models (MM: 543k searches a month for model names, reports/sporteka/content-gap-2026-11d.md). A product gets
+# ('model', name) when its titles name the model; models that need the brand to be unambiguous ("530", "Forum", "Suede") require it.
+# (name shown in the filter, landing base category, required brand regex or '', model regex) — the landing slug is valueSlug(name).
+MODELS = [
+    ('Nike Air Force 1', 'tenisky', '', r'air ?force( ?1|1)?(\W|$)|(^|\W)af ?1(\W|$)'),
+    ('Nike Air Max', 'tenisky', '', r'air ?max(\W|$|\d)'),
+    ('Jordan 4', 'tenisky', '', r'jordan (4|iv)(\W|$)|(^|\W)aj ?4(\W|$)'),
+    ('Jordan 1', 'tenisky', '', r'jordan (1|i)(\W|$)|(^|\W)aj ?1(\W|$)'),
+    ('Nike Dunk', 'tenisky', '', r'(^|\W)dunk(\W|$)'),
+    ('Nike Cortez', 'tenisky', '', r'cortez'),
+    ('Nike Vomero', 'sportovni-obuv', '', r'vomero'),
+    ('Nike Pegasus', 'sportovni-obuv', r'nike', r'pegasus'),
+    ('Adidas Samba', 'tenisky', r'adidas', r'(^|\W)samba(\W|$)'),
+    ('Adidas Spezial', 'tenisky', '', r'spezial'),
+    ('Adidas Handball Spezial', 'tenisky', '', r'handball spezial'),
+    ('Adidas Campus', 'tenisky', r'adidas', r'(^|\W)campus(\W|$)'),
+    ('Adidas Gazelle', 'tenisky', r'adidas', r'gazelle'),
+    ('Adidas Superstar', 'tenisky', r'adidas', r'superstar'),
+    ('Adidas Stan Smith', 'tenisky', '', r'stan ?smith'),
+    ('Adidas Forum', 'tenisky', r'adidas', r'(^|\W)forum(\W|$)'),
+    ('Adidas Ultraboost', 'sportovni-obuv', '', r'ultra ?boost'),
+    ('New Balance 530', 'tenisky', r'new balance|(^|\W)nb(\W|$)', r'(^|\W)m?w?u?530(\W|$)'),
+    ('New Balance 550', 'tenisky', r'new balance|(^|\W)nb(\W|$)', r'(^|\W)(bb|gsb|psb)?550(\W|$)'),
+    ('New Balance 574', 'tenisky', r'new balance|(^|\W)nb(\W|$)', r'(^|\W)[mwug]?l?574(\W|$)'),
+    ('New Balance 327', 'tenisky', r'new balance|(^|\W)nb(\W|$)', r'(^|\W)[mwu]?s?327(\W|$)'),
+    ('New Balance 2002R', 'tenisky', r'new balance|(^|\W)nb(\W|$)', r'2002 ?r'),
+    ('New Balance 9060', 'tenisky', r'new balance|(^|\W)nb(\W|$)', r'(^|\W)u?9060'),
+    ('New Balance 1906', 'tenisky', r'new balance|(^|\W)nb(\W|$)', r'(^|\W)m?1906'),
+    ('Asics Gel-NYC', 'tenisky', '', r'gel.?nyc'),
+    ('Asics Gel-Kayano', 'sportovni-obuv', '', r'kayano'),
+    ('Asics Gel-1130', 'tenisky', r'asics', r'(^|\W)(gel.?)?1130(\W|$)'),
+    ('Vans Old Skool', 'tenisky', '', r'old ?skool'),
+    ('Converse Chuck Taylor', 'tenisky', r'converse|chuck', r'chuck ?taylor|chuck ?70|all ?star'),
+    ('Puma Suede', 'tenisky', r'puma', r'(^|\W)suede(\W|$)'),
+    ('Puma Palermo', 'tenisky', r'puma', r'palermo'),
+    ('Puma Speedcat', 'tenisky', '', r'speedcat'),
+    ('Salomon Speedcross', 'sportovni-obuv', '', r'speedcross'),
+    ('Salomon XT-6', 'sportovni-obuv', r'salomon', r'xt.?6(\W|$)'),
+    ('Salomon X Ultra', 'sportovni-obuv', r'salomon', r'x.?ultra'),
+    ('Merrell Moab', 'sportovni-obuv', '', r'(^|\W)moab(\W|$)'),
+    ('On Cloudmonster', 'sportovni-obuv', '', r'cloudmonster'),
+    ('Hoka Clifton', 'sportovni-obuv', r'hoka', r'clifton'),
+    ('Nike Tech Fleece', 'sportovni-obleceni', '', r'tech ?fleece'),
+]
+_MODELS = [(n, base, re.compile(b) if b else None, re.compile(m)) for n, base, b, m in MODELS]
+
+
+def models(t, chain):
+    """('model', name) for a shoe (or Nike Tech Fleece clothing) whose titles name a known model."""
+    out = []
+    for n, base, b, m in _MODELS:
+        if base not in chain and not (base == 'tenisky' and 'sportovni-obuv' in chain):
+            continue
+        if m.search(t) and (b is None or b.search(t)):
+            out.append(('model', n))
+    return out
+
+
 def _chain(slug):
     out, t = [], K.BY_SLUG.get(slug)
     while t:
@@ -219,6 +277,8 @@ def params(texts, cat, desc=''):
     if chain & WEAR:
         seas = [name for name, rx in SEASON if re.search(rx, t)]
         out += [('sezona', x) for x in seas[:2]]
+    if chain & {'sportovni-obuv', 'sportovni-obleceni'}:
+        out += models(t, chain)
     if chain & BAGS and cat != 'lahve-a-termosky':
         m = re.search(r'(?<![\d.,])(\d{1,3})\s?l(?![a-z])', t)
         if m:

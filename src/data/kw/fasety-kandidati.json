@@ -6028,5 +6028,347 @@
 "vol": 50,
 "n": 30,
 "existing": false
+},
+{
+"slug": "nike-air-force-1",
+"h1": "Nike Air Force 1",
+"base": "tenisky",
+"qs": "p_model=nike-air-force-1",
+"vol": 106020,
+"n": 2184,
+"existing": false
+},
+{
+"slug": "nike-air-max",
+"h1": "Nike Air Max",
+"base": "tenisky",
+"qs": "p_model=nike-air-max",
+"vol": 69400,
+"n": 4006,
+"existing": false
+},
+{
+"slug": "jordan-4",
+"h1": "Jordan 4",
+"base": "tenisky",
+"qs": "p_model=jordan-4",
+"vol": 57160,
+"n": 216,
+"existing": false
+},
+{
+"slug": "adidas-campus",
+"h1": "Adidas Campus",
+"base": "tenisky",
+"qs": "p_model=adidas-campus",
+"vol": 40400,
+"n": 672,
+"existing": false
+},
+{
+"slug": "jordan-1",
+"h1": "Jordan 1",
+"base": "tenisky",
+"qs": "p_model=jordan-1",
+"vol": 32110,
+"n": 1308,
+"existing": false
+},
+{
+"slug": "adidas-samba",
+"h1": "Adidas Samba",
+"base": "tenisky",
+"qs": "p_model=adidas-samba",
+"vol": 31550,
+"n": 1632,
+"existing": false
+},
+{
+"slug": "nike-dunk",
+"h1": "Nike Dunk",
+"base": "tenisky",
+"qs": "p_model=nike-dunk",
+"vol": 26960,
+"n": 1564,
+"existing": false
+},
+{
+"slug": "adidas-spezial",
+"h1": "Adidas Spezial",
+"base": "tenisky",
+"qs": "p_model=adidas-spezial",
+"vol": 25860,
+"n": 1568,
+"existing": false
+},
+{
+"slug": "nike-tech-fleece",
+"h1": "Nike Tech Fleece",
+"base": "sportovni-obleceni",
+"qs": "p_model=nike-tech-fleece",
+"vol": 18780,
+"n": 94,
+"existing": false
+},
+{
+"slug": "adidas-superstar",
+"h1": "Adidas Superstar",
+"base": "tenisky",
+"qs": "p_model=adidas-superstar",
+"vol": 13550,
+"n": 799,
+"existing": false
+},
+{
+"slug": "new-balance-530",
+"h1": "New Balance 530",
+"base": "tenisky",
+"qs": "p_model=new-balance-530",
+"vol": 12840,
+"n": 780,
+"existing": false
+},
+{
+"slug": "new-balance-9060",
+"h1": "New Balance 9060",
+"base": "tenisky",
+"qs": "p_model=new-balance-9060",
+"vol": 10800,
+"n": 696,
+"existing": false
+},
+{
+"slug": "salomon-xt-6",
+"h1": "Salomon XT-6",
+"base": "sportovni-obuv",
+"qs": "p_model=salomon-xt-6",
+"vol": 9500,
+"n": 30,
+"existing": false
+},
+{
+"slug": "adidas-gazelle",
+"h1": "Adidas Gazelle",
+"base": "tenisky",
+"qs": "p_model=adidas-gazelle",
+"vol": 8440,
+"n": 1440,
+"existing": false
+},
+{
+"slug": "nike-vomero",
+"h1": "Nike Vomero",
+"base": "sportovni-obuv",
+"qs": "p_model=nike-vomero",
+"vol": 7800,
+"n": 792,
+"existing": false
+},
+{
+"slug": "asics-gel-nyc",
+"h1": "Asics Gel-NYC",
+"base": "tenisky",
+"qs": "p_model=asics-gel-nyc",
+"vol": 7680,
+"n": 714,
+"existing": false
+},
+{
+"slug": "vans-old-skool",
+"h1": "Vans Old Skool",
+"base": "tenisky",
+"qs": "p_model=vans-old-skool",
+"vol": 7240,
+"n": 1930,
+"existing": false
+},
+{
+"slug": "converse-chuck-taylor",
+"h1": "Converse Chuck Taylor",
+"base": "tenisky",
+"qs": "p_model=converse-chuck-taylor",
+"vol": 7140,
+"n": 8774,
+"existing": false
+},
+{
+"slug": "new-balance-574",
+"h1": "New Balance 574",
+"base": "tenisky",
+"qs": "p_model=new-balance-574",
+"vol": 6200,
+"n": 802,
+"existing": false
+},
+{
+"slug": "asics-gel-kayano",
+"h1": "Asics Gel-Kayano",
+"base": "sportovni-obuv",
+"qs": "p_model=asics-gel-kayano",
+"vol": 6020,
+"n": 498,
+"existing": false
+},
+{
+"slug": "new-balance-550",
+"h1": "New Balance 550",
+"base": "tenisky",
+"qs": "p_model=new-balance-550",
+"vol": 5300,
+"n": 319,
+"existing": false
+},
+{
+"slug": "nike-cortez",
+"h1": "Nike Cortez",
+"base": "tenisky",
+"qs": "p_model=nike-cortez",
+"vol": 4800,
+"n": 292,
+"existing": false
+},
+{
+"slug": "puma-speedcat",
+"h1": "Puma Speedcat",
+"base": "tenisky",
+"qs": "p_model=puma-speedcat",
+"vol": 4610,
+"n": 306,
+"existing": false
+},
+{
+"slug": "merrell-moab",
+"h1": "Merrell Moab",
+"base": "sportovni-obuv",
+"qs": "p_model=merrell-moab",
+"vol": 4150,
+"n": 1303,
+"existing": false
+},
+{
+"slug": "salomon-speedcross",
+"h1": "Salomon Speedcross",
+"base": "sportovni-obuv",
+"qs": "p_model=salomon-speedcross",
+"vol": 4000,
+"n": 358,
+"existing": false
+},
+{
+"slug": "salomon-x-ultra",
+"h1": "Salomon X Ultra",
+"base": "sportovni-obuv",
+"qs": "p_model=salomon-x-ultra",
+"vol": 3690,
+"n": 278,
+"existing": false
+},
+{
+"slug": "new-balance-1906",
+"h1": "New Balance 1906",
+"base": "tenisky",
+"qs": "p_model=new-balance-1906",
+"vol": 3140,
+"n": 352,
+"existing": false
+},
+{
+"slug": "asics-gel-1130",
+"h1": "Asics Gel-1130",
+"base": "tenisky",
+"qs": "p_model=asics-gel-1130",
+"vol": 2960,
+"n": 663,
+"existing": false
+},
+{
+"slug": "adidas-ultraboost",
+"h1": "Adidas Ultraboost",
+"base": "sportovni-obuv",
+"qs": "p_model=adidas-ultraboost",
+"vol": 2800,
+"n": 149,
+"existing": false
+},
+{
+"slug": "nike-pegasus",
+"h1": "Nike Pegasus",
+"base": "sportovni-obuv",
+"qs": "p_model=nike-pegasus",
+"vol": 2500,
+"n": 572,
+"existing": false
+},
+{
+"slug": "new-balance-327",
+"h1": "New Balance 327",
+"base": "tenisky",
+"qs": "p_model=new-balance-327",
+"vol": 2400,
+"n": 527,
+"existing": false
+},
+{
+"slug": "new-balance-2002r",
+"h1": "New Balance 2002R",
+"base": "tenisky",
+"qs": "p_model=new-balance-2002r",
+"vol": 2100,
+"n": 282,
+"existing": false
+},
+{
+"slug": "adidas-handball-spezial",
+"h1": "Adidas Handball Spezial",
+"base": "tenisky",
+"qs": "p_model=adidas-handball-spezial",
+"vol": 2000,
+"n": 1376,
+"existing": false
+},
+{
+"slug": "adidas-stan-smith",
+"h1": "Adidas Stan Smith",
+"base": "tenisky",
+"qs": "p_model=adidas-stan-smith",
+"vol": 1580,
+"n": 330,
+"existing": false
+},
+{
+"slug": "puma-palermo",
+"h1": "Puma Palermo",
+"base": "tenisky",
+"qs": "p_model=puma-palermo",
+"vol": 1200,
+"n": 458,
+"existing": false
+},
+{
+"slug": "adidas-forum",
+"h1": "Adidas Forum",
+"base": "tenisky",
+"qs": "p_model=adidas-forum",
+"vol": 1000,
+"n": 160,
+"existing": false
+},
+{
+"slug": "puma-suede",
+"h1": "Puma Suede",
+"base": "tenisky",
+"qs": "p_model=puma-suede",
+"vol": 790,
+"n": 427,
+"existing": false
+},
+{
+"slug": "on-cloudmonster",
+"h1": "On Cloudmonster",
+"base": "sportovni-obuv",
+"qs": "p_model=on-cloudmonster",
+"vol": 740,
+"n": 196,
+"existing": false
 }
 ]

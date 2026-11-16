@@ -3,9 +3,9 @@
 //   velikost = normalised size (scripts/velikosti.py): XS…XXXL, "EU 42", "128 cm", "4 let"
 //   sezona / material / objem / osoby = read from the titles (scripts/parametry.py)
 //   barva = one of ~14 base colours (feed colour or title)
-export const PARAM_ORDER = ['pro', 'velikost', 'sezona', 'material', 'objem', 'osoby', 'delka', 'flex', 'teplota', 'vypln', 'typ', 'tvar', 'profil', 'tuhost', 'uroven', 'filtr', 'zip', 'vaha', 'vlastnost', 'membrana', 'barva'] as const;
+export const PARAM_ORDER = ['pro', 'model', 'velikost', 'sezona', 'material', 'objem', 'osoby', 'delka', 'flex', 'teplota', 'vypln', 'typ', 'tvar', 'profil', 'tuhost', 'uroven', 'filtr', 'zip', 'vaha', 'vlastnost', 'membrana', 'barva'] as const;
 export type ParamKey = (typeof PARAM_ORDER)[number];
-export const PARAM_LABEL: Record<ParamKey, string> = { pro: 'Pro koho', velikost: 'Velikost', sezona: 'Sezóna', material: 'Materiál a technologie', objem: 'Objem', osoby: 'Počet osob', delka: 'Délka', flex: 'Tuhost (flex)', teplota: 'Teplota použití', vypln: 'Výplň', tvar: 'Tvar', profil: 'Profil prkna', tuhost: 'Tuhost prkna', uroven: 'Úroveň jezdce', filtr: 'Kategorie filtru', zip: 'Zip', vaha: 'Hmotnost', vlastnost: 'Vlastnosti', typ: 'Typ a použití', membrana: 'Vodní sloupec', barva: 'Barva' };
+export const PARAM_LABEL: Record<ParamKey, string> = { pro: 'Pro koho', model: 'Model', velikost: 'Velikost', sezona: 'Sezóna', material: 'Materiál a technologie', objem: 'Objem', osoby: 'Počet osob', delka: 'Délka', flex: 'Tuhost (flex)', teplota: 'Teplota použití', vypln: 'Výplň', tvar: 'Tvar', profil: 'Profil prkna', tuhost: 'Tuhost prkna', uroven: 'Úroveň jezdce', filtr: 'Kategorie filtru', zip: 'Zip', vaha: 'Hmotnost', vlastnost: 'Vlastnosti', typ: 'Typ a použití', membrana: 'Vodní sloupec', barva: 'Barva' };
 /** Values whose natural order is not alphabetical or numeric. */
 export const VALUE_ORDER: Partial<Record<ParamKey, string[]>> = {
   teplota: ['Letní (nad 10 °C)', 'Přechodový (0 až 10 °C)', 'Zimní (−10 až 0 °C)', 'Extrémní (pod −10 °C)'],

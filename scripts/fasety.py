@@ -29,7 +29,7 @@ from pathlib import Path
 KW_FILES = [Path(__file__).resolve().parent.parent / 'src/data/kw/kw-all.json', Path(__file__).resolve().parent.parent / 'src/data/kw/kw-gap.json']
 MIN_PRODUCTS = 6
 # 11. 11. 2026: from 250 down to 50 searches a month — a landing only becomes indexable with its hand-written text (src/lib/facet-texts.ts)
-MIN_VOL = {'gender': 50, 'brand': 50, 'color': 50, 'sale': 100}
+MIN_VOL = {'gender': 50, 'brand': 50, 'color': 50, 'sale': 100, 'model': 300}
 MAX_LANDINGS = 1500
 HAND_TEXTS = Path(__file__).resolve().parent.parent / 'src/texts/fasety.json'
 MIN_RESULT = 150      # fewer landings than this means the keyword files are missing / broken: keep the old table
@@ -177,6 +177,28 @@ def generate(db, show=0):
             ph = [k for k in idx if idx[k] >= 100 and any(re.search(rf'(^| ){re.escape(n)}( |$)', k) for n in ns) and re.search(rf'(^| ){re.escape(stem)}\w{{0,3}}( |$)', k)]
             add('color', cid, cslug, cname, f'p_barva={slugify(cv)}', ph, ("AND EXISTS (SELECT 1 FROM product_params q WHERE q.product_id = p.id AND q.key = 'barva' AND q.value = ?)", (cv,)), cv)
 
+    # shoe models (16. 11. 2026): base category × product_params model=<name> (scripts/parametry.py MODELS); demand = every keyword that names
+    # the model (and its brand when the model needs it), the H1 is the model name itself
+    import parametry as PM
+    cat_ids = {r[1]: r for r in db.execute('SELECT id, slug, name FROM categories')}
+    for name, bslug_, b_rx, m_rx in PM._MODELS:
+        if bslug_ not in cat_ids:
+            continue
+        vol = sum(v for k, v in idx.items() if m_rx.search(k) and (b_rx is None or b_rx.search(k)))
+        if vol < MIN_VOL['model']:
+            continue
+        slug = slugify(name)
+        if slug in taken or slug in used:
+            continue
+        cid, cslug, cname = cat_ids[bslug_]
+        flt = ("AND EXISTS (SELECT 1 FROM product_params q WHERE q.product_id = p.id AND q.key = 'model' AND q.value = ?)", (name,))
+        n = db.execute(f"SELECT COUNT(*) FROM cat_products cp JOIN products p ON p.id = cp.product_id WHERE cp.cat_id = ? AND p.status = 'publish' {flt[0]}",
+                       (cid, *flt[1])).fetchone()[0]
+        if n < MIN_PRODUCTS:
+            continue
+        used.add(slug)
+        out.append(dict(slug=slug, cid=cid, cslug=cslug, cname=cname, qs=f'p_model={slug}', h1=name, vol=vol, n=n, kind='model', label=name, sql=flt[0], args=flt[1]))
+
     # a hand-written text was written for a candidate of scripts/fasety-export.py (src/data/kw/fasety-kandidati.json: slug, h1,
     # base category, qs, volume). Some of them the demand matching above never finds (brand × parent category: "Alpine Pro
     # bunda" in sportovni-bundy) — such a text still gets its page when the base category has enough products for the filter.
@@ -207,6 +229,12 @@ def generate(db, show=0):
             flt = ("AND EXISTS (SELECT 1 FROM product_params q WHERE q.product_id = p.id AND q.key = 'barva' AND q.value = ?)", (cv,))
         elif key == 'sleva':
             kind, flt, label = 'sale', ('AND p.disc_pct >= 10', ()), 've slevě'
+        elif key == 'p_model':
+            cv = next((n_ for n_, *_ in PM.MODELS if slugify(n_) == val), None)
+            if not cv:
+                continue
+            kind, label = 'model', cv
+            flt = ("AND EXISTS (SELECT 1 FROM product_params q WHERE q.product_id = p.id AND q.key = 'model' AND q.value = ?)", (cv,))
         else:
             continue
         n = db.execute(f"SELECT COUNT(*) FROM cat_products cp JOIN products p ON p.id = cp.product_id WHERE cp.cat_id = ? AND p.status = 'publish' {flt[0]}",
@@ -271,6 +299,8 @@ def texts(db, r):
                    f'a obchody, které je mají skladem. Filtrem vlevo zúžíte výběr podle značky, ceny nebo barvy.</p>')
     elif r['kind'] == 'brand':
         second += f'<p>Nabídku značky {r["label"]} v této kategorii sbíráme z více obchodů najednou, takže vidíte, jak se u stejného modelu liší cena.</p>'
+    elif r['kind'] == 'model':
+        second += f'<p>Model {h1} nabízí víc obchodů v různých barvách a velikostech. Filtrem upřesníte velikost, barvu nebo cenu a u každé nabídky vidíte, který obchod ji má skladem.</p>'
     elif r['kind'] == 'sale':
         second += f'<p>Ve slevě je teď {num(disc)} z {num(n)} produktů (sleva alespoň 10 %). Řaďte podle největší slevy nebo podle ceny.</p>'
     else:
