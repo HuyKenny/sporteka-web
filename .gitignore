@@ -18,3 +18,4 @@ worker-configuration.d.ts
 /data/
 /tmp-static/
 /data/static-state.db
+__pycache__/

@@ -2,6 +2,7 @@
 """sporteka.cz — content gap from Marketing Miner (CZ): keywords that competitors rank for and sporteka.cz does not.
 
     scripts/gap-harvest.py                 # website_content_gap for every competitor below (one call each, cached)
+    scripts/gap-harvest.py --domains a.cz,b.cz   # only these competitors (wave 27: specialist shops, 16. 11.)
     scripts/gap-harvest.py --report        # merge the cache -> src/data/kw/kw-gap.json (keyword, volume, competitors [domain, position, url])
 
 One call returns at most 100 rows (the biggest by volume), so every competitor is asked on its own; the seed list for the next
@@ -16,7 +17,7 @@ sys.path.insert(0, '/home/kenny/ai/bin')
 import mm  # noqa: E402
 
 CACHE = Path('/home/kenny/ai/reports/sporteka/gap')
-OUT = Path(__file__).resolve().parent.parent / 'src/src/data/kw/kw-gap.json'
+OUT = Path(__file__).resolve().parent.parent / 'src/data/kw/kw-gap.json'
 COMPETITORS = ['sportisimo.cz', 'decathlon.cz', 'intersport.cz', 'insportline.cz', '4camping.cz', 'hudy.cz', 'sportega.cz', 'mastersport.cz',
                'sportano.cz', 'altisport.cz', 'a3sport.cz', 'sportvision.cz', 'exisport.cz', 'martessport.eu', 'sportsdirect.cz', 'hervis.cz',
                'sportobchod.cz', '4fstore.cz', 'bezvasport.cz', 'top4running.cz', 'd-sport.cz', 'rockpoint.cz', 'gymbeam.cz', 'aminostar.cz',
@@ -42,7 +43,8 @@ def fetch(domain):
 def main():
     CACHE.mkdir(parents=True, exist_ok=True)
     if '--report' not in sys.argv:
-        for d in COMPETITORS:
+        doms = next((a.split('=', 1)[1] if '=' in a else sys.argv[sys.argv.index(a) + 1] for a in sys.argv if a.startswith('--domains')), None)
+        for d in (doms.split(',') if doms else COMPETITORS):
             rows = fetch(d)
             print(f'{d}: {len(rows) if rows is not None else "FAILED"} rows', flush=True)
             time.sleep(2)

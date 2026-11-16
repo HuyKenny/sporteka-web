@@ -201,6 +201,23 @@ TREE = [
     (70813, 'fit-potraviny', 'Fit potraviny a arašídová másla', 'sportovni-vyziva'),
     (6171, 'krasobruslarske-brusle', 'Krasobruslařské brusle', 'brusle'),
     (6172, 'rekreacni-brusle', 'Rekreační brusle na led', 'brusle'),
+    # ---- 16. 11. 2026 January wave 2 (reports/sporteka/content-gap-2026-11c.md: MM January data + specialist shops' content gap) ----
+    (708091, 'elektrolyty', 'Elektrolyty a solné tablety', 'iontove-napoje'),
+    (708076, 'multivitaminy', 'Multivitamíny', 'vitaminy-a-mineraly'),
+    (708061, 'l-karnitin', 'L-karnitin', 'spalovace-tuku'),
+    (708112, 'probiotika', 'Probiotika', 'ostatni-doplnky-stravy'),
+    (708113, 'tribulus', 'Tribulus terrestris (kotvičník)', 'ostatni-doplnky-stravy'),
+    (708114, 'kurkuma', 'Kurkuma a kurkumin', 'ostatni-doplnky-stravy'),
+    (708115, 'spirulina-chlorella', 'Spirulina, chlorella a zelené superpotraviny', 'ostatni-doplnky-stravy'),
+    (3051, 'sejkry', 'Šejkry na protein', 'lahve-a-termosky'),
+    (70531, 'balancni-podlozky-bosu', 'Balanční podložky a BOSU', 'balancni-pomucky'),
+    (7063, 'medicinbaly', 'Medicinbaly a slam bally', 'funkcni-trenink'),
+    (70611, 'zebriny', 'Žebřiny', 'hrazdy-a-bradla'),
+    (7012, 'stojany-na-cinky', 'Stojany na činky a kotouče', 'cinky-a-kotouce'),
+    (10151, 'reflexni-vesty', 'Reflexní vesty', 'sportovni-vesty'),
+    (1141, 'kukly', 'Kukly (balaclavy)', 'nakrcniky-a-satky'),
+    (6163, 'chranice-pater', 'Chrániče páteře', 'zimni-sporty'),
+    (2151, 'impregnace', 'Impregnace a péče o boty a oblečení', 'doplnky-k-obuvi'),
     # ---------- fitness ----------
     (700, 'fitness', 'Fitness a posilování', None),
     (701, 'cinky-a-kotouce', 'Činky a kotouče', 'fitness'),
@@ -1282,6 +1299,59 @@ for _parent, _rules in {
     'proteiny': [('fit-potraviny', _FIT_FOOD)],
     'proteinove-tycinky-a-snacky': [('fit-potraviny', _FIT_FOOD)],
     'sportovni-vyziva': [('fit-potraviny', _FIT_FOOD)],
+}.items():
+    REFINE.setdefault(_parent, [])[0:0] = _rules
+# ---- 16. 11. 2026 January wave 2: own loop again (inserted in front of the older rules of the same parent) ----
+_ELEKTRO = r'^(?!.*(bcaa|eaa|aminokysel|protein|kolagen|collagen|kreatin|creatin|gainer)).*(elektrolyt|electrolyt|salt ?(caps|tabs|stick)|soln\w* tablet|(^|\W)sul\w* v tablet)'
+_MULTIVIT = r'^(?!.*(protein|gainer|pro psy|pro kone|pro kocky|(^|\W)psy(\W|$))).*(multi.?vit|multi.?mineral|vitaminov\w* a mineraln\w* komplex)'
+_KARNITIN = r'karnitin|carnitin|carnipure'
+_PROBIO = r'probiot|lactobacil|bifidobakter|bifidobacter|(^|\W)lacto\w* (rhamnos|acidoph)'
+_TRIBULUS = r'tribulus|kotvicn'
+_KURKUMA = r'kurkum|curcum|turmeric'
+_GREENS = r'^(?!.*(cloud|versa|bot[ay]|obuv|tenisk|trick|mikin)).*(spirulin|chlorell|super ?greens|(^|\W)greens(\W|$)|mlad\w* (jecmen|psenice)|barley grass|zelen\w* (superfood|smoothie|jecmen))'
+_SEJKR = r'^(?!.*(trick|triko|trika|mikin|kosil|cepic|ponoz|svetr|chrastit|termolah|termosk|ice shaker|(^|\W)nba(\W|$)|\+ ?(sejkr|shaker)|protein\w* \d)).*(sejkr|shaker|(^|\W)mixer (na|pro) protein|smart ?shake)'
+_BOSU = r'^(?!.*(balance ball|(^|\W)mic(\W|$))).*((^|\W)bosu(\W|$)|half ?ball|balancn\w* (podlozk|polokoul|cock|disk|polstar|vankus)|balance (pad|trainer|disc|cushion)|senzomotor\w* (podlozk|cock|disk|polstar)|dynair)'
+_MEDBAL = r'^(?!.*(stojan|drzak|regal|grip|sedl)).*(medicinbal|medicine ?ball|slam ?ball|wall ?ball|(^|\W)med ?ball)'
+_ZEBRINY = r'^(?!.*(triko|tricko|mikin|divci|chlapeck)).*(zebrin|ribstol|swedish ladder|stall bars)'
+_STOJAN = r'^(?!.*(drep|squat|power ?rack|klec|bench|lavic|medicinbal|kolo|bike)).*((stojan|regal|drzak|vesak)\w* (na |pro )?(\w+ )?(cink|jednoruc|kotouc|kettlebel|os[auy]?(\W|$)|zavazi)|dumbbell rack|plate (tree|rack)|toast rack)'
+_REFLEX = r'^(?!.*(polokosil|tricko|triko|bunda|kalhot|pro psa|psi|canihunt)).*(reflexn\w* vest|hi-?vis\w* vest|vest\w* (s )?reflex|bezpecnostn\w* vest|vystrazn\w* vest)'
+_KUKLA = r'^(?!.*(neopren|potap|freediv|spearfish)).*((^|\W)kukl[ayu]?(\W|$)|balaclava)'
+_PATER = r'chranic\w* (pater|zad)|(^|\W)pater\w* chranic|back protector|spine protector|back ?pro(\W|$)'
+_IMPREG = r'^(?!.*(s impregnac|impregnovan)).*(impregnac|nikwax|grangers|tx\.? ?direct|(^|\W)proof (spray|sprej)|water ?proof(ing)? spray)'
+for _parent, _rules in {
+    'iontove-napoje': [('elektrolyty', _ELEKTRO)],
+    'aminokyseliny-bcaa': [('elektrolyty', _ELEKTRO), ('l-karnitin', _KARNITIN)],
+    'energeticke-gely-a-tycinky': [('elektrolyty', _ELEKTRO)],
+    'vitaminy-a-mineraly': [('multivitaminy', _MULTIVIT), ('probiotika', _PROBIO), ('spirulina-chlorella', _GREENS),
+                            ('tribulus', _TRIBULUS), ('kurkuma', _KURKUMA)],
+    'spalovace-tuku': [('l-karnitin', _KARNITIN)],
+    'ostatni-doplnky-stravy': [('elektrolyty', _ELEKTRO), ('multivitaminy', _MULTIVIT), ('l-karnitin', _KARNITIN),
+                               ('probiotika', _PROBIO), ('tribulus', _TRIBULUS), ('kurkuma', _KURKUMA), ('spirulina-chlorella', _GREENS)],
+    'sportovni-vyziva': [('elektrolyty', _ELEKTRO), ('multivitaminy', _MULTIVIT), ('l-karnitin', _KARNITIN),
+                         ('probiotika', _PROBIO), ('tribulus', _TRIBULUS), ('kurkuma', _KURKUMA), ('spirulina-chlorella', _GREENS), ('sejkry', _SEJKR)],
+    'lahve-a-termosky': [('sejkry', _SEJKR)],
+    'fitness-pomucky': [('sejkry', _SEJKR), ('balancni-podlozky-bosu', _BOSU), ('medicinbaly', _MEDBAL), ('stojany-na-cinky', _STOJAN)],
+    'balancni-pomucky': [('balancni-podlozky-bosu', _BOSU)],
+    'pilates-pomucky': [('balancni-podlozky-bosu', _BOSU), ('medicinbaly', _MEDBAL)],
+    'funkcni-trenink': [('medicinbaly', _MEDBAL), ('zebriny', _ZEBRINY)],
+    'hrazdy-a-bradla': [('zebriny', _ZEBRINY)],
+    'posilovaci-stroje': [('zebriny', _ZEBRINY)],
+    'gymnasticke-pomucky': [('zebriny', _ZEBRINY)],
+    'cinky-a-kotouce': [('stojany-na-cinky', _STOJAN)],
+    'kettlebelly': [('stojany-na-cinky', _STOJAN)],
+    'sportovni-vesty': [('reflexni-vesty', _REFLEX)],
+    'bezecke-vesty-a-batohy': [('reflexni-vesty', _REFLEX)],
+    'nakrcniky-a-satky': [('kukly', _KUKLA)],
+    'lyzarske-cepice-a-nakrcniky': [('kukly', _KUKLA)],
+    'merino-doplnky': [('kukly', _KUKLA)],
+    'termopradlo': [('kukly', _KUKLA)],
+    'chranice-a-helmy': [('chranice-pater', _PATER)],
+    'snowboardove-chranice': [('chranice-pater', _PATER)],
+    'cyklo-chranice': [('chranice-pater', _PATER)],
+    'lyzarske-doplnky': [('chranice-pater', _PATER)],
+    'doplnky-k-obuvi': [('impregnace', _IMPREG)],
+    'outdoor-doplnky': [('impregnace', _IMPREG)],
+    'kempingove-doplnky': [('impregnace', _IMPREG)],
 }.items():
     REFINE.setdefault(_parent, [])[0:0] = _rules
 REFINE['cyklo-prislusenstvi'].append(('cyklo-stojany-a-drzaky', r'stojan|drzak\w* (na )?(kol|bicykl)|nastenn|zavesn\w* (na )?kol|zavesen\w* na kolo'))
