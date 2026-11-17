@@ -258,6 +258,18 @@ TREE = [
     (1102, 'kalhotky', 'Sportovní kalhotky', 'sportovni-spodni-pradlo'),
     (120031, 'pennyboardy', 'Pennyboardy', 'skateboardy'),
     (8042, 'basketbalove-kose', 'Basketbalové koše', 'basketbal'),
+    # ---- 17. 11. 2026 November wave 5: what sportisimo.cz / decathlon.cz rank with and we lacked (reports/sporteka/content-gap-2026-11f.md) ----
+    (2081, 'snehule', 'Sněhule', 'zimni-obuv'),
+    (10441, 'cargo-kalhoty', 'Cargo kalhoty a kapsáče', 'sportovni-kalhoty'),
+    (1061, 'zateplene-leginy', 'Zateplené a termo legíny', 'leginy'),
+    (2152, 'vlozky-do-bot', 'Vložky do bot', 'doplnky-k-obuvi'),
+    (90721, 'rucniky', 'Ručníky a osušky', 'plazove-doplnky'),
+    (2101, 'domaci-pantofle', 'Papuče a domácí pantofle', 'pantofle-a-zabky'),
+    (8081, 'pingpongove-stoly', 'Pingpongové stoly', 'stolni-tenis'),
+    (7072, 'masazni-valce', 'Masážní válce', 'masazni-pomucky'),
+    (3101, 'buzoly-a-kompasy', 'Buzoly a kompasy', 'dalekohledy-a-kompasy'),
+    (2121, 'neoprenove-boty-a-ponozky', 'Neoprenové boty a ponožky', 'obuv-do-vody'),
+    (40521, 'esusy', 'Ešusy', 'kempingove-nadobi'),
     # ---------- fitness ----------
     (700, 'fitness', 'Fitness a posilování', None),
     (701, 'cinky-a-kotouce', 'Činky a kotouče', 'fitness'),
@@ -1503,6 +1515,45 @@ for _parent, _rules in {
     'skateboardy': [('pennyboardy', _PENNY)],
     'basketbalove-mice': [('basketbalove-kose', _KOS)],
     'basketbal': [('basketbalove-kose', _KOS)],
+}.items():
+    REFINE.setdefault(_parent, [])[0:0] = _rules
+# ---- 17. 11. 2026 November wave 5: own loop ----
+_SNEHULE = r'^(?!.*(ponoz|navlek|vlozk|impregn|tkanick|kalhot|bund|rukavic|cepic|kombinez)).*(snehul|snow ?boots?(\W|$)|(^|\W)apres|moon ?boot)'
+_CARGO = r'^(?!.*(kratk\w* kalhot|kratas|short|bermud|3/4|sukn|bund|mikin|bike|nakladn|kolo(\W|$))).*(cargo|kapsac)'
+_ZATEPL = r'^(?!.*(ponoz|merino)).*((zateplen|termo|thermo|fleece|flis|zimn|warm|hrejiv)\w* legin|legin\w* (zateplen|termo|thermo|fleece|s flisem|zimn)|(thermal|winter|warm|fleece) (tights?|leggings?))'
+_VLOZKY = r'^(?!.*(spacak|helm|prilb|kalhot|bund|rukavic|batoh|bryl)).*(vlozk\w* do (bot|obuv)|(^|\W)vlozky(\W|$)|stelk|insoles?(\W|$)|(^|\W)footbed)'
+_RUCNIK = r'^(?!.*(vesak|drzak|hacek|(^|\W)tas|task|dek[ay]|stan(\W|$)|lehatk|zidl|kresl|ponc)).*(rucnik|osusk|towel)'
+_PAPUCE = r'^(?!.*(plaz|bazen|do vody|sprch|crocs|zabk|sandal|(^|\W)slides?(\W|$))).*(papuc|domac\w* (obuv|pantof|bot)|backor|bacor|slippers?(\W|$)|na doma)'
+_PINGSTUL = r'^(?!.*((^|\W)sit(\W|$)|sitk|obal|potah|kryci|plachta|kryt|palk|mick|robot|sada)).*((pingpong|ping pong|ping-pong)\w* stul|stoln\w* tenis\w* stul|stul\w* (na |pro )?(ping|stoln\w* tenis)|table tennis table)'
+_VALEC = r'^(?!.*(inline|brusl|kolecka|kolo(\W|$)|skate|kolobez|lozisk|ab roller|ab wheel|posilovac\w* kol)).*(masazn\w* (valec|valce|valecek|roller|tyc)|foam ?roll|(^|\W)roller(\W|$)|valec na (masaz|cviceni)|fasci\w* (valec|roller)|blackroll)'
+_BUZOLA = r'^(?!.*(pouzdr|podper|kresadl|klip|hodink|watch|cyklopocit|dalekohled)).*(buzol|(^|\W)kompas)'
+_NEOPREN = r'^(?!.*(rukavic|kukl|oblek|vest|tricko|kratas|kalhot|bund)).*(neopren\w* (ponoz|bot|obuv|botick|capack|navlek|sock|boot)|(ponoz|bot|botick|sock|boot)\w* .*neopren|(^|\W)neo(prene)? (socks?|boots?)(\W|$))'
+_ESUS = r'(^|\W)esus|mess ?tins?(\W|$)|(^|\W)kotlik'
+for _parent, _rules in {
+    'zimni-obuv': [('snehule', _SNEHULE)],
+    'barefoot-obuv': [('snehule', _SNEHULE), ('domaci-pantofle', r'papuc|na doma|domac\w* (obuv|pantof|bot)')],
+    'sportovni-kalhoty': [('cargo-kalhoty', _CARGO)],
+    'outdoorove-kalhoty': [('cargo-kalhoty', _CARGO)],
+    'teplaky': [('cargo-kalhoty', _CARGO)],
+    'leginy': [('zateplene-leginy', _ZATEPL)],
+    'doplnky-k-obuvi': [('vlozky-do-bot', _VLOZKY)],
+    'plazove-doplnky': [('rucniky', _RUCNIK)],
+    'hygiena-a-repelenty': [('rucniky', _RUCNIK)],
+    'outdoor-doplnky': [('rucniky', _RUCNIK), ('buzoly-a-kompasy', _BUZOLA)],
+    'pantofle-a-zabky': [('domaci-pantofle', _PAPUCE)],
+    'stolni-tenis': [('pingpongove-stoly', _PINGSTUL)],
+    'masazni-pomucky': [('masazni-valce', _VALEC)],
+    'fitness-pomucky': [('masazni-valce', _VALEC)],
+    'joga-a-podlozky': [('masazni-valce', _VALEC)],
+    'pilates-pomucky': [('masazni-valce', _VALEC)],
+    'dalekohledy-a-kompasy': [('buzoly-a-kompasy', _BUZOLA)],
+    'obuv-do-vody': [('neoprenove-boty-a-ponozky', _NEOPREN)],
+    'sportovni-ponozky': [('neoprenove-boty-a-ponozky', _NEOPREN)],
+    'neopreny': [('neoprenove-boty-a-ponozky', _NEOPREN)],
+    'kempingove-nadobi': [('esusy', _ESUS)],
+    'vareni-v-prirode': [('esusy', _ESUS)],
+    'lovecke-vybaveni': [('esusy', _ESUS)],
+    'lovecke-obleceni': [('esusy', _ESUS)],
 }.items():
     REFINE.setdefault(_parent, [])[0:0] = _rules
 REFINE['cyklo-prislusenstvi'].append(('cyklo-stojany-a-drzaky', r'stojan|drzak\w* (na )?(kol|bicykl)|nastenn|zavesn\w* (na )?kol|zavesen\w* na kolo'))
