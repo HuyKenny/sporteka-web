@@ -26,7 +26,9 @@ from pathlib import Path
 
 # tracked copies (the GitHub Actions build has no workspace): kw-all.json = suggestions of our own category / brand names, kw-gap.json = what
 # competitors rank for and we do not (scripts/gap-harvest.py); both are {keyword, volume}
-KW_FILES = [Path(__file__).resolve().parent.parent / 'src/data/kw/kw-all.json', Path(__file__).resolve().parent.parent / 'src/data/kw/kw-gap.json']
+# kw-konkurence.json (17. 11. 2026) = Ahrefs phrases behind the top category pages of sportisimo.cz / decathlon.cz that neither file had
+KW_FILES = [Path(__file__).resolve().parent.parent / 'src/data/kw/kw-all.json', Path(__file__).resolve().parent.parent / 'src/data/kw/kw-gap.json',
+            Path(__file__).resolve().parent.parent / 'src/data/kw/kw-konkurence.json']
 MIN_PRODUCTS = 6
 # 11. 11. 2026: from 250 down to 50 searches a month — a landing only becomes indexable with its hand-written text (src/lib/facet-texts.ts)
 MIN_VOL = {'gender': 50, 'brand': 50, 'color': 50, 'sale': 100, 'model': 300}
@@ -42,7 +44,7 @@ ALT = {
     'sportovni-bundy': ['bundy', 'bunda'], 'turisticke-batohy': ['turisticke batohy', 'treking batoh'], 'batohy': ['batohy', 'batoh'],
     'mestske-batohy': ['mestske batohy', 'sportovni batohy'], 'termopradlo': ['termopradlo', 'funkcni pradlo'], 'plavky': ['plavky'],
     'lyzarske-bundy': ['lyzarske bundy', 'lyzarska bunda'], 'sportovni-ponozky': ['ponozky', 'sportovni ponozky'], 'cepice-a-celenky': ['cepice', 'ksiltovky'],
-    'leginy': ['leginy', 'legíny'], 'teplaky': ['teplaky'], 'sportovni-podprsenky': ['sportovni podprsenky', 'podprsenky'], 'zimni-obuv': ['zimni boty', 'snehule'],
+    'leginy': ['leginy', 'legíny'], 'teplaky': ['teplaky'], 'sportovni-podprsenky': ['sportovni podprsenky', 'podprsenky'], 'zimni-obuv': ['zimni boty'],
     'zimni-bundy': ['zimni bundy', 'zimni bunda'], 'softshellove-bundy': ['softshellove bundy', 'softshellova bunda'], 'sandaly': ['sandaly'],
     'sjezdove-lyze': ['sjezdove lyze', 'lyze'], 'lyzarske-boty': ['lyzarske boty', 'lyzaky'], 'lyzarske-kalhoty': ['lyzarske kalhoty'], 'lyzarske-rukavice': ['lyzarske rukavice'],
     'lyzarske-helmy': ['lyzarske helmy', 'helma na lyze', 'prilba na lyze'], 'lyzarske-bryle': ['lyzarske bryle', 'bryle na snowboard', 'bryle na lyze'], 'snowboardy': ['snowboardy', 'snowboard'], 'snowboardove-sety': ['snowboard komplet', 'snowboard s vazanim', 'snowboard set'],
@@ -52,6 +54,34 @@ ALT = {
     'skialpove-boty': ['skialpove boty'], 'skialpove-lyze': ['skialpove lyze'], 'detske-lyze': ['detske lyze'], 'lyzarske-termopradlo': ['lyzarske termopradlo'], 'lyzarske-hole': ['lyzarske hole', 'hulky na lyze'],
     'kopacky': ['kopacky'], 'sportovni-bryle': ['sportovni bryle', 'slunecni bryle'], 'barefoot-obuv': ['barefoot boty'],
 }
+# 17. 11. 2026: categories whose own name is not what people type ("Pantofle a žabky", "Tašky přes rameno a dokladovky") never got a gender /
+# brand landing — the phrases are built from these names (singular forms are added by singulars())
+ALT.update({
+    'pantofle-a-zabky': ['pantofle', 'zabky', 'nazouvaky'], 'domaci-pantofle': ['papuce', 'domaci pantofle', 'pantofle na doma'],
+    'tasky-pres-rameno': ['taska pres rameno', 'tasky pres rameno', 'dokladovka'], 'sportovni-tasky': ['sportovni taska', 'sportovni tasky', 'taska do fitka'],
+    'cestovni-tasky': ['cestovni taska', 'cestovni tasky'], 'skolni-batohy': ['skolni batoh', 'skolni batohy', 'aktovka'], 'batohy-na-notebook': ['batoh na notebook'],
+    'ledvinky': ['ledvinka', 'ledvinky'], 'lahve-a-termosky': ['termoska', 'lahev na vodu', 'lahev na piti'], 'termohrnky': ['termohrnek', 'termohrnky'],
+    'nepromokave-bundy': ['nepromokava bunda', 'nepromokave bundy', 'outdoorova bunda'], 'perove-bundy': ['perova bunda', 'perove bundy'],
+    'kabaty-a-parky': ['kabat', 'kabaty', 'zimni kabat', 'parka'], 'vetrovky': ['vetrovka', 'vetrovky', 'sustakova bunda'],
+    'plastenky': ['plastenka', 'plastenky', 'ponco'], 'kombinezy': ['kombineza', 'kombinezy'],
+    'teplakove-soupravy': ['teplakova souprava', 'teplakove soupravy', 'teplakovka'], 'mikiny-s-kapuci': ['mikina s kapuci', 'mikiny s kapuci'],
+    'mikiny-na-zip': ['mikina na zip', 'mikiny na zip'], 'crop-topy': ['crop top', 'crop topy'], 'tilka': ['tilko', 'tilka'],
+    'merino-tricka': ['merino tricko', 'merino triko', 'merino tricka'], 'merino-pradlo': ['merino pradlo', 'merino leginy'], 'merino-mikiny': ['merino mikina'],
+    'softshellove-kalhoty': ['softshellove kalhoty'], 'cargo-kalhoty': ['cargo kalhoty', 'kapsace'], 'zateplene-leginy': ['zateplene leginy', 'termo leginy'],
+    'sportovni-sukne-a-saty': ['sportovni sukne', 'sportovni saty'], 'boxerky': ['boxerky', 'trenky'], 'kalhotky': ['kalhotky'],
+    'jednodilne-plavky': ['jednodilne plavky'], 'dvoudilne-plavky': ['dvoudilne plavky', 'bikiny'], 'fotbalove-dresy': ['fotbalovy dres', 'fotbalove dresy'],
+    'ksiltovky': ['ksiltovka', 'ksiltovky'], 'nakrcniky-a-satky': ['nakrcnik', 'nakrcniky', 'satek'], 'kompresni-ponozky': ['kompresni ponozky'],
+    'snehule': ['snehule'], 'treninkova-obuv': ['boty na fitness', 'boty do posilovny', 'fitness boty'], 'salova-obuv': ['salovky', 'salova obuv', 'salove boty'],
+    'turfy': ['turfy'], 'vlozky-do-bot': ['vlozky do bot'], 'cyklisticke-kratasy-a-kalhoty': ['cyklisticke kratasy', 'cyklisticke kalhoty'],
+    'cyklisticke-rukavice': ['rukavice na kolo', 'cyklisticke rukavice'], 'detske-cyklohelmy': ['detska helma na kolo', 'detska cyklisticka helma'],
+    'ortezy-na-koleno': ['orteza na koleno'], 'karimatky-a-matrace': ['karimatka', 'karimatky'], 'kempingove-zidle': ['kempingova zidle', 'skladaci zidle'],
+    'celovky-a-svitilny': ['celovka', 'celovky'], 'trekove-hole': ['trekove hole', 'trekove hulky', 'nordic walking hole'], 'nesmeky': ['nesmeky', 'macky'],
+    'cinky-a-kotouce': ['cinky', 'cinka'], 'boxovaci-pytle': ['boxovaci pytel'], 'joga-a-podlozky': ['podlozka na jogu', 'jogamatka', 'podlozka na cviceni'],
+    'skateboardy': ['skateboard', 'longboard'], 'plavecke-cepice': ['plavecka cepice', 'koupaci cepice'], 'rucniky': ['rucnik', 'rucniky', 'osuska'],
+    'masazni-valce': ['masazni valec'], 'pingpongove-stoly': ['pingpongovy stul'], 'detska-kola': ['detske kolo', 'detska kola'], 'odrazedla': ['odrazedlo'],
+    'sportovni-hodinky': ['sportovni hodinky'], 'chytre-hodinky': ['chytre hodinky'], 'lovecke-obleceni': ['lovecke obleceni', 'myslivecke obleceni'],
+})
+
 
 
 def fold(s):
