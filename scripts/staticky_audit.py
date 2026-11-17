@@ -21,6 +21,7 @@ import re
 import sys
 import urllib.error
 import urllib.parse
+import time
 import urllib.request
 
 SITE = 'https://sporteka.cz'
@@ -36,14 +37,19 @@ OPEN = urllib.request.build_opener(NoRedirect)
 
 
 def get(url, body=True):
-    for attempt in range(3):
+    for attempt in range(4):
         try:
             with OPEN.open(urllib.request.Request(url, headers=UA), timeout=60) as r:
                 return r.status, r.headers, (r.read().decode('utf-8', 'replace') if body else '')
         except urllib.error.HTTPError as e:
+            # 429 = Cloudflare throttles the runner (10 000+ image requests in a burst): wait and retry
+            if e.code == 429 and attempt < 3:
+                ra = (e.headers or {}).get('retry-after') or ''
+                time.sleep(min(60, int(ra)) if ra.isdigit() else 10 * (attempt + 1))
+                continue
             return e.code, e.headers, (e.read().decode('utf-8', 'replace') if body else '')
         except Exception:  # noqa: BLE001 — network hiccup: retry
-            if attempt == 2:
+            if attempt == 3:
                 return 0, {}, ''
 
 
@@ -142,13 +148,17 @@ def main():
                 bad('internal link', f'{chain} {href}')
         # /img/ (sporteka-img Worker, R2 only): 302 = the shop's original (no thumbnail yet / not resizable) — fine;
         # 404 = the shop deleted the picture (not a static-site fault, reported apart)
-        gone = 0
+        # 429 after the retries = the audit itself is rate limited, not a fault of the site: counted apart
+        gone = throttled = 0
         for href, (st, chain) in zip(sorted(assets), ex.map(lambda x: follow(SITE + x), sorted(assets))):
             if st == 404 and href.startswith('/img/'):
                 gone += 1
+            elif st == 429:
+                throttled += 1
             elif st != 200:
                 bad('asset', f'{chain} {href}')
-    print(f'internal links: {len(lk)} of {len(links)} checked; assets: {len(assets)} ({gone} shop pictures gone)', flush=True)
+    print(f'internal links: {len(lk)} of {len(links)} checked; assets: {len(assets)} ({gone} shop pictures gone, '
+          f'{throttled} still rate-limited after retries)', flush=True)
 
     # retired products / renamed categories: _redirects + stub pages must land on a 200
     sys.path.insert(0, __file__.rsplit('/', 1)[0])
