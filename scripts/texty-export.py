@@ -27,6 +27,8 @@ MIN_INTRO, MAX_INTRO, MIN_GUIDE = 100, 200, 450
 slugs = {t[1] for t in K.TREE}
 # facet landings with a hand-written text (indexable, e.g. the shoe-model pages of 16. 11. 2026) may be linked from a category text too
 facet_texts = set(json.loads((HERE.parent / 'src/texts/fasety.json').read_text(encoding='utf-8')))
+# guides live at /<slug>/ too (src/lib/dispatch.ts): a category text may link the size chart and the other guides
+facet_texts |= set(json.loads((HERE.parent / 'src/texts/pruvodce.json').read_text(encoding='utf-8')))
 new = {}
 _key = lambda n: (int(re.search(r'vlna(\d+)', n).group(1)), n)       # numeric wave order: later waves override earlier ones
 for mod in sorted((p.stem for p in HERE.glob('texty_vlna[0-9]*[a-wyz].py')), key=_key):

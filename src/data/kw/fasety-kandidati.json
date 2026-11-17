@@ -6604,5 +6604,95 @@
 "vol": 1340,
 "n": 700,
 "existing": false
+},
+{
+"slug": "panska-podzimni-bunda",
+"h1": "Pánská podzimní bunda",
+"base": "sportovni-bundy-jaro-podzim",
+"qs": "p_pro=panske",
+"vol": 3960,
+"n": 7468,
+"existing": false
+},
+{
+"slug": "zimni-boty-adidas",
+"h1": "Zimní boty Adidas",
+"base": "zimni-obuv",
+"qs": "znacka=adidas",
+"vol": 2430,
+"n": 56,
+"existing": false
+},
+{
+"slug": "damske-brusle-na-led",
+"h1": "Dámské brusle na led",
+"base": "rekreacni-brusle",
+"qs": "p_pro=damske",
+"vol": 2400,
+"n": 70,
+"existing": false
+},
+{
+"slug": "damska-prosivana-bunda",
+"h1": "Dámská prošívaná bunda",
+"base": "prosivane-bundy",
+"qs": "p_pro=damske",
+"vol": 2200,
+"n": 376,
+"existing": false
+},
+{
+"slug": "zimni-boty-salomon",
+"h1": "Zimní boty Salomon",
+"base": "zimni-obuv",
+"qs": "znacka=salomon",
+"vol": 1930,
+"n": 56,
+"existing": false
+},
+{
+"slug": "detska-podzimni-bunda",
+"h1": "Dětská podzimní bunda",
+"base": "sportovni-bundy-jaro-podzim",
+"qs": "p_pro=detske",
+"vol": 1360,
+"n": 1634,
+"existing": false
+},
+{
+"slug": "detske-brusle-na-led",
+"h1": "Dětské brusle na led",
+"base": "rekreacni-brusle",
+"qs": "p_pro=detske",
+"vol": 1100,
+"n": 122,
+"existing": false
+},
+{
+"slug": "detsky-turisticky-batoh",
+"h1": "Dětský turistický batoh",
+"base": "turisticke-batohy",
+"qs": "p_pro=detske",
+"vol": 980,
+"n": 153,
+"existing": false
+},
+{
+"slug": "damsky-turisticky-batoh",
+"h1": "Dámský turistický batoh",
+"base": "turisticke-batohy",
+"qs": "p_pro=damske",
+"vol": 950,
+"n": 240,
+"existing": false
+},
+{
+"slug": "keen-zimni-boty",
+"h1": "Keen zimní boty",
+"base": "zimni-obuv",
+"qs": "znacka=keen",
+"vol": 920,
+"n": 67,
+"existing": false
 }
 ]
