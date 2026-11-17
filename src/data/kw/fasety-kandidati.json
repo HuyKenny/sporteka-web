@@ -6370,5 +6370,239 @@
 "vol": 740,
 "n": 196,
 "existing": false
+},
+{
+"slug": "birkenstock-pantofle",
+"h1": "Birkenstock pantofle",
+"base": "pantofle-a-zabky",
+"qs": "znacka=birkenstock",
+"vol": 15950,
+"n": 286,
+"existing": false
+},
+{
+"slug": "damske-pantofle",
+"h1": "Dámské pantofle",
+"base": "pantofle-a-zabky",
+"qs": "p_pro=damske",
+"vol": 14300,
+"n": 2890,
+"existing": false
+},
+{
+"slug": "damsky-kabat",
+"h1": "Dámský kabát",
+"base": "kabaty-a-parky",
+"qs": "p_pro=damske",
+"vol": 7300,
+"n": 511,
+"existing": false
+},
+{
+"slug": "panske-pantofle",
+"h1": "Pánské pantofle",
+"base": "pantofle-a-zabky",
+"qs": "p_pro=panske",
+"vol": 7250,
+"n": 1727,
+"existing": false
+},
+{
+"slug": "crocs-pantofle",
+"h1": "Crocs pantofle",
+"base": "pantofle-a-zabky",
+"qs": "znacka=crocs",
+"vol": 5780,
+"n": 3112,
+"existing": false
+},
+{
+"slug": "damske-snehule",
+"h1": "Dámské sněhule",
+"base": "snehule",
+"qs": "p_pro=damske",
+"vol": 5300,
+"n": 800,
+"existing": false
+},
+{
+"slug": "nike-pantofle",
+"h1": "Nike pantofle",
+"base": "pantofle-a-zabky",
+"qs": "znacka=nike",
+"vol": 5200,
+"n": 142,
+"existing": false
+},
+{
+"slug": "napapijri-bunda",
+"h1": "Napapijri bunda",
+"base": "sportovni-bundy",
+"qs": "znacka=napapijri",
+"vol": 4900,
+"n": 72,
+"existing": false
+},
+{
+"slug": "panska-taska-pres-rameno",
+"h1": "Pánská taška přes rameno",
+"base": "tasky-pres-rameno",
+"qs": "p_pro=panske",
+"vol": 4500,
+"n": 425,
+"existing": false
+},
+{
+"slug": "teplakova-souprava-nike",
+"h1": "Tepláková souprava Nike",
+"base": "teplakove-soupravy",
+"qs": "znacka=nike",
+"vol": 4150,
+"n": 150,
+"existing": false
+},
+{
+"slug": "pansky-kabat",
+"h1": "Pánský kabát",
+"base": "kabaty-a-parky",
+"qs": "p_pro=panske",
+"vol": 4150,
+"n": 336,
+"existing": false
+},
+{
+"slug": "adidas-pantofle",
+"h1": "Adidas pantofle",
+"base": "pantofle-a-zabky",
+"qs": "znacka=adidas",
+"vol": 4100,
+"n": 261,
+"existing": false
+},
+{
+"slug": "damska-teplakova-souprava",
+"h1": "Dámská tepláková souprava",
+"base": "teplakove-soupravy",
+"qs": "p_pro=damske",
+"vol": 3800,
+"n": 700,
+"existing": false
+},
+{
+"slug": "teplakova-souprava-panska",
+"h1": "Tepláková souprava pánská",
+"base": "teplakove-soupravy",
+"qs": "p_pro=panske",
+"vol": 3000,
+"n": 1200,
+"existing": false
+},
+{
+"slug": "damska-ledvinka",
+"h1": "Dámská ledvinka",
+"base": "ledvinky",
+"qs": "p_pro=damske",
+"vol": 2700,
+"n": 250,
+"existing": false
+},
+{
+"slug": "perova-bunda-damska",
+"h1": "Péřová bunda dámská",
+"base": "perove-bundy",
+"qs": "p_pro=damske",
+"vol": 2210,
+"n": 600,
+"existing": false
+},
+{
+"slug": "adidas-teplakovka",
+"h1": "Adidas teplakovka",
+"base": "teplakove-soupravy",
+"qs": "znacka=adidas",
+"vol": 2150,
+"n": 150,
+"existing": false
+},
+{
+"slug": "cargo-kalhoty-damske",
+"h1": "Cargo kalhoty dámské",
+"base": "cargo-kalhoty",
+"qs": "p_pro=damske",
+"vol": 2050,
+"n": 200,
+"existing": false
+},
+{
+"slug": "stanley-termoska",
+"h1": "Stanley termoska",
+"base": "lahve-a-termosky",
+"qs": "znacka=stanley",
+"vol": 1900,
+"n": 61,
+"existing": false
+},
+{
+"slug": "damska-nepromokava-bunda",
+"h1": "Dámská nepromokavá bunda",
+"base": "nepromokave-bundy",
+"qs": "p_pro=damske",
+"vol": 1800,
+"n": 900,
+"existing": false
+},
+{
+"slug": "merino-triko-damske",
+"h1": "Merino triko dámské",
+"base": "merino-tricka",
+"qs": "p_pro=damske",
+"vol": 1750,
+"n": 1500,
+"existing": false
+},
+{
+"slug": "panska-ksiltovka",
+"h1": "Pánská kšiltovka",
+"base": "ksiltovky",
+"qs": "p_pro=panske",
+"vol": 1500,
+"n": 3000,
+"existing": false
+},
+{
+"slug": "damska-ksiltovka",
+"h1": "Dámská kšiltovka",
+"base": "ksiltovky",
+"qs": "p_pro=damske",
+"vol": 1450,
+"n": 1500,
+"existing": false
+},
+{
+"slug": "ksiltovka-nike",
+"h1": "Kšiltovka Nike",
+"base": "ksiltovky",
+"qs": "znacka=nike",
+"vol": 1450,
+"n": 300,
+"existing": false
+},
+{
+"slug": "jordan-ksiltovka",
+"h1": "Jordan kšiltovka",
+"base": "ksiltovky",
+"qs": "znacka=jordan",
+"vol": 1360,
+"n": 100,
+"existing": false
+},
+{
+"slug": "panska-perova-bunda",
+"h1": "Pánská péřová bunda",
+"base": "perove-bundy",
+"qs": "p_pro=panske",
+"vol": 1340,
+"n": 700,
+"existing": false
 }
 ]

@@ -551,7 +551,7 @@ def rules():
         # --- combat ---
         ('boxerske-rukavice', None, R(r'boxersk\w* rukavic|rukavice na box|mma rukavic|rukavice na bojov'), None),
         ('boxerske-rukavice', R(r'rukavice na bojove'), None, None),
-        ('boxovaci-pytle', None, R(r'boxovac\w* (pytel|hrusk)|speedbag|lapy|lapa|blok'), R(r'box|bojov|^$')),
+        ('boxovaci-pytle', None, R(r'boxovac\w* (pytel|hrusk)|speedbag|(^|\W)(lapy|lapa|blok)(\W|$)'), R(r'box|bojov|^$')),
         ('boxovaci-pytle', R(r'boxovac|lapy a bloky'), None, None),
         ('chranice-bojove-sporty', R(r'chranice (na|pro) bojov'), None, None),
         ('chranice-bojove-sporty', None, R(r'chranic zubu|suspenzor|chranic\w* holeni.*(mma|thai|kickbox)'), None),
@@ -821,7 +821,7 @@ TOP_RULES = [
     ('cyklo-sedacky-a-voziky', None, R(r'(sedack\w*|vozik\w*|prives\w*) (na|pro|za) (kolo|jizdn|dit)|cyklovozik|detsk\w* sedack\w* (na|za) kolo'), None),
     ('cyklo-udrzba', None, R(r'(mazadl\w*|mazivo|mazani|olej|cistic\w*|odmastovac|lubrikant|lube|vosk(?!a)|wax|sprej|cistici|sampon|degreaser|lubricant).*(retez|chain|kolo|kola|cykl|brzd|bike|e-bike)|(retez|chain|kolo|cykl|bike|e-bike).*(mazadl\w*|mazivo|cistic\w*|odmastovac|lubrikant|lube|wax|vosk(?!a)|degreaser)'), None),
     ('kardio-trenazery', None, R(r'(posilovac\w*|domaci|fitness|spinning\w*|magnetick\w*) (kolo|kola)|rotoped|ergometr|airbike|air bike|veloergometr|cyklotrenazer'), None),
-    ('cyklo-vidlice-a-tlumice', None, R(r'(^|\W)(vidlic\w*|tlumic\w*)(\W|$)(?!.*(hokej|lyz|snow))'), R(r'^$|cykl|kol|bike|mtb')),
+    ('cyklo-vidlice-a-tlumice', None, R(r'(^|\W)(vidlic(?!k)\w*|tlumic\w*)(\W|$)(?!.*(hokej|lyz|snow))'), R(r'^$|cykl|kol|bike|mtb')),
     ('cyklo-brzdy', None, R(r'(^|\W)(brzd(a|y|u|ov\w*)|desticky|brzdov\w* (kotouc|packa|paka))(\W|$)'), R(r'^$|cykl|kol|bike|mtb|brzd')),
     ('cyklo-pedaly', None, R(r'(^|\W)pedal(y|u|ech|ek)?(\W|$)'), R(r'^$|cykl|kol|bike|mtb')),
     ('cyklo-blatniky', None, R(r'(^|\W)blatnik\w*'), None),
