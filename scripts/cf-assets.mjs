@@ -64,7 +64,10 @@ for (const [p, e] of Object.entries(m.files)) {
 }
 if (Object.keys(manifest).length > 100000) throw new Error('more than 100 000 files in one Worker version');
 
-const session = await api('POST', `/accounts/${ACCOUNT}/workers/scripts/${m.worker}/assets-upload-session`, JSON.stringify({ manifest }), { ...AUTH, 'Content-Type': 'application/json' });
+// The upload JWT of a session can expire or be refused mid-upload (401 on a 30k-file shard after ~40 min, 16. 11. 2026):
+// then open a new session with the same manifest — Cloudflare answers with only the blobs it still lacks — and go on.
+const newSession = () => api('POST', `/accounts/${ACCOUNT}/workers/scripts/${m.worker}/assets-upload-session`, JSON.stringify({ manifest }), { ...AUTH, 'Content-Type': 'application/json' });
+let session = await newSession();
 let jwt = session.jwt;
 const need = (session.buckets ?? []).flat();
 let bytes = 0;
@@ -79,21 +82,37 @@ if (missing.length) {
   await new Promise(() => {});
 }
 // buckets as Cloudflare grouped them, 3 in flight (wrangler's BULK_UPLOAD_CONCURRENCY)
-const queue = [...session.buckets ?? []];
-async function worker() {
-  for (let b = queue.shift(); b; b = queue.shift()) {
-    const form = new FormData();
-    for (const h of b) {
-      const [p, file] = local.get(h);
-      const buf = fs.readFileSync(file);
-      bytes += buf.length;
-      form.append(h, new File([buf.toString('base64')], h, { type: MIME[path.extname(p).slice(1)] ?? 'application/null' }), h);
+for (let round = 1; ; round++) {
+  const queue = [...session.buckets ?? []];
+  const upJwt = session.jwt;
+  let refused = false;
+  async function worker() {
+    for (let b = queue.shift(); b && !refused; b = queue.shift()) {
+      const form = new FormData();
+      let size = 0;
+      for (const h of b) {
+        const [p, file] = local.get(h);
+        const buf = fs.readFileSync(file);
+        size += buf.length;
+        form.append(h, new File([buf.toString('base64')], h, { type: MIME[path.extname(p).slice(1)] ?? 'application/null' }), h);
+      }
+      try {
+        const res = await api('POST', `/accounts/${ACCOUNT}/workers/assets/upload?base64=true`, form, { Authorization: `Bearer ${upJwt}` });
+        bytes += size;
+        if (res?.jwt) jwt = res.jwt;
+      } catch (e) {
+        if (!/ → 401 /.test(String(e.message)) || round >= 4) throw e;
+        refused = true;
+      }
     }
-    const res = await api('POST', `/accounts/${ACCOUNT}/workers/assets/upload?base64=true`, form, { Authorization: `Bearer ${session.jwt}` });
-    if (res?.jwt) jwt = res.jwt;
   }
+  await Promise.all([worker(), worker(), worker()]);
+  if (!refused) break;
+  console.error(`cf-assets: ${m.worker}: upload token refused (401), new upload session (round ${round + 1})`);
+  session = await newSession();
+  jwt = session.jwt;
+  if (!(session.buckets ?? []).length) break;     // everything arrived before the refusal: the new session's jwt completes
 }
-await Promise.all([worker(), worker(), worker()]);
 
 const meta = {
   assets: { jwt, config: { ...m.config, ...(m.redirects ? { _redirects: m.redirects } : {}), ...(m.headers ? { _headers: m.headers } : {}) } },

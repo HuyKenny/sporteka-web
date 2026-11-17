@@ -242,6 +242,22 @@ TREE = [
     (4042, 'kempingove-stoly', 'Kempingové stoly', 'kempingovy-nabytek'),
     (70532, 'balancni-desky', 'Balanční desky', 'balancni-pomucky'),
     (110011, 'mma-rukavice', 'MMA rukavice', 'boxerske-rukavice'),
+    # ---- 16. 11. 2026 November wave 4 (reports/sporteka/content-gap-2026-11e.md) ----
+    (6082, 'boby', 'Boby', 'sane-a-boby'),
+    (6083, 'sanky', 'Sáňky a saně', 'sane-a-boby'),
+    (708011, 'whey-proteiny', 'Whey proteiny (syrovátkové)', 'proteiny'),
+    (708012, 'veganske-proteiny', 'Veganské a rostlinné proteiny', 'proteiny'),
+    (1023, 'mikiny-na-zip', 'Mikiny na zip', 'mikiny'),
+    (1024, 'mikiny-s-kapuci', 'Mikiny s kapucí', 'mikiny'),
+    (7013, 'jednorucni-cinky', 'Jednoruční činky', 'cinky-a-kotouce'),
+    (7092, 'ortezy-na-koleno', 'Ortézy a chrániče na koleno', 'bandaze-a-ortezy'),
+    (7093, 'ortezy-na-kotnik', 'Ortézy a bandáže na kotník', 'bandaze-a-ortezy'),
+    (3022, 'cestovni-tasky', 'Cestovní tašky a duffle bagy', 'sportovni-tasky'),
+    (1161, 'fotbalove-dresy', 'Fotbalové dresy', 'dresy'),
+    (1101, 'boxerky', 'Boxerky a trenky', 'sportovni-spodni-pradlo'),
+    (1102, 'kalhotky', 'Sportovní kalhotky', 'sportovni-spodni-pradlo'),
+    (120031, 'pennyboardy', 'Pennyboardy', 'skateboardy'),
+    (8042, 'basketbalove-kose', 'Basketbalové koše', 'basketbal'),
     # ---------- fitness ----------
     (700, 'fitness', 'Fitness a posilování', None),
     (701, 'cinky-a-kotouce', 'Činky a kotouče', 'fitness'),
@@ -1451,6 +1467,42 @@ for _parent, _rules in {
     'boxerske-rukavice': [('mma-rukavice', _MMA)],
     'sportovni-rukavice': [('mma-rukavice', rf'^(?=.*(rukav|glove)).*{_MMA}')],
     'obleceni-bojove-sporty': [('mma-rukavice', rf'^(?=.*(rukav|glove)).*{_MMA}')],
+}.items():
+    REFINE.setdefault(_parent, [])[0:0] = _rules
+# ---- 16. 11. 2026 November wave 4: own loop again ----
+_NOTSHOE = r'^(?!.*(bot[ay]?(\W|$)|tenisk|obuv|brusl|cepic|kulich|pantof|skechers|bbk|sneaker|ponoz|rukavic|mikin|bund|kalhot|trick)).*'
+_BOBY = r'^(?!.*(marley|edamame|soj|s okraji|fazol|flexfit|klobouk|bucket|dres|kakao|(^|\W)polo(\W|$)))' + _NOTSHOE + r'((^|\W)(bob|boby|bobik|bobek)(\W|$)|snow ?bob|s volantem|ridit\w* (bob|sane)|kluzak s volant)'
+_SANKY = _NOTSHOE + r'(sank[ya]?(\W|$)|sanek|(^|\W)sane(\W|$)|saních|sanich|rohat\w* sane|drevene sane|skladac\w* sane|sled(ge)?(\W|$))'
+_WHEY = r'^(?!.*(tyc|bar(\W|$)|susenk|cookie|wafl|pudink|kase|palacink|sejkr|shaker|clear whey hydrate)).*(whey|syrovatk)'
+_VEGAN = r'^(?!.*(tyc|bar(\W|$)|susenk|cookie|wafl)).*(vegan\w* protein|protein\w* vegan|rostlinn\w* protein|plant ?(based )?protein|hrachov\w* protein|(sojov|ryzov|konopn|dyn)\w* protein|vegan (blend|protein))'
+_ZIP = r'^(?!.*(vest|bund|kalhot|teplak|souprav)).*(na zip|full.?zip|(^|\W)fz(\W|$)|zip hood|zip(ova|ove|ovou)? mikin|mikin\w* (s )?zip)'
+_KAPUCE = r'^(?!.*(vest|bund|kalhot|teplak|souprav|bez kapuc)).*(s kapuc|kapuci|hood(ie|y)?(\W|$)|hooded|(^|\W)hd(\W|$))'
+_JEDNORUC = r'^(?!.*(stojan|drzak|regal|osa|osy|kotouc|zavazi|kettlebel)).*(jednoruc|dumbbell|(hexagon|neopren|vinyl|chrom|gumov|nakladac|stavitel)\w* cink|cink\w* (hexagon|neopren|vinyl|nakladac|stavitel)|(^|\W)par cinek|(^|\W)\d+ ?x ?\d+ ?kg cink)'
+_KOLENO = r'^(?!.*(kotnik|zapest|loket|ramen|kycl|bederni|zad)).*((ortez|bandaz|navlek|chranic|stabilizator|nakolenik)\w* (na |pro )?(kolen|kolen[ou]|koleno)|kolenn\w* (ortez|bandaz|chranic|navlek)|nakolenik|knee (brace|sleeve|support|pad|guard))'
+_KOTNIK = r'^(?!.*(kolen|zapest|loket)).*((ortez|bandaz|stabilizator|navlek|chranic)\w* (na |pro )?(kotnik|hlezn)|kotnikov\w* (ortez|bandaz)|ankle (brace|support|sleeve))'
+_CESTOVNI = r'^(?!.*(ledvin|pres rameno|crossbody|kosmetick|toaletn|organizer)).*(cestovn\w* (tas|vak|batoh)|duffel|duffle|weekender|travel ?bag|(^|\W)base camp duffel|kufr|na kolecka|trolley)'
+_FOTBDRES = r'^(?!.*(cykl|iihf|nhl|nba|nfl|mlb|hokej|basket|(^|\W)tas|(^|\W)vak|batoh|mic|ball|ponoz|stulp|chranic|kratas|short|bund|mikin|teplak|kalhot|cepic|saly|brankar)).*(fotbal\w* dres|dres\w* fotbal|football (jersey|shirt)|(home|away|third) (jersey|shirt|kit|dres)|(domaci|venkovni|hostujic)\w* dres|replica|(^|\W)(ac milan|ac sparta|sk slavia|real madrid|barcelona|manchester|liverpool|arsenal|chelsea|juventus|bayern|psg|inter) )'
+_BOXERKY = r'^(?!.*(kalhotk|plavk|plavec|aquashort|swim|plavani|tanga|sport bra|podprsenk)).*(boxerk|boxer(s|ky)?(\W|$)|trenk|(^|\W)trunks?(\W|$)|boxer brief|briefs?(\W|$)|slip(y)? pansk|pansk\w* slip)'
+_KALHOTKY = r'^(?!.*(plavk|swim|boxer|trenk|pansk)).*(kalhotk|tanga|(^|\W)string(\W|$)|brazilk|hipster|(^|\W)bikini brief|damsk\w* slip|slip(y)? damsk)'
+_PENNY = r'penny ?board|pennyboard|(^|\W)penny(\W|$)|plastov\w* (skate|board)|mini ?cruiser|fish ?board|(^|\W)(22|27)("| ?palc)'
+_KOS = r'^(?!.*(mic(\W|$)|ball(\W|$)|dres|bot[ay]|tric|sit na mic)).*(basketbal\w* kos(e|u|i|em|ich)?(\W|$)|kos (na )?basket|(^|\W)kos s desk|basketbal\w* (desk|konstrukc|stojan|sit(\W|$)|obruc)|basketball (hoop|system|board|stand|ring|net)|streetbal\w* kos|(^|\W)obruc (na )?basket)'
+for _parent, _rules in {
+    'sane-a-boby': [('boby', _BOBY), ('sanky', _SANKY)],
+    'zimni-sporty': [('boby', _BOBY)],
+    'proteiny': [('veganske-proteiny', _VEGAN), ('whey-proteiny', _WHEY)],
+    'sportovni-vyziva': [('veganske-proteiny', _VEGAN)],
+    'mikiny': [('mikiny-na-zip', _ZIP), ('mikiny-s-kapuci', _KAPUCE)],
+    'cinky-a-kotouce': [('jednorucni-cinky', _JEDNORUC)],
+    'bandaze-a-ortezy': [('ortezy-na-kotnik', _KOTNIK), ('ortezy-na-koleno', _KOLENO)],
+    'chranice-a-helmy': [('ortezy-na-koleno', r'^(?=.*(kolen|knee)).*(chranic|nakolenik|pad|guard)')],
+    'volejbal': [('ortezy-na-koleno', r'^(?=.*(kolen|knee)).*(chranic|nakolenik|pad|guard)')],
+    'sportovni-tasky': [('cestovni-tasky', _CESTOVNI)],
+    'dresy': [('fotbalove-dresy', _FOTBDRES)],
+    'sportovni-spodni-pradlo': [('boxerky', _BOXERKY), ('kalhotky', _KALHOTKY)],
+    'merino-pradlo': [('boxerky', _BOXERKY), ('kalhotky', _KALHOTKY)],
+    'skateboardy': [('pennyboardy', _PENNY)],
+    'basketbalove-mice': [('basketbalove-kose', _KOS)],
+    'basketbal': [('basketbalove-kose', _KOS)],
 }.items():
     REFINE.setdefault(_parent, [])[0:0] = _rules
 REFINE['cyklo-prislusenstvi'].append(('cyklo-stojany-a-drzaky', r'stojan|drzak\w* (na )?(kol|bicykl)|nastenn|zavesn\w* (na )?kol|zavesen\w* na kolo'))

@@ -48,6 +48,10 @@
   "name": "New Balance 9060"
  },
  {
+  "slug": "salomon-xt-6",
+  "name": "Salomon XT-6"
+ },
+ {
   "slug": "adidas-gazelle",
   "name": "Adidas Gazelle"
  },
@@ -94,5 +98,57 @@
  {
   "slug": "salomon-speedcross",
   "name": "Salomon Speedcross"
+ },
+ {
+  "slug": "salomon-x-ultra",
+  "name": "Salomon X Ultra"
+ },
+ {
+  "slug": "new-balance-1906",
+  "name": "New Balance 1906"
+ },
+ {
+  "slug": "asics-gel-1130",
+  "name": "Asics Gel-1130"
+ },
+ {
+  "slug": "adidas-ultraboost",
+  "name": "Adidas Ultraboost"
+ },
+ {
+  "slug": "nike-pegasus",
+  "name": "Nike Pegasus"
+ },
+ {
+  "slug": "new-balance-327",
+  "name": "New Balance 327"
+ },
+ {
+  "slug": "new-balance-2002r",
+  "name": "New Balance 2002R"
+ },
+ {
+  "slug": "adidas-handball-spezial",
+  "name": "Adidas Handball Spezial"
+ },
+ {
+  "slug": "adidas-stan-smith",
+  "name": "Adidas Stan Smith"
+ },
+ {
+  "slug": "puma-palermo",
+  "name": "Puma Palermo"
+ },
+ {
+  "slug": "adidas-forum",
+  "name": "Adidas Forum"
+ },
+ {
+  "slug": "puma-suede",
+  "name": "Puma Suede"
+ },
+ {
+  "slug": "on-cloudmonster",
+  "name": "On Cloudmonster"
  }
 ]

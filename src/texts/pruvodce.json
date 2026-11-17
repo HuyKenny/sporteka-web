@@ -17,6 +17,12 @@
     "n": 4
    },
    {
+    "h2": "Jednoruční činky: pevné, nebo nakládací",
+    "cat": "jednorucni-cinky",
+    "n": 4,
+    "html": "<p>Pár jednoruček je nejuniverzálnější kus domácí posilovny. Pevné činky s gumovou nebo chromovanou úpravou jsou hned připravené a nic se na nich neuvolní, zato pro postup zátěže jich potřebujete víc párů. Nakládací činky s kotouči a zámky ušetří místo i peníze, přehazování kotoučů ale zdržuje. Neoprenové a vinylové činky s malou hmotností se hodí na rehabilitaci a aerobní cvičení. Porovnání najdete ve výpisu <a href=\"/jednorucni-cinky/\">jednoruční činky</a>.</p>"
+   },
+   {
     "h2": "Stojan na činky: pořádek a bezpečná podlaha",
     "cat": "stojany-na-cinky",
     "n": 4,
@@ -342,6 +348,18 @@
     "html": "<p>V kategorii <a href=\"/sane-a-boby/\">sáně a boby</a> je široký výběr od plastových sáněk po dřevěné. Při srovnávání se vyplatí dívat se na několik věcí, které na fotografii nepoznáte. Plast je lehký a odolný vůči vlhku, ale v mrazu může být křehčí a při nárazu může prasknout. Dřevo je tradiční a dobře se opravuje, jenže vyžaduje trochu péče a dřevěné sáňky jsou těžší. U sáněk pro nejmenší pomáhá opěrka zad, popruh nebo zábrana, která dítě drží. K tahání se hodí pevný provaz, který dobře padne do ruky.</p><p>Boby s řízením je potřeba vyzkoušet. Zjistěte, jak fungují brzdy, a dítěti ukažte, jak se používají. Sáně a boby, například od značky <a href=\"/znacka/merco/\">Merco</a>, se prodávají v několika velikostech, takže zvolte takovou, která vyhovuje nejen dítěti, ale i autu nebo sklepu. Sáně, které se skládají, se lépe vozí a skladují.</p>"
    },
    {
+    "h2": "Boby: řiditelné, s brzdou, nebo úplně jednoduché",
+    "cat": "boby",
+    "n": 4,
+    "html": "<p>Plastový bob je pro většinu dětí první zimní „vozidlo“. Nejjednodušší modely nemají řízení ani brzdu a jezdí se na nich hlavně na mírných svazích za domem. Řiditelné boby s volantem a brzdami po stranách dávají staršímu dítěti víc kontroly, jsou ale těžší a na tvrdém sněhu rychlejší. Než vyberete, podívejte se na hmotnost, kterou výrobce udává jako maximální, na tvar sedačky a na to, jestli má bob vpředu šňůru k tahání do kopce. Celou nabídku porovnáte ve výpisu <a href=\"/boby/\">boby</a>.</p>"
+   },
+   {
+    "h2": "Sáňky a saně: dřevo, kov, nebo skládací",
+    "cat": "sanky",
+    "n": 4,
+    "html": "<p>Klasické dřevěné saně vydrží roky a s opěrkou nebo ohrádkou se na nich vozí i malé dítě. Kovové a skládací sáňky jsou lehčí a vejdou se do kufru auta, plastové saně zase nevadí mokro. Pro sáňkování z kopce se hodí delší saně s pevnými ližinami, na tahání batolete po rovině stačí kratší model s opěradlem. Modely všech typů najdete ve výpisu <a href=\"/sanky/\">sáňky a saně</a>.</p>"
+   },
+   {
     "h2": "Kluzáky na sníh",
     "cat": "kluzaky-na-snih",
     "n": 4,
@@ -499,6 +517,18 @@
     "cat": "proteiny",
     "n": 6,
     "html": "<p>Bílkoviny přispívají k nárůstu a udržení svalové hmoty. To platí pro bílkoviny ze stravy stejně jako z doplňku. <a href=\"/proteiny/\">Proteinový prášek</a> je tedy prostě pohodlný zdroj bílkovin: rozmícháte ho s vodou nebo mlékem a máte porci bílkovin bez vaření. Kdo má bílkovin ze stravy dost, ho proto nepotřebuje.</p><p>Nejčastější typy jsou syrovátkový protein (z mléka), kaseinový (z mléka, pomaleji se tráví) a rostlinné, například hrachový nebo sójový. Lidé s intolerancí laktózy hledají izoláty nebo rostlinné směsi. Mezi nabízenými značkami jsou například <a href=\"/znacka/gymbeam/\">GymBeam</a> a další. Srovnávejte obsah bílkovin v porci a příchuť – nápoj budete pít několikrát týdně. Pro zdravé dospělé platí doporučení na obalu. Při onemocnění ledvin nebo jiných chronických potížích se předem poraďte s lékařem.</p>"
+   },
+   {
+    "h2": "Whey: syrovátkový koncentrát, izolát a clear",
+    "cat": "whey-proteiny",
+    "n": 4,
+    "html": "<p>Syrovátkový protein je nejrozšířenější typ proteinového prášku. Koncentrát obsahuje kromě bílkovin i trochu laktózy a tuku, izolát prochází další filtrací, takže má vyšší podíl bílkovin a méně laktózy. Clear whey je izolát připravený tak, aby se pil jako ovocný nápoj místo mléčného koktejlu. Rozdíly v chuti, rozpustnosti a složení porovnáte ve výpisu <a href=\"/whey-proteiny/\">whey proteiny</a>.</p>"
+   },
+   {
+    "h2": "Rostlinný protein pro vegany i při nesnášenlivosti mléka",
+    "cat": "veganske-proteiny",
+    "n": 4,
+    "html": "<p>Kdo nejí živočišné produkty nebo mléčné bílkoviny nesnáší, sáhne po proteinu z hrachu, sóji, rýže nebo konopí. Jednotlivé rostliny mají odlišné složení aminokyselin, proto výrobci často míchají několik zdrojů dohromady. Na etiketě se vyplatí sledovat podíl bílkovin v porci a sladidla. Nabídku najdete ve výpisu <a href=\"/veganske-proteiny/\">veganské a rostlinné proteiny</a>.</p>"
    },
    {
     "h2": "Kreatin",
