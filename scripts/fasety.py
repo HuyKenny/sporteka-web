@@ -26,7 +26,8 @@ from pathlib import Path
 
 # tracked copies (the GitHub Actions build has no workspace): kw-all.json = suggestions of our own category / brand names, kw-gap.json = what
 # competitors rank for and we do not (scripts/gap-harvest.py); both are {keyword, volume}
-# kw-konkurence.json (17. 11. 2026) = Ahrefs phrases behind the top category pages of sportisimo.cz / decathlon.cz that neither file had
+# kw-konkurence.json (17. 11. 2026) = Ahrefs phrases behind the top category pages of sportisimo.cz / decathlon.cz that neither file had,
+# + seed 'gap31': Ahrefs content gap vs 14 shops (2+ of them in the top 10, volume >= 200)
 KW_FILES = [Path(__file__).resolve().parent.parent / 'src/data/kw/kw-all.json', Path(__file__).resolve().parent.parent / 'src/data/kw/kw-gap.json',
             Path(__file__).resolve().parent.parent / 'src/data/kw/kw-konkurence.json']
 MIN_PRODUCTS = 6
@@ -80,6 +81,26 @@ ALT.update({
     'skateboardy': ['skateboard', 'longboard'], 'plavecke-cepice': ['plavecka cepice', 'koupaci cepice'], 'rucniky': ['rucnik', 'rucniky', 'osuska'],
     'masazni-valce': ['masazni valec'], 'pingpongove-stoly': ['pingpongovy stul'], 'detska-kola': ['detske kolo', 'detska kola'], 'odrazedla': ['odrazedlo'],
     'sportovni-hodinky': ['sportovni hodinky'], 'chytre-hodinky': ['chytre hodinky'], 'lovecke-obleceni': ['lovecke obleceni', 'myslivecke obleceni'],
+})
+# 17. 11. 2026 wave 31 (Ahrefs content gap vs 14 shops): the new categories + existing ones whose searched name was missing
+ALT.update({
+    'akupresurni-podlozky': ['akupresurni podlozka', 'akupresurni podlozky'], 'chodici-pasy': ['chodici pas', 'walking pad', 'chodici pas na doma'],
+    'airtracky-a-zinenky': ['airtrack', 'zinenka', 'gymnasticka zinenka'], 'prosivane-bundy': ['prosivana bunda', 'prosivane bundy'],
+    'nepromokave-kalhoty': ['nepromokave kalhoty', 'kalhoty do deste'], 'snowboardove-bundy': ['snowboardova bunda', 'bunda na snowboard'],
+    'snowboardove-kalhoty': ['snowboardove kalhoty', 'kalhoty na snowboard'], 'navleky-na-boty': ['navleky na boty', 'gamase'],
+    'fotbalove-branky': ['fotbalova branka', 'branka na fotbal'], 'moskytiery': ['moskytiera'], 'chladici-tasky': ['chladici taska', 'termotaska'],
+    'hokejove-rukavice': ['hokejove rukavice'], 'chranice-zubu': ['chranic zubu', 'chranice zubu', 'chranic na zuby'], 'otuzovaci-kade': ['otuzovaci kad', 'otuzovaci vana'],
+    'joga-bloky': ['joga blok', 'jogovy blok'], 'kotouce-na-cinky': ['kotouce na cinky', 'olympijska osa'], 'zavazi-na-kotniky': ['zavazi na kotniky', 'zavazi na nohy'],
+    'via-ferrata': ['ferratovy set', 'via ferrata set', 'ferrata'],
+    'sportovni-bundy-jaro-podzim': ['podzimni bunda', 'prechodova bunda', 'prechodna bunda'], 'rekreacni-brusle': ['brusle na led', 'ledni brusle'],
+    'behaci-pasy': ['behaci pas', 'bezecky pas', 'bezici pas'], 'trekova-obuv': ['trekove boty', 'turisticke boty', 'trekingove boty', 'outdoorove boty', 'pohorky'],
+    'turisticke-batohy': ['turisticke batohy', 'treking batoh', 'turisticky batoh', 'krosna'], 'softshellove-bundy': ['softshellove bundy', 'softshellova bunda', 'softshell'],
+    'termopradlo': ['termopradlo', 'funkcni pradlo', 'termo pradlo', 'termo triko'], 'chranice-pater': ['paterak', 'chranic patere'],
+    'cyklo-stojany-a-drzaky': ['stojan na kola', 'stojan na kolo', 'drzak na kolo'], 'cyklo-computery': ['tachometr na kolo', 'cyklocomputer'],
+    'posilovaci-lavice': ['posilovaci lavice', 'lavice na cviceni'], 'medicinbaly': ['medicinbal'], 'fotbalove-chranice-a-stulpny': ['chranice holeni', 'stulpny'],
+    'lyzarske-helmy': ['lyzarske helmy', 'helma na lyze', 'prilba na lyze', 'helma na snowboard'], 'inline-brusle': ['koleckove brusle', 'inline brusle'],
+    'posilovaci-gumy': ['posilovaci guma', 'guma na cviceni', 'odporova guma'], 'hrazdy-a-bradla': ['hrazda', 'hrazda na cviceni', 'hrazda do dveri'],
+    'zimni-bundy': ['zimni bundy', 'zimni bunda', 'bunda zimni'],
 })
 
 
