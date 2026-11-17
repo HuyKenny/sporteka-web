@@ -270,6 +270,25 @@ TREE = [
     (3101, 'buzoly-a-kompasy', 'Buzoly a kompasy', 'dalekohledy-a-kompasy'),
     (2121, 'neoprenove-boty-a-ponozky', 'Neoprenové boty a ponožky', 'obuv-do-vody'),
     (40521, 'esusy', 'Ešusy', 'kempingove-nadobi'),
+    # ---- 17. 11. 2026 November wave 6: Ahrefs content gap vs 14 shops (reports/sporteka/content-gap-2026-11g.md) ----
+    (7073, 'akupresurni-podlozky', 'Akupresurní podložky', 'masazni-pomucky'),
+    (70511, 'chodici-pasy', 'Chodicí pásy (walking pady)', 'behaci-pasy'),
+    (17041, 'airtracky-a-zinenky', 'Airtracky a žíněnky', 'gymnasticke-pomucky'),
+    (1053, 'prosivane-bundy', 'Prošívané bundy', 'zimni-bundy'),
+    (10541, 'nepromokave-kalhoty', 'Nepromokavé kalhoty', 'outdoorove-kalhoty'),
+    (6031, 'snowboardove-bundy', 'Snowboardové bundy', 'lyzarske-bundy'),
+    (6032, 'snowboardove-kalhoty', 'Snowboardové kalhoty', 'lyzarske-kalhoty'),
+    (2153, 'navleky-na-boty', 'Návleky na boty a gamaše', 'doplnky-k-obuvi'),
+    (8014, 'fotbalove-branky', 'Fotbalové branky', 'fotbal'),
+    (3121, 'moskytiery', 'Moskytiéry', 'hygiena-a-repelenty'),
+    (4061, 'chladici-tasky', 'Chladicí tašky a termotašky', 'chladici-boxy'),
+    (80221, 'hokejove-rukavice', 'Hokejové rukavice', 'hokejove-chranice'),
+    (110031, 'chranice-zubu', 'Chrániče zubů', 'chranice-bojove-sporty'),
+    (7074, 'otuzovaci-kade', 'Otužovací kádě a vany', 'fitness'),
+    (180021, 'joga-bloky', 'Jógové bloky', 'jogove-pomucky'),
+    (70111, 'kotouce-na-cinky', 'Kotouče a osy na činky', 'cinky-a-kotouce'),
+    (70121, 'zavazi-na-kotniky', 'Závaží na kotníky a zápěstí', 'cinky-a-kotouce'),
+    (30731, 'via-ferrata', 'Via ferrata: sety, lonže a rukavice', 'horolezectvi'),
     # ---------- fitness ----------
     (700, 'fitness', 'Fitness a posilování', None),
     (701, 'cinky-a-kotouce', 'Činky a kotouče', 'fitness'),
@@ -551,7 +570,7 @@ def rules():
         # --- combat ---
         ('boxerske-rukavice', None, R(r'boxersk\w* rukavic|rukavice na box|mma rukavic|rukavice na bojov'), None),
         ('boxerske-rukavice', R(r'rukavice na bojove'), None, None),
-        ('boxovaci-pytle', None, R(r'boxovac\w* (pytel|hrusk)|speedbag|(^|\W)(lapy|lapa|blok)(\W|$)'), R(r'box|bojov|^$')),
+        ('boxovaci-pytle', None, R(r'boxovac\w* (pytel|hrusk)|speedbag|(^|\W)(lapy|lapa)(\W|$)|^(?!.*(jog|yog|pilat|kostk|cihl)).*(^|\W)blok(\W|$)'), R(r'box|bojov|^$')),
         ('boxovaci-pytle', R(r'boxovac|lapy a bloky'), None, None),
         ('chranice-bojove-sporty', R(r'chranice (na|pro) bojov'), None, None),
         ('chranice-bojove-sporty', None, R(r'chranic zubu|suspenzor|chranic\w* holeni.*(mma|thai|kickbox)'), None),
@@ -1556,6 +1575,80 @@ for _parent, _rules in {
     'lovecke-obleceni': [('esusy', _ESUS)],
 }.items():
     REFINE.setdefault(_parent, [])[0:0] = _rules
+# ---- 17. 11. 2026 November wave 6: own loop (first = prepended before the older rules of the parent, last = appended after them) ----
+_AKUPRES = r'^(?!.*(sprej|cistic|vlozk|stelk|do bot|(^|\W)mic(ek|ky)?(\W|$)|valec|naramk|ponoz)).*(akupres|akupunkt\w* (podlozk|sad|polstar)|fakirsk\w* (podlozk|lozk)|shakti|spike ?mat)'
+_CHODPAS = r'^(?!.*(podlozk\w* pod|olej|maziv|silikon|kryt|dalkov\w* ovlad)).*(walking ?pad|chodic\w* pas|chodic\w* a bezeck\w* pas|bezeck\w* a chodic\w* pas|pas pod stul|under ?desk)'
+_AIRTRACK = r'^(?!.*((^|\W)(pumpa|kompresor|lepidlo|zaplat)\w* (na|pro|k)\W)).*(air ?track|air ?floor|air ?spot|zinenk)'
+_PROSIV = r'^(?!.*((^|\W)vest[ay]?(\W|$)|gilet|kalhot|rukavic|cepic|sukn|kombinez|spacak|dek[ay]|(^|\W)bot[ya]?(\W|$))).*(prosivan|quilted|(^|\W)puffer|(^|\W)quilt\w* (jacket|bund))'
+_NEPRKAL = (r'^(?!.*(kratas|short|bund|jacket|rukavic|ponoz|navlek|sukn|kombinez|lyzar|(^|\W)ski(\W|$)|snowboard|softshell)).*('
+            r'(nepromokav\w*|do deste|(^|\W)rain(\W|$)|waterproof|gore.?tex|(^|\W)gtx(\W|$)|h2no|dryvent|precip)\W.{0,30}(kalhot|pants|trousers)'
+            r'|(kalhot|pants|trousers)\w*\W.{0,40}(nepromokav|do deste|(^|\W)rain(\W|$)|waterproof|gore.?tex|(^|\W)gtx(\W|$))|prekalhot|overpants)')
+_SNBBUNDA = r'^(?!.*(kalhot|pants|rukavic|cepic|kukl|batoh|helm|bryl)).*(snowboard\w* (bund|jacket|anorak)|(bund|jacket|anorak)\w*\W.{0,30}snowboard)'
+_SNBKAL = r'^(?!.*(bund|jacket|rukavic|kratas|short)).*(snowboard\w* (kalhot|pants)|(kalhot|pants)\w*\W.{0,30}snowboard)'
+_NAVLEKBOT = (r'^(?!.*(neck|nakrcn|(^|\W)krk|tube|rukav|rukou|nohavic|kolen|(leg|arm) ?warm|zapest|nesmek|spike)).*('
+              r'(navlek|navleky)\w*\W(na |pres )?(bot|obuv|tretr)|(^|\W)gamas|(^|\W)kamas|(^|\W)gaiters?(\W|$)|shoe ?covers?|overshoes?|turistick\w* navlek)')
+_FOTBRANKA = (r'^(?!.*(brankar|rukavic|dres|kalhot|mikin|tricko|chranic|hokej|florbal)).*((fotbal\w*|futsal\w*)\W.{0,20}bran(k|e|y)'
+              r'|bran(k\w*|y) (na|pro) (fotbal|futsal|minifotbal)|football goal|(^|\W)bran(ka|ky|ek)(\W|$))')
+_MOSKYT = r'^(?!.*(spacak|repelent|sprej|hamak|hammock)).*(moskyt|mosquito ?net|sit\w* proti (hmyz|komar))'
+_CHLTASKA = (r'^(?!.*((^|\W)box(\W|$)|autochlad|kompresor|chladnic|vlozk|nahradn)).*(chladic\w* (task|batoh|vak)|termotask|termo task'
+             r'|obedov\w* task|task\w* na (jidlo|obed|svacin)|lunch ?bag|cooler ?bag|soft ?cooler|chladic\w* batoh)')
+_HOKRUK = r'^(?!.*(brankar|lapack|vyrazeck|blokar|(^|\W)potah)).*(rukavic|gloves?(\W|$))'
+_ZUBY = r'^(?!.*(sprej|desinf|cistic|pouzdr|krabick|(^|\W)box na)).*(chranic\w* (na )?(zub|chrup)|mouth ?guard|gum ?shield|(^|\W)mouthpiece)'
+_OTUZ = (r'^(?!.*(neopren|rukavic|ponoz|(^|\W)bot[ya]?(\W|$)|teplomer|(^|\W)kryt|(^|\W)vik(o)?(\W|$)|plachta|chladic\w* jednot|filtr|cerpadl|podlozk|naparov|ohrivac)).*('
+         r'otuzov\w* (kad|vana|vanu|sud|bazen|nadob)|ice ?bath|ice ?tub|icetub|cold ?plunge|ledov\w* (lazen|kad|vana)|ochlazovac\w* (kad|kruh|vana))')
+_JOGABLOK = r'^(?!.*((^|\W)sada|(^|\W)set(\W|$)|podlozk\w* (a|\+))).*((jog\w*|yog\w*|pilates\w*) (blok|kostk|cihl|block|brick)|(blok|kostk|cihl)\w* (na|pro) (jog|yog|pilat)|yoga ?blocks?|jogablok)'
+_KOTOUC = (r'^(?!.*((^|\W)pil[ay](\W|$)|kotoucov\w* pil|brzd|rotor|cykl|disc ?brake|stojan|(^|\W)strom|(^|\W)drzak|jednoruc|kettlebel)).*(kotouc|bumper ?plates?|olympijsk\w* (talir|osa|tyc)'
+           r'|talir\w* (na|zavazi)|zavazi\w* talir|(^|\W)osa (na cink|olymp|ez|rovna|k cink)|(^|\W)ez osa|vzperack\w* tyc|tyc na kotouc|olympic bar)')
+_ZAVAZI = r'(zavazi|zatez\w*)\W(na\W)?(nohy|kotnik|zapest|ruce)|ankle ?weights?|wrist ?weights?|(^|\W)manzet\w* se zatez'
+_FERRATA = r'^(?!.*((^|\W)(mtb|kolo|bike)(\W|$)|rock ?shox|(^|\W)fox(\W|$)|kosil)).*ferrat'
+_FERRBOOT = r'^(?=.*ferrat)(?=.*((^|\W)(bot[ya]?|obuv)(\W|$)|hanwag))'   # Hanwag Ferrata II / Loap Ferrat are boots
+_SHIN_BOJ = r'(chranic\w* holen|shin ?guard).*(venum|bushido|dbx|(^|\W)mma(\W|$)|muay|thai|kickbox|leone|rdx|outshock|fairtex|twins)|(venum|bushido|dbx|(^|\W)mma(\W|$)|muay|thai|kickbox|leone|rdx|outshock|fairtex|twins).*(chranic\w* holen|shin ?guard)'
+_SHIN_SKATE = r'(chranic\w* holen|shin).*(triple eight|skate|whip|kolobez|brusl)|(triple eight|skate|kolobez|brusl).*(chranic\w* holen|shin)'
+_SHIN = r'chranic\w* holen|shin ?guard|(^|\W)stulpn'
+for _parent, _pre, _post in [
+    ('masazni-pomucky', [('akupresurni-podlozky', _AKUPRES)], []),
+    ('fitness-pomucky', [('akupresurni-podlozky', _AKUPRES), ('chodici-pasy', _CHODPAS), ('airtracky-a-zinenky', _AIRTRACK),
+                         ('otuzovaci-kade', _OTUZ), ('joga-bloky', _JOGABLOK), ('zavazi-na-kotniky', _ZAVAZI)], []),
+    ('joga-a-podlozky', [('akupresurni-podlozky', _AKUPRES), ('joga-bloky', _JOGABLOK)], []),
+    ('behaci-pasy', [('chodici-pasy', _CHODPAS)], []),
+    ('kardio-trenazery', [('chodici-pasy', _CHODPAS)], []),
+    ('posilovaci-stroje', [('chodici-pasy', _CHODPAS)], []),
+    ('funkcni-trenink', [('airtracky-a-zinenky', _AIRTRACK), ('zavazi-na-kotniky', _ZAVAZI)], []),
+    ('pilates-pomucky', [('airtracky-a-zinenky', _AIRTRACK), ('joga-bloky', _JOGABLOK)], []),
+    ('gymnasticke-pomucky', [('airtracky-a-zinenky', _AIRTRACK)], []),
+    ('zimni-bundy', [], [('snowboardove-bundy', _SNBBUNDA), ('prosivane-bundy', _PROSIV)]),   # péřové first (older rule)
+    ('sportovni-bundy-jaro-podzim', [('prosivane-bundy', _PROSIV)], []),
+    ('outdoorove-kalhoty', [('nepromokave-kalhoty', _NEPRKAL)], []),
+    ('sportovni-kalhoty', [('snowboardove-kalhoty', _SNBKAL), ('nepromokave-kalhoty', _NEPRKAL)], []),
+    ('lyzarske-bundy', [], [('snowboardove-bundy', _SNBBUNDA)]),        # after the kesi / termoprádlo vetoes
+    ('lyzarske-kalhoty', [], [('snowboardove-kalhoty', _SNBKAL)]),
+    ('doplnky-k-obuvi', [('navleky-na-boty', _NAVLEKBOT)], []),
+    ('outdoor-doplnky', [('navleky-na-boty', _NAVLEKBOT), ('otuzovaci-kade', _OTUZ)], []),
+    ('trekova-obuv', [('navleky-na-boty', _NAVLEKBOT)], []),
+    ('lyzarske-doplnky', [('navleky-na-boty', _NAVLEKBOT)], []),
+    ('cyklisticke-navleky', [('navleky-na-boty', _NAVLEKBOT)], []),
+    ('fotbal', [('chranice-bojove-sporty', _SHIN_BOJ), ('chranice-a-helmy', _SHIN_SKATE), ('fotbalove-chranice-a-stulpny', _SHIN),
+                ('fotbalove-branky', _FOTBRANKA)], []),
+    ('hygiena-a-repelenty', [('moskytiery', _MOSKYT)], []),
+    ('chladici-boxy', [('chladici-tasky', _CHLTASKA)], []),
+    ('lahve-a-termosky', [('chladici-tasky', _CHLTASKA)], []),
+    ('tasky-pres-rameno', [('chladici-tasky', _CHLTASKA)], []),
+    ('hokejove-chranice', [('hokejove-rukavice', _HOKRUK)], []),
+    ('chranice-bojove-sporty', [('chranice-zubu', _ZUBY)], []),
+    ('chranice-a-helmy', [('chranice-zubu', _ZUBY)], []),
+    ('ragby-a-americky-fotbal', [('chranice-zubu', _ZUBY)], []),
+    ('bazeny', [('otuzovaci-kade', _OTUZ)], []),
+    ('jogove-pomucky', [('joga-bloky', _JOGABLOK)], []),
+    ('boxovaci-pytle', [('joga-bloky', _JOGABLOK)], []),
+    ('cinky-a-kotouce', [('zavazi-na-kotniky', _ZAVAZI)], [('kotouce-na-cinky', _KOTOUC)]),   # stojany / jednoruční first
+    ('lezecka-lana-a-karabiny', [('zimni-obuv', r'(?=.*ferrat)(?=.*zimn\w* bot)'), ('trekova-obuv', _FERRBOOT), ('via-ferrata', _FERRATA)], []),
+    ('horolezectvi', [('zimni-obuv', r'(?=.*ferrat)(?=.*zimn\w* bot)'), ('trekova-obuv', _FERRBOOT), ('via-ferrata', _FERRATA)], []),
+    ('lezecke-sedaky-a-pomucky', [('zimni-obuv', r'(?=.*ferrat)(?=.*zimn\w* bot)'), ('trekova-obuv', _FERRBOOT), ('via-ferrata', _FERRATA)], []),
+    ('cyklo-vidlice-a-tlumice', [('zimni-obuv', r'(?=.*ferrat)(?=.*zimn\w* bot)'), ('trekova-obuv', _FERRBOOT), ('via-ferrata', _FERRATA)], []),
+    ('cyklo-brzdy', [('zimni-obuv', r'(?=.*ferrat)(?=.*zimn\w* bot)'), ('trekova-obuv', _FERRBOOT), ('via-ferrata', _FERRATA)], []),
+]:
+    REFINE.setdefault(_parent, [])[0:0] = _pre
+    REFINE[_parent].extend(_post)
 REFINE['cyklo-prislusenstvi'].append(('cyklo-stojany-a-drzaky', r'stojan|drzak\w* (na )?(kol|bicykl)|nastenn|zavesn\w* (na )?kol|zavesen\w* na kolo'))
 REFINE = {k: [(c, re.compile(r)) for c, r in v] for k, v in REFINE.items()}
 
