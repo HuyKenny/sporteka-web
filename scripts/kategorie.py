@@ -289,6 +289,30 @@ TREE = [
     (70111, 'kotouce-na-cinky', 'Kotouče a osy na činky', 'cinky-a-kotouce'),
     (70121, 'zavazi-na-kotniky', 'Závaží na kotníky a zápěstí', 'cinky-a-kotouce'),
     (30731, 'via-ferrata', 'Via ferrata: sety, lonže a rukavice', 'horolezectvi'),
+    # ---- 18. 11. 2026 November wave 7: small categories competitors earn traffic with (Ahrefs top pages + gap 100-199, content-gap-2026-11h.md) ----
+    (30732, 'karabiny', 'Karabiny', 'lezecka-lana-a-karabiny'),
+    (30733, 'horolezecka-lana', 'Horolezecká lana', 'lezecka-lana-a-karabiny'),
+    (3074, 'cepiny-a-macky', 'Cepíny a mačky', 'horolezectvi'),
+    (4101, 'tarpy', 'Tarpy a celty', 'stanove-doplnky'),
+    (3023, 'kosmeticke-tasky', 'Kosmetické a toaletní tašky', 'sportovni-tasky'),
+    (3024, 'nepromokave-vaky', 'Nepromokavé vaky a dry bagy', 'sportovni-tasky'),
+    (7023, 'posilovaci-kladky', 'Posilovací kladky', 'posilovaci-stroje'),
+    (3081, 'filtry-na-vodu', 'Filtry na vodu', 'outdoor-doplnky'),
+    (3053, 'hydrovaky', 'Hydrovaky a vaky na vodu', 'lahve-a-termosky'),
+    (3054, 'termosky-na-jidlo', 'Termosky na jídlo', 'lahve-a-termosky'),
+    (3092, 'hrudni-pasy', 'Hrudní pásy a snímače tepu', 'sportovni-hodinky'),
+    (1112, 'nepromokave-ponozky', 'Nepromokavé ponožky', 'sportovni-ponozky'),
+    (5101, 'brasny-na-kolo', 'Brašny na kolo', 'cyklo-tasky-a-nosice'),
+    (5102, 'kosiky-na-kolo', 'Košíky na kolo', 'cyklo-tasky-a-nosice'),
+    (5103, 'cyklisticke-batohy', 'Cyklistické batohy', 'cyklo-tasky-a-nosice'),
+    (180031, 'pilates-reformery', 'Pilates reformery', 'pilates-pomucky'),
+    (110032, 'suspenzory', 'Suspenzory', 'chranice-bojove-sporty'),
+    (3031, 'nordic-walking-hole', 'Nordic walking hole', 'trekove-hole'),
+    (3141, 'solarni-nabijecky', 'Solární nabíječky a panely', 'powerbanky-a-nabijeni'),
+    (7075, 'vibracni-plosiny', 'Vibrační plošiny', 'masazni-pomucky'),
+    (7064, 'zavesne-systemy-trx', 'Závěsné systémy TRX', 'funkcni-trenink'),
+    (1122, 'potitka', 'Potítka', 'cepice-a-celenky'),
+    (130031, 'petanque', 'Pétanque', 'hry-na-zahradu'),
     # ---------- fitness ----------
     (700, 'fitness', 'Fitness a posilování', None),
     (701, 'cinky-a-kotouce', 'Činky a kotouče', 'fitness'),
@@ -1646,6 +1670,72 @@ for _parent, _pre, _post in [
     ('lezecke-sedaky-a-pomucky', [('zimni-obuv', r'(?=.*ferrat)(?=.*zimn\w* bot)'), ('trekova-obuv', _FERRBOOT), ('via-ferrata', _FERRATA)], []),
     ('cyklo-vidlice-a-tlumice', [('zimni-obuv', r'(?=.*ferrat)(?=.*zimn\w* bot)'), ('trekova-obuv', _FERRBOOT), ('via-ferrata', _FERRATA)], []),
     ('cyklo-brzdy', [('zimni-obuv', r'(?=.*ferrat)(?=.*zimn\w* bot)'), ('trekova-obuv', _FERRBOOT), ('via-ferrata', _FERRATA)], []),
+]:
+    REFINE.setdefault(_parent, [])[0:0] = _pre
+    REFINE[_parent].extend(_post)
+# ---- 18. 11. 2026 November wave 7: own loop (pre = before the older rules of the parent, post = after them) ----
+_LANO = r'^(?!.*(svihad|tazn|odtah|vlek\w*|na pradlo|skakac|batt?le ?rope|posilov|(^|\W)smyck|ferrat|lonz|splhac|trenink\w* lan|triceps|bushido|(^|\W)dbx(\W|$)|kladk|(^|\W)jut)).*((^|\W)lan[oa](\W|$)|(^|\W)ropes?(\W|$)|repsnur)'
+_KARABINA = r'^(?!.*(hrnek|hrnk|(^|\W)set(\W|$)|ferrat|lonz|obratlik|swivel|eggsnap|privesek|klicenk|(^|\W)task|tastick|kolecka|reflexn)).*(karabin|carabiner)'
+_CEPIN = r'^(?!.*(pouzdr|chranic\w* (hrot|spic)|(^|\W)obal|nesmek)).*(cepin|ice ?axe|(^|\W)macky(\W|$)|stoupac\w* zelez|crampons?(\W|$))'
+_TARP = r'^(?!.*((^|\W)stan(\W|$)|kolik|(^|\W)napinak|kolobez|motork|(^|\W)auto(\W|$)|kol[ao](\W|$))).*((^|\W)tarp|(^|\W)celta|placht\w* (na|pro|nad) (kemp|stan|hamak)|hamak\w* placht|rain ?fly)'
+_KOSMET = r'^(?!.*(batoh|krem|sampon|(^|\W)gel(\W|$)|mydl)).*(toaletn\w* (task|pouzdr|tastick)|kosmetick\w* (task|pouzdr|tastick|kufrik)|neceser|wash ?bag|toiletry)'
+_DRYVAK = r'^(?!.*(spacak|(^|\W)stan(\W|$)|mobil|telefon|smartphone|phone)).*(dry ?bag|drybag|dry ?sack|vodotesn\w* (vak|pytel|batoh)|nepromokav\w* (vak|pytel)|lodni vak|vodack\w* (vak|batoh|barel|sud)|roll ?top (vak|bag))'
+_KLADKA = r'^(?!.*(cyklo|(^|\W)kol[ao](\W|$)|bike|retez|lanovk|horolez|lezec|zachran|kladkostroj|kladk\w* (na|pro) (lan|kladkostr))).*(kladk|lat ?pull|kabelov\w* (stroj|crossover)|cable ?crossover)'
+_FILTR = r'^(?!.*(kavov|(^|\W)kav[ay](\W|$)|bazen|akvari|prach|vzduch|uv filtr|objektiv|cerpadl)).*(filtr\w* (na|pro) vod|vodni filtr|lifestraw|sawyer|katadyn|filtracn\w* (lahev|lahv|brck|slamk)|tablet\w* (na|pro) (cisteni|dezinfekci|upravu) vod|grayl|befree)'
+_HYDROVAK = r'^(?!.*(batoh|(^|\W)vest[ay]?(\W|$)|ledvin)).*(hydrovak|hydratacn\w* vak|hydrapak|widepac|rezervoar|vak\w* na vodu|(^|\W)bladder|water ?reservoir|soft ?flask)'
+_TERMOJIDLO = r'^(?!.*(hrnek|hrnk|lahev|lahv|na piti|kava|uzaver|(^|\W)vick|pouzdr|nahradn|tesneni)).*(termosk\w* na (jidlo|polevk|obed)|jidelni termosk|food ?jar|food ?container|food ?flask|termo\w* (box|nadob|obedar|jidlonosic)\w* na jidlo|termoobedar|jidlonosic)'
+_HRUDNI = r'^(?!.*podprsenk).*(hrudni pas|snimac\w* (tepu|srdecn)|pulsmetr|heart ?rate (monitor|sensor|strap)|(^|\W)hrm[ -]?(pro|dual|run|fit)|polar h(9|10)(\W|$))'
+_NEPRPONOZ = r'((nepromokav|vodeodoln|waterproof)\w*\W.{0,25}(ponoz|socks?(\W|$))|(ponoz|socks?(\W|$))\w*\W?.{0,25}(nepromokav|vodeodoln|waterproof)|(dexshell|sealskinz).*(sock|ponoz))'
+_BRASNA = r'^(?!.*(batoh|kosik|stojan|kolobez|chladic|(^|\W)lahv|drzak (na )?(mobil|telefon))).*(brasn|podsedlov|(task|vak|bag)\w* (na ram|pod sedlo|na riditk|na nosic|na predstavec)|frame ?bag|saddle ?bag|handlebar ?bag|top ?tube|bikepacking|pannier|seat ?pack|cyklistick\w* task|(^|\W)zadni task|task\w* na kolo)'
+_KOSIK = r'^(?!.*(lahv|lahev|bidon|(^|\W)drzak (na )?lahv|sroub|uchyt)).*(kosik|basket)'
+_CYKLOBATOH = r'^(?!.*(ledvin|(^|\W)vak na vodu)).*((cyklo|cyklistick|bike|mtb|enduro)\w*\W.{0,15}(batoh|backpack)|(batoh|backpack)\w*\W.{0,20}(na kolo|cyklo|cyklisti|(^|\W)bike|mtb|enduro)|(^|\W)evoc|deuter (trans alpine|bike|race|attack))'
+_REFORMER = r'reformer'
+_SUSPENZOR = r'suspenzor|(^|\W)jock ?straps?(\W|$)|chranic\w* (rozkrok|genital|slabin)|groin ?(guard|protector)'
+_NORDIC = r'nordic ?walk|(^|\W)nw (hul|hol)'
+_SOLAR = r'solarn|solar ?(panel|charger|power)'
+_VIBRA = r'vibracn\w* (plosin|desk|stroj|trenaz)|vibration ?plate|vibro ?plosin|power ?plate'
+_TRX = r'^(?!.*(task|bund|park[ay]?(\W|$)|kalhot|(^|\W)bot[ya]?(\W|$)|seno|adidas|kopack|(^|\W)tf(\W|$)|vintage)).*(zavesn\w* (posilov\w* )?(system|trenaz|popruh|pas)|(^|\W)trx(\W|$)|suspension ?train|sling ?train)'
+_POTITKO = r'potitk|potni pask|sweat ?bands?(\W|$)|wrist ?bands?(\W|$)'
+_PETANQ = r'p[e]tanq|petank|petang|boccia|(^|\W)boules?(\W|$)|(^|\W)bocce'
+_VYHRIV = r'vyhrivan|heated (gloves?|socks?|vest|jacket)'
+_PREDSTAN = r'predstan|stan (k|ke|za|na) aut|autostan|markyz|zadni stan|(^|\W)awning'
+for _parent, _pre, _post in [
+    ('lezecka-lana-a-karabiny', [], [('horolezecka-lana', _LANO), ('karabiny', _KARABINA)]),   # after the ferrata rules
+    ('horolezectvi', [('cepiny-a-macky', _CEPIN)], [('horolezecka-lana', _LANO), ('karabiny', _KARABINA)]),
+    ('skialpinismus', [('cepiny-a-macky', _CEPIN)], []),
+    ('kempingove-nadobi', [], [('karabiny', r'^(?!.*(hrnek|hrnk|esus|nadob|kotlik)).*karabin')]),
+    ('stanove-doplnky', [('strechni-stany', _PREDSTAN), ('tarpy', _TARP)], []),
+    ('outdoor-doplnky', [('tarpy', _TARP), ('kosmeticke-tasky', _KOSMET), ('nepromokave-vaky', _DRYVAK), ('filtry-na-vodu', _FILTR)], []),
+    ('sportovni-tasky', [('kosmeticke-tasky', _KOSMET), ('nepromokave-vaky', _DRYVAK), ('hydrovaky', _HYDROVAK)], []),
+    ('cestovni-tasky', [('kosmeticke-tasky', _KOSMET)], []),
+    ('mestske-batohy', [('kosmeticke-tasky', _KOSMET), ('cyklisticke-batohy', _CYKLOBATOH)], []),
+    ('hygiena-a-repelenty', [('kosmeticke-tasky', _KOSMET), ('filtry-na-vodu', _FILTR)], []),
+    ('kempingove-doplnky', [('nepromokave-vaky', _DRYVAK)], []),
+    ('paddleboardy', [('nepromokave-vaky', _DRYVAK)], []),
+    ('posilovaci-stroje', [('posilovaci-kladky', _KLADKA)], []),
+    ('fitness-pomucky', [('posilovaci-kladky', _KLADKA), ('vibracni-plosiny', _VIBRA), ('zavesne-systemy-trx', _TRX)], []),
+    ('lahve-a-termosky', [('filtry-na-vodu', _FILTR), ('hydrovaky', _HYDROVAK), ('termosky-na-jidlo', _TERMOJIDLO)], []),
+    ('vareni-v-prirode', [('filtry-na-vodu', _FILTR)], []),
+    ('sportovni-hodinky', [('hrudni-pasy', _HRUDNI)], []),
+    ('cyklo-prislusenstvi', [('hrudni-pasy', _HRUDNI)], []),
+    ('sportovni-ponozky', [('vyhrivane-obleceni', _VYHRIV), ('nepromokave-ponozky', _NEPRPONOZ)], []),
+    ('cyklo-tasky-a-nosice', [('cyklisticke-batohy', _CYKLOBATOH), ('kosiky-na-kolo', _KOSIK), ('brasny-na-kolo', _BRASNA)], []),
+    ('cyklo-riditka', [('kosiky-na-kolo', _KOSIK)], []),
+    ('pilates-pomucky', [('pilates-reformery', _REFORMER)], []),
+    ('chranice-bojove-sporty', [('suspenzory', _SUSPENZOR)], []),
+    ('hokejove-chranice', [('suspenzory', _SUSPENZOR)], []),
+    ('trekove-hole', [('nordic-walking-hole', _NORDIC)], []),
+    ('powerbanky-a-nabijeni', [('solarni-nabijecky', _SOLAR)], []),
+    ('masazni-pomucky', [('vibracni-plosiny', _VIBRA)], []),
+    ('posilovaci-gumy', [('vibracni-plosiny', _VIBRA), ('zavesne-systemy-trx', _TRX)], []),
+    ('funkcni-trenink', [('zavesne-systemy-trx', _TRX)], []),
+    ('cepice-a-celenky', [('vyhrivane-obleceni', _VYHRIV), ('potitka', _POTITKO)], []),
+    ('hry-na-zahradu', [('petanque', _PETANQ)], []),
+    ('sportovni-rukavice', [('vyhrivane-obleceni', _VYHRIV)], []),
+    ('lyzarske-rukavice', [('vyhrivane-obleceni', _VYHRIV)], []),
+    ('sportovni-vesty', [('vyhrivane-obleceni', _VYHRIV)], []),
+    ('sportovni-bundy-jaro-podzim', [('vyhrivane-obleceni', _VYHRIV)], []),
+    ('zimni-bundy', [('vyhrivane-obleceni', _VYHRIV)], []),
 ]:
     REFINE.setdefault(_parent, [])[0:0] = _pre
     REFINE[_parent].extend(_post)
