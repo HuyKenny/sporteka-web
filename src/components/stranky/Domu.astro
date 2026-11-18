@@ -1,22 +1,21 @@
 ---
-// Homepage: search first (H1 + search + popular searches) with the signpost of sections, section tiles, today's biggest
+// Homepage: search first (H1 + search + popular searches) with the signpost of sections, section tiles, the 4 newest blog articles, today's biggest
 // discounts, the most compared products, brands, how the comparison works, shops, SEO text and FAQ (FAQPage).
 import Base from '../../layouts/Base.astro';
-import { GUIDES } from '../../lib/guides';
-import SEASON from '../../texts/sezona.json';
-import MODELY from '../../texts/modely.json';
-import { hasFacetText } from '../../lib/facet-texts';
+import { ARTICLES } from '../../lib/guides';
 import { isStatic } from '../../lib/server/env';
 import Ik from '../Ik.astro';
 import Sp from '../Sp.astro';
 import Karta from '../Karta.astro';
+import ClanekKarta from '../ClanekKarta.astro';
 import type { homeView } from '../../lib/views';
 import { cislo, decode } from '../../lib/format';
 import { SECTIONS, TOP } from '../../lib/ikony';
 import { shopColor, shopLogo, shopName } from '../../lib/shops';
 import { BASE, OG_HOME } from '../../lib/site';
 import { robots } from '../../lib/seo';
-const guides = Object.entries(GUIDES);
+// the four newest blog articles (Kenny 18. 11. 2026: the rest lives on /blog/, no season / model chips on the homepage)
+const articles = ARTICLES.slice(0, 4);
 
 interface Props { v: Awaited<ReturnType<typeof homeView>> }
 const { v } = Astro.props;
@@ -25,10 +24,6 @@ const description = 'Porovnejte ceny sportovního oblečení, bot, outdoorového
 const secs = SECTIONS.map((s) => ({ ...s, count: v.tree.bySlug.get(s.slug)?.count_total ?? 0 })).filter((s) => s.count > 0);
 const POPULAR: Array<[string, string]> = [['/bezecka-obuv/', 'běžecké boty'], ['/trekova-obuv/', 'trekové boty'], ['/lyzarske-bundy/', 'lyžařské bundy'], ['/termopradlo/', 'termoprádlo'],
 	['/turisticke-batohy/', 'batohy'], ['/stany/', 'stany'], ['/cinky-a-kotouce/', 'činky'], ['/plavecke-bryle/', 'plavecké brýle']];
-// January categories (src/texts/sezona.json, fast texts deploy): only those that exist, are indexable and have products
-const season = (SEASON as string[]).map((s) => v.tree.bySlug.get(s)).filter((c): c is NonNullable<typeof c> => !!c && !c.noindex && c.count_total >= 5);
-// most searched shoe / apparel models (src/texts/modely.json): only landings that have their hand-written text (= indexable)
-const models = (MODELY as Array<{ slug: string; name: string }>).filter((m) => hasFacetText(m.slug));
 const tiles = TOP.slice(0, 12).map((x) => secs.find((s) => s.slug === x)).filter((s): s is NonNullable<typeof s> => !!s);
 const popular = POPULAR.filter(([u]) => (v.tree.bySlug.get(u.slice(1, -1))?.count_total ?? 0) >= 5);
 const brands = v.home.brands.map(([id, n]) => { const b = v.brands.byId.get(id); return b ? { slug: b.slug, name: decode(b.name), n } : null; }).filter((x): x is NonNullable<typeof x> => !!x).slice(0, 18);
@@ -95,12 +90,10 @@ const graph = [
 			</ul>
 		</section>
 
-		{guides.length > 0 && (
+		{articles.length > 0 && (
 			<section class="sek" aria-labelledby="h-pv">
-				<div class="sek__h"><h2 id="h-pv"><Sp id="rozcestnik" size={36} />Průvodci na zimu a nový rok</h2></div>
-				<ul class="kt kt--pv">{guides.map(([slug, g]) => <li><a href={`/${slug}/`}><b>{g.name}</b><small>{g.seo_desc.slice(0, 90).replace(/\s\S*$/, '')}…</small></a></li>)}</ul>
-				{season.length > 0 && <><h3 class="sz__h">Nové v lednové sezóně</h3><ul class="sz">{season.map((c) => <li><a href={`/${c.slug}/`}>{decode(c.name)} <small class="num">{cislo(c.count_total)}</small></a></li>)}</ul></>}
-				{models.length > 0 && <><h3 class="sz__h">Nejhledanější modely</h3><ul class="sz">{models.map((m) => <li><a href={`/${m.slug}/`}>{m.name}</a></li>)}</ul></>}
+				<div class="sek__h"><h2 id="h-pv"><Sp id="rozcestnik" size={36} />Z blogu</h2><a href="/blog/">Všechny články</a></div>
+				<ul class="pc pc--4">{articles.map((a) => <ClanekKarta slug={a.slug} g={a.g} b={a.b} h="h3" />)}</ul>
 			</section>
 		)}
 

@@ -144,7 +144,7 @@ function only(f: ReturnType<typeof parseFilters>): string | null {
 }
 
 // ---------- seasonal guides (src/texts/pruvodce.json) ----------
-import { GUIDES, guidesFor } from './guides';
+import { BLOG, GUIDES, guidesFor } from './guides';
 
 export async function guideView(db: D1Database, slug: string) {
   const g = GUIDES[slug];
@@ -161,13 +161,15 @@ export async function guideView(db: D1Database, slug: string) {
   }));
   let faq: Array<{ q: string; a: string }> = [];
   try { faq = g.faq_json ? JSON.parse(g.faq_json) : []; } catch { /* broken JSON = no FAQ */ }
-  const crumbs: Crumb[] = [{ name: 'Domů', url: '/' }, { name: g.name, url: `/${slug}/` }];
+  const crumbs: Crumb[] = [{ name: 'Domů', url: '/' }, { name: 'Blog', url: '/blog/' }, { name: g.name, url: `/${slug}/` }];
   const all = sections.flatMap((s) => s.items);
+  const b = BLOG[slug];
+  const img = b ? BASE + b.image : undefined;
   const meta: Meta = {
-    title: g.seo_title, description: g.seo_desc, canonical: url, robots: robots(false), ogType: 'article',
+    title: g.seo_title, description: g.seo_desc, canonical: url, robots: robots(false), ogType: 'article', ogImage: img,
     graph: [
       { '@type': 'WebPage', '@id': url + '#webpage', url, name: g.seo_title, dateModified: g.updated, isPartOf: { '@id': BASE + '/#website' }, inLanguage: 'cs' },
-      { '@type': 'Article', '@id': url + '#article', headline: g.h1, description: g.seo_desc, dateModified: g.updated, author: { '@id': BASE + '/#organization' },
+      { '@type': 'Article', '@id': url + '#article', headline: g.h1, description: g.seo_desc, ...(b ? { datePublished: b.published, image: img } : {}), dateModified: g.updated, author: { '@id': BASE + '/#organization' },
         publisher: { '@id': BASE + '/#organization' }, mainEntityOfPage: { '@id': url + '#webpage' }, inLanguage: 'cs' },
       ...(faq.length ? [{ '@type': 'FAQPage', '@id': url + '#faq', mainEntity: faq.map((x) => ({ '@type': 'Question', name: stripTags(x.q), acceptedAnswer: { '@type': 'Answer', text: stripTags(x.a) } })) }] : []),
       { ...breadcrumbLd(crumbs), '@context': undefined, '@id': BASE + '/#breadcrumb' },
@@ -175,7 +177,7 @@ export async function guideView(db: D1Database, slug: string) {
     ],
     jsonLd: [],
   };
-  return { meta, g, slug, crumbs, sections, faq };
+  return { meta, g, b, slug, crumbs, sections, faq };
 }
 
 // ---------- brand ----------

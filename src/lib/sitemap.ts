@@ -52,7 +52,7 @@ export async function sitemapFile(db: D1Database, name: string): Promise<string 
   }
   if (name === 'page-sitemap') {
     const rows = await all<{ slug: string; u: string }>("SELECT slug, modified_at AS u FROM posts WHERE status = 'publish' AND noindex = 0");
-    return urlset([[`${BASE}/obchody/`, ''], [`${BASE}/slevy/`, ''], ...Object.entries(GUIDES).map(([slug, g]): [string, string] => [`${BASE}/${slug}/`, g.updated]),
+    return urlset([[`${BASE}/obchody/`, ''], [`${BASE}/slevy/`, ''], [`${BASE}/blog/`, ''], ...Object.entries(GUIDES).map(([slug, g]): [string, string] => [`${BASE}/${slug}/`, g.updated]),
       ...rows.map((r): [string, string] => [`${BASE}/${r.slug}/`, day(r.u)])]);
   }
   return null;

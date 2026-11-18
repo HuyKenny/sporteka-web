@@ -5,6 +5,7 @@ import Clanek from '../components/stranky/Clanek.astro';
 import Blog from '../components/stranky/Blog.astro';
 import Hledani from '../components/stranky/Hledani.astro';
 import Pruvodce from '../components/stranky/Pruvodce.astro';
+import Clanky from '../components/stranky/Clanky.astro';
 import Nenalezeno from '../components/stranky/Nenalezeno.astro';
 import { dispatch } from '../lib/dispatch';
 import { blogView, categoryView, facetView, guideView, postView, productView, searchView } from '../lib/views';
@@ -27,6 +28,7 @@ else if (r.kind === 'post' || r.kind === 'page') view = await postView(db, r.id)
 else if (r.kind === 'postcat') view = await blogView(db, r.page, r.id);
 else if (r.kind === 'blog') view = await blogView(db, r.page);
 else if (r.kind === 'guide') view = await guideView(db, r.slug);
+else if (r.kind === 'articles') view = true;
 else if (r.kind === 'search') view = await searchView(db, (url.searchParams.get('s') ?? '').trim().toLowerCase().slice(0, 100), r.page);
 if (!view && Astro.request.method === 'GET') {
 	const t = await deadUrlTarget(db, url.pathname);
@@ -41,3 +43,4 @@ if (!view) Astro.response.status = 404;
 {view && (r.kind === 'postcat' || r.kind === 'blog') && <Blog v={view} />}
 {view && r.kind === 'search' && <Hledani v={view} />}
 {view && r.kind === 'guide' && <Pruvodce v={view} />}
+{view && r.kind === 'articles' && <Clanky />}

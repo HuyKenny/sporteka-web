@@ -626,6 +626,7 @@ def build(env):
     facet_slugs = set()
     for ft in (APP / 'src' / 'texts' / 'fasety.json', APP / 'src' / 'texts' / 'pruvodce.json'):
         facet_slugs |= set(json.load(open(ft))) if ft.exists() else set()
+    facet_slugs.add('blog')   # /blog/ lists the guides (src/lib/dispatch.ts)
     taken_slug |= facet_slugs
     moved_for_facets = 0
 

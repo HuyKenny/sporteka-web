@@ -1,0 +1,21 @@
+---
+// Blog article card (a seasonal guide with its featured photo): /blog/ and the homepage.
+import { datum, texturize } from '../lib/format';
+import type { BlogMeta, Guide } from '../lib/guides';
+import Ik from './Ik.astro';
+interface Props { slug: string; g: Guide; b?: BlogMeta; h?: 'h2' | 'h3'; eager?: boolean }
+const { slug, g, b, h = 'h2', eager = false } = Astro.props;
+const H = h;
+const date = b?.published ?? g.updated;
+const perex = g.seo_desc.length > 150 ? g.seo_desc.slice(0, 150).replace(/\s\S*$/, '') + '…' : g.seo_desc;
+---
+<li>
+	<article class="pk2">
+		<div class="pk2__i">
+			{b ? <img src={b.image_card} srcset={`${b.image_card} 640w, ${b.image} 1200w`} sizes="(min-width: 1000px) 300px, (min-width: 640px) 50vw, 100vw" alt={b.alt} width="640" height="360" loading={eager ? 'eager' : 'lazy'} decoding="async" /> : <Ik id="foto" size={40} />}
+		</div>
+		<time datetime={date}>{datum(date)}</time>
+		<H><a href={`/${slug}/`}>{texturize(g.h1)}</a></H>
+		<p>{perex}</p>
+	</article>
+</li>

@@ -1,0 +1,28 @@
+---
+// /blog/: every seasonal guide as an article (src/texts/pruvodce.json + blog.json), newest first.
+import Base from '../../layouts/Base.astro';
+import Drobky from '../Drobky.astro';
+import ClanekKarta from '../ClanekKarta.astro';
+import { ARTICLES } from '../../lib/guides';
+import { BASE } from '../../lib/site';
+import { robots } from '../../lib/seo';
+
+const url = BASE + '/blog/';
+const title = 'Blog: průvodci nákupem sportovního vybavení | Sporteka';
+const description = 'Průvodci a rady k nákupu sportovního vybavení: domácí posilovna, běh v zimě, běžky, brusle, tabulka velikostí a další. Co vybrat a na co si dát pozor.';
+const crumbs = [{ name: 'Domů', url: '/' }, { name: 'Blog' }];
+const graph = [
+	{ '@type': 'CollectionPage', '@id': url + '#webpage', url, name: title, description, isPartOf: { '@id': BASE + '/#website' }, inLanguage: 'cs' },
+	{ '@type': 'ItemList', '@id': url + '#list', itemListElement: ARTICLES.map((a, i) => ({ '@type': 'ListItem', position: i + 1, url: `${BASE}/${a.slug}/`, name: a.g.h1 })) },
+	{ '@type': 'BreadcrumbList', '@id': BASE + '/#breadcrumb', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Domů', item: BASE + '/' }, { '@type': 'ListItem', position: 2, name: 'Blog', item: url }] },
+];
+const og = ARTICLES[0]?.b ? BASE + ARTICLES[0].b.image : undefined;
+---
+<Base title={title} description={description} canonical={url} robots={robots(false)} graph={graph} ogType="website" ogImage={og} pageType="blog">
+	<div class="w">
+		<Drobky items={crumbs} />
+		<h1>Blog: průvodci nákupem</h1>
+		<p class="intro" style="margin-bottom:22px">Než začnete porovnávat ceny, ujasněte si, co vlastně potřebujete. V průvodcích vysvětlujeme, jak vybrat vybavení na sezónu, které parametry rozhodují a čemu se vyhnout. U každého tématu najdete i nejoblíbenější produkty z porovnání.</p>
+		<ul class="pc">{ARTICLES.map((a, i) => <ClanekKarta slug={a.slug} g={a.g} b={a.b} eager={i < 3} />)}</ul>
+	</div>
+</Base>

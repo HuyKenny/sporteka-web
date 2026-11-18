@@ -14,6 +14,7 @@ export type Route =
   | { kind: 'product' | 'category' | 'facet' | 'post' | 'page' | 'postcat'; id: number; page: number }
   | { kind: 'blog'; page: number }
   | { kind: 'guide'; slug: string }
+  | { kind: 'articles' }
   | { kind: 'search'; page: number }
   | { kind: 'redirect'; to: string }
   | { kind: 'notfound' };
@@ -47,6 +48,8 @@ export async function dispatch(db: D1Database, pathname: string, sp: URLSearchPa
   if (slug !== seg[0]) return { kind: 'redirect', to: `/${encodeURIComponent(slug)}/` };
   // seasonal guides (src/texts/pruvodce.json): their slugs are reserved in the catalogue build
   if (Object.hasOwn(GUIDES, slug)) return page > 1 ? { kind: 'notfound' } : { kind: 'guide', slug };
+  // /blog/: the guides as articles (Kenny 18. 11. 2026); one page, the list is short
+  if (slug === 'blog') return page > 1 ? { kind: 'redirect', to: '/blog/' } : { kind: 'articles' };
   const r = await resolveSlug(db, slug);
   if (r) {
     if (r.kind === 'page' && slug === 'blog') return { kind: 'blog', page };

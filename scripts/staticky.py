@@ -367,6 +367,7 @@ def all_paths():
         yield f'/{slug}/', 'page'
     for slug in json.loads((APP / 'src/texts/pruvodce.json').read_text()):   # seasonal guides (src/lib/guides.ts)
         yield f'/{slug}/', 'page'
+    yield '/blog/', 'page'   # the guides as blog articles
     for (slug,) in c.execute("SELECT slug FROM products WHERE status = 'publish' AND offer_count > 0"):
         yield f'/{slug}/', 'product'
     for p in search_paths():
@@ -974,10 +975,10 @@ def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=F
             raise SystemExit('local SSR did not start (tmp-static/wrangler.log)')
         if skip_data and not texts:
             reconcile_kinds(db)   # daily: no new paths (search / filter data stay), but retired ↔ back on sale is fixed every night
-        if texts:   # a new seasonal guide (src/texts/pruvodce.json) goes live with the texts push, not a week later
+        if texts:   # a new seasonal guide (src/texts/pruvodce.json) and /blog/ go live with the texts push, not a week later
             m = shard_map(db)
             have = {p for (p,) in db.execute("SELECT path FROM files WHERE kind = 'page'")}
-            add = [f'/{g}/' for g in json.loads((APP / 'src/texts/pruvodce.json').read_text()) if f'/{g}/' not in have]
+            add = [p for p in [f'/{g}/' for g in json.loads((APP / 'src/texts/pruvodce.json').read_text())] + ['/blog/'] if p not in have]
             db.executemany('INSERT OR REPLACE INTO files (path, kind, shard) VALUES (?, ?, ?)', [(p, 'page', shard_of(p, m)) for p in add])
             db.commit()
             if add:
@@ -999,8 +1000,9 @@ def weekly(db, threads, prefix, noindex, only=None, skip_prep=False, skip_data=F
                 break
             while render(db, sh, threads=threads, changed=not texts, sync=False, kind='listing' if texts else None, first_page=texts, ignore_stamp=daily) == 'disk':
                 deploy_retry(db, sh, worker_name(sh, prefix), noindex, threads)   # frees the rendered files, then render the rest
-            if texts:   # pages (guides, static pages): a handful, rendered whole
+            if texts:   # pages (guides, /blog/, static pages) and the homepage (its 4 newest articles): a handful, rendered whole
                 render(db, sh, threads=threads, sync=False, kind='page')
+                render(db, sh, threads=threads, sync=False, kind='home')
             deploy_retry(db, sh, worker_name(sh, prefix), noindex, threads)
     finally:
         os.killpg(srv.pid, 15)
