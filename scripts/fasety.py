@@ -28,6 +28,7 @@ from pathlib import Path
 # competitors rank for and we do not (scripts/gap-harvest.py); both are {keyword, volume}
 # kw-konkurence.json (17. 11. 2026) = Ahrefs phrases behind the top category pages of sportisimo.cz / decathlon.cz that neither file had,
 # + seed 'gap31': Ahrefs content gap vs 14 shops (2+ of them in the top 10, volume >= 200)
+# + seed 'gap32': the same gap for volume 100-199 + volumes of the wave 32 category names (18. 11. 2026)
 KW_FILES = [Path(__file__).resolve().parent.parent / 'src/data/kw/kw-all.json', Path(__file__).resolve().parent.parent / 'src/data/kw/kw-gap.json',
             Path(__file__).resolve().parent.parent / 'src/data/kw/kw-konkurence.json']
 MIN_PRODUCTS = 6
@@ -76,7 +77,7 @@ ALT.update({
     'turfy': ['turfy'], 'vlozky-do-bot': ['vlozky do bot'], 'cyklisticke-kratasy-a-kalhoty': ['cyklisticke kratasy', 'cyklisticke kalhoty'],
     'cyklisticke-rukavice': ['rukavice na kolo', 'cyklisticke rukavice'], 'detske-cyklohelmy': ['detska helma na kolo', 'detska cyklisticka helma'],
     'ortezy-na-koleno': ['orteza na koleno'], 'karimatky-a-matrace': ['karimatka', 'karimatky'], 'kempingove-zidle': ['kempingova zidle', 'skladaci zidle'],
-    'celovky-a-svitilny': ['celovka', 'celovky'], 'trekove-hole': ['trekove hole', 'trekove hulky', 'nordic walking hole'], 'nesmeky': ['nesmeky', 'macky'],
+    'celovky-a-svitilny': ['celovka', 'celovky'], 'trekove-hole': ['trekove hole', 'trekove hulky'], 'nesmeky': ['nesmeky'],
     'cinky-a-kotouce': ['cinky', 'cinka'], 'boxovaci-pytle': ['boxovaci pytel'], 'joga-a-podlozky': ['podlozka na jogu', 'jogamatka', 'podlozka na cviceni'],
     'skateboardy': ['skateboard', 'longboard'], 'plavecke-cepice': ['plavecka cepice', 'koupaci cepice'], 'rucniky': ['rucnik', 'rucniky', 'osuska'],
     'masazni-valce': ['masazni valec'], 'pingpongove-stoly': ['pingpongovy stul'], 'detska-kola': ['detske kolo', 'detska kola'], 'odrazedla': ['odrazedlo'],
@@ -101,6 +102,18 @@ ALT.update({
     'lyzarske-helmy': ['lyzarske helmy', 'helma na lyze', 'prilba na lyze', 'helma na snowboard'], 'inline-brusle': ['koleckove brusle', 'inline brusle'],
     'posilovaci-gumy': ['posilovaci guma', 'guma na cviceni', 'odporova guma'], 'hrazdy-a-bradla': ['hrazda', 'hrazda na cviceni', 'hrazda do dveri'],
     'zimni-bundy': ['zimni bundy', 'zimni bunda', 'bunda zimni'],
+})
+# 18. 11. 2026 wave 32 (Ahrefs top pages of 8 shops + gap 100-199): the small categories competitors earn traffic with
+ALT.update({
+    'karabiny': ['karabina', 'karabiny'], 'horolezecka-lana': ['horolezecke lano', 'lezecke lano', 'lano na lezeni'], 'cepiny-a-macky': ['cepin', 'macky'],
+    'tarpy': ['tarp', 'celta'], 'kosmeticke-tasky': ['kosmeticka taska', 'toaletni taska'], 'nepromokave-vaky': ['nepromokavy vak', 'dry bag', 'vodacky vak'],
+    'posilovaci-kladky': ['kladka na cviceni', 'posilovaci kladka'], 'filtry-na-vodu': ['filtr na vodu', 'filtracni lahev'], 'hydrovaky': ['hydrovak', 'vak na vodu'],
+    'termosky-na-jidlo': ['termoska na jidlo'], 'hrudni-pasy': ['hrudni pas', 'snimac tepu'], 'nepromokave-ponozky': ['nepromokave ponozky'],
+    'brasny-na-kolo': ['brasna na kolo', 'brasny na kolo'], 'kosiky-na-kolo': ['kosik na kolo'], 'cyklisticke-batohy': ['cyklisticky batoh', 'batoh na kolo', 'cyklobatoh'],
+    'pilates-reformery': ['pilates reformer'], 'suspenzory': ['suspenzor'], 'nordic-walking-hole': ['nordic walking hole', 'hole na nordic walking'],
+    'solarni-nabijecky': ['solarni nabijecka', 'solarni panel'], 'vibracni-plosiny': ['vibracni plosina'], 'zavesne-systemy-trx': ['trx', 'zavesny posilovaci system'],
+    'potitka': ['potitko', 'potitka'], 'petanque': ['petanque'], 'prvni-pomoc': ['lekarnicka'], 'vyhrivane-obleceni': ['vyhrivane obleceni'],
+    'strechni-stany': ['stan k autu', 'autostan', 'stresni stan'],
 })
 
 
