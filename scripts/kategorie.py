@@ -878,6 +878,8 @@ def rules():
         ('impregnace', R(r'^survival > outdoorove obleceni > cistici prostredky'), None, None),
         ('mikiny', R(r'^survival > outdoorove obleceni > outdoor svetry'), None, None),
         ('sportovni-ponozky', R(r'^survival > outdoorove obleceni > outdoorova obuv > outdoorove ponozky'), None, None),
+        # --- 20. 11. 2026: eHub Aylla.cz (own barefoot models) and Barefootboty.cz (first shoes); Cleverhorse.cz is in TOP_RULES ---
+        ('barefoot-obuv', R(r'^nase modely > (?!.*poukaz)|^boty pro deti > capacky a prvni boty'), None, None),
         # --- 19. 11. 2026: eHub Fjallraven-shop.cz, Kilpi.cz (Heureka tree), Armyshop.cz, Doke.cz ---
         ('cyklisticke-dresy', R(r'cyklistika > obleceni a boty na kolo > cyklisticke dresy'), None, None),
         ('cyklisticke-kratasy-a-kalhoty', R(r'cyklistika > obleceni a boty na kolo > cyklisticke (kalhoty|kratasy)'), None, None),
@@ -904,6 +906,14 @@ def rules():
 # v2 rules: specific product types / sports that must beat the generic ones ("stanové kolíky" are not "stany", a protein bar
 # is not a protein). Checked first. Same tuple shape as rules().
 TOP_RULES = [
+    # 20. 11. 2026: eHub Cleverhorse.cz — its riding tree decides before title words (horse saddles are not bike saddles, a bridle's browband is not a
+    # headband, a fleece rug is not a fleece jacket); '.' puts the path-only rows into PASS_A ahead of the generic title rules
+    ('jezdecke-kalhoty', R(r'^jezdec > jezdecke rajtky'), R(r'.'), None),
+    ('jezdecka-obuv', R(r'^jezdec > jezdecke boty, chapsy|^western > western pro jezdce'), R(r'(^|\W)(bot[ay]?|obuv|perka|chaps\w*|kamase|cizm\w*)(\W|$)'), None),
+    ('jezdecke-helmy', R(r'^jezdec > helmy, bezpecnostni vesty'), R(r'prilb|helm'), None),
+    ('jezdecke-obleceni', R(r'^jezdec > (helmy, bezpecnostni vesty|trika, kosile|bundy, mikiny, vesty|jezdecke rukavice|zavodni saka, fraky|cepice, saly|podkolenky|westernove klobouky)|^western > western pro jezdce'), R(r'.'), None),
+    ('jezdecke-doplnky', R(r'^jezdec > (zavodni doplnky|bicik\w* a sporny|tasky, obaly|back on track|hobby horsing)'), R(r'.'), None),
+    ('vybaveni-pro-kone', R(r'^(kun|staj|pece o kone|zakladni vybava pro kone) > |^western > western pro kone'), R(r'.'), None),
     # v4 (2. 11.): more specific product types (Sportisimo / Decathlon category lists)
     ('rybarske-lode-a-elektronika', None, R(r'sonar|echolot|plotter|zavazec\w* (lod|lodk)|bait ?boat|lodni motor|elektromotor|trolling motor|rybarsk\w* (clun|lod)|motor (parsun|wolong|minn)|(^|\W)motor (joy|flowstar)'), None),
     ('hokejove-brankarske-vybaveni', None, R(r'brankarsk\w*.*(hokej|chranic|lapak|vyrazec|maska|betonka)|(hokej\w*|goalie).*brankarsk|lapacka|vyrazecka'), None),

@@ -18,7 +18,7 @@ import kategorie as K  # noqa: E402
 
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 3
 OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else Path('/home/kenny/ai/reports/sporteka/nezarazene-analyza.md')
-FASHION = {'Bezvasport cz/sk', 'Answear.cz', 'Spartoo.cz', 'Kokiskashop.cz', 'Allegro.cz', 'Lekarna.cz', 'Benu.cz'}
+FASHION = {'Bezvasport cz/sk', 'Answear.cz', 'Spartoo.cz', 'Kokiskashop.cz', 'Allegro.cz', 'Lekarna.cz', 'Benu.cz', 'Diesel.com'}
 STOP = set('a i na pro s se z ze do od k o u v ve the and of set sada ks cm mm kg ml g l xl xs m panske damske detske unisex pansky damsky detsky'.split())
 shops = json.load(open(APP / 'src/data/obchody.json'))['shops']
 paths = collections.defaultdict(lambda: [0, []])

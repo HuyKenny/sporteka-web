@@ -36,7 +36,8 @@ OUTDIR = APP / "data/cj"
 UA = "SportekaFeed/1.0 (+https://sporteka.cz)"
 FAILED = OUTDIR / "_failed.json"   # ids whose download failed in this run; read by feedy-kontrola.py
 failed = []
-EHUB_CLICK = "https://ehub.cz/system/scripts/click.php?a_aid={aid}&a_bid={bid}&desturl="
+AP_PARTNER = "5453"   # AffiliatePort partner id (public: part of every tracking link)
+EHUB_CLICK ="https://ehub.cz/system/scripts/click.php?a_aid={aid}&a_bid={bid}&desturl="
 
 
 def env_file(name):
@@ -362,6 +363,17 @@ def main():
             return (u, u) if "click.php" in u or "tracking." in u else (u, pre + quote(u, safe=""))
         total += run(s, s["url"], link_of)
     ap = [s for s in cfg.get("affiliateport", []) if not only or s["id"] in only]
+    # an entry with "feed_url" (the public feed of the offer's creative) is read directly: the AP API answers 403 to
+    # GitHub's datacenter IPs. Its product links are bare shop URLs, so the tracking link is built here.
+    for s in [s for s in ap if s.get("feed_url")]:
+        def link_of(u, offer=s["offer"]):
+            u = u.replace("&amp;", "&")
+            if "tracking.affiliateport.eu" in u:
+                m = re.search(r"deep_link=([^&]+)", u)
+                return (unquote(m.group(1)) if m else u, u)
+            return (u, f"https://tracking.affiliateport.eu/click?o={offer}&a={AP_PARTNER}&deep_link=" + quote(u, safe=""))
+        total += run(s, s["feed_url"], link_of)
+    ap = [s for s in ap if not s.get("feed_url")]
     if ap:
         key = env_file(".affiliateport-credentials.env")
         key = key.get("AFFILIATEPORT_API_KEY_FULL") or key.get("AFFILIATEPORT_API_KEY")

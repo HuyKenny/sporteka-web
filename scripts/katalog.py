@@ -92,7 +92,7 @@ PRICE_FLOOR = {'sportovni-obleceni': 30000, 'merino': 30000, 'sportovni-obuv': 2
 NOW = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 TODAY = NOW[:10]
 # shops that sell everything fashion: their clothing/shoes only from sport brands
-FASHION_SHOPS = {'Bezvasport cz/sk', 'Answear.cz', 'Spartoo.cz', 'Kokiskashop.cz', 'Allegro.cz', 'Lekarna.cz', 'Benu.cz'}
+FASHION_SHOPS = {'Bezvasport cz/sk', 'Answear.cz', 'Spartoo.cz', 'Kokiskashop.cz', 'Allegro.cz', 'Lekarna.cz', 'Benu.cz', 'Diesel.com'}
 RESERVED = {'znacka', 'go', 'api', 'page', 'hledat', 'a', 'img', 'robots', 'sitemap', 'o-nas', 'kontakt', 'obchody',
             'ochrana-osobnich-udaju', 'podminky-pouziti', 'jak-srovnavame', 'cookies'}
 

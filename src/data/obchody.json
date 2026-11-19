@@ -383,7 +383,7 @@
    "name": "Outdoorshops.cz",
    "domain": "outdoorshops.cz",
    "adIds": [],
-   "enabled": true,
+   "enabled": false,
    "source": "xml"
   },
   {
@@ -614,6 +614,54 @@
    "advertiserId": "eh-246e9378",
    "name": "Kilpi.cz",
    "domain": "shopkilpi.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-8b80bc8b",
+   "name": "Barefootboty.cz",
+   "domain": "barefootboty.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-45c200a9",
+   "name": "Aylla.cz",
+   "domain": "aylla.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-c7906d8f",
+   "name": "Cleverhorse.cz",
+   "domain": "cleverhorse.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-616616d0",
+   "name": "Triola.cz",
+   "domain": "triola.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-97a638ff",
+   "name": "C-store.cz",
+   "domain": "c-store.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "ap-1740",
+   "name": "Diesel.com",
+   "domain": "diesel.com",
    "adIds": [],
    "enabled": true,
    "source": "xml"
