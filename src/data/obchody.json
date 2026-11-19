@@ -577,6 +577,46 @@
    "adIds": [],
    "enabled": true,
    "source": "xml"
+  },
+  {
+   "advertiserId": "eh-ca86153e",
+   "name": "Exalted.com",
+   "domain": "exalted.com",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-425bddde",
+   "name": "Doke.cz",
+   "domain": "doke.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-d9ef0e56",
+   "name": "Fjallraven-shop.cz",
+   "domain": "fjallraven-shop.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-1db16b4e",
+   "name": "Armyshop.cz",
+   "domain": "armyshop.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "eh-246e9378",
+   "name": "Kilpi.cz",
+   "domain": "shopkilpi.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
   }
  ]
 }
