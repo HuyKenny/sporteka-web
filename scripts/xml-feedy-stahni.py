@@ -34,6 +34,8 @@ APP = Path(__file__).resolve().parent.parent
 ROOT = Path(os.environ.get("SPT_ROOT") or "/home/kenny/ai")
 OUTDIR = APP / "data/cj"
 UA = "SportekaFeed/1.0 (+https://sporteka.cz)"
+FAILED = OUTDIR / "_failed.json"   # ids whose download failed in this run; read by feedy-kontrola.py
+failed = []
 EHUB_CLICK = "https://ehub.cz/system/scripts/click.php?a_aid={aid}&a_bid={bid}&desturl="
 
 
@@ -189,6 +191,7 @@ def run(shop, url, link_of):
             time.sleep(5 * (attempt + 1))
     else:
         print(f"{shop['id']} {shop['name']}: FAILED ({last}), keeping the previous file", file=sys.stderr)
+        failed.append(shop["id"])
         return 0
     if kept == 0 or (prev and kept < prev * 0.5):
         tmp.unlink(missing_ok=True)
@@ -386,6 +389,7 @@ def main():
             continue
         total += run_td(s)
     print(f"total kept: {total}", file=sys.stderr)
+    FAILED.write_text(json.dumps(sorted(set(failed))))
 
 
 if __name__ == "__main__":
