@@ -116,7 +116,7 @@ ALT.update({
     'strechni-stany': ['stan k autu', 'autostan', 'stresni stan'],
 })
 # 19. 11. 2026 wave 33 (Sportano / Decathlon / Sportisimo / inSPORTline)
-ALT.update({'volejbalova-obuv': ['volejbalove boty', 'boty na volejbal'], 'boxerske-boty': ['boxerske boty', 'zapasnicke boty', 'boty na box']})
+ALT.update({'volejbalova-obuv': ['volejbalove boty', 'boty na volejbal'], 'boxerske-boty': ['boxerske boty', 'zapasnicke boty', 'boty na box'], 'posilovaci-kolecka': ['posilovaci kolecko', 'kolecko na cviceni']})
 
 
 

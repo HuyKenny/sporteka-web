@@ -316,6 +316,7 @@ TREE = [
     # ---- 19. 11. 2026 November wave 8: Sportano / Decathlon / Sportisimo / inSPORTline (content-gap-2026-11i.md) ----
     (216, 'volejbalova-obuv', 'Volejbalové boty', 'sportovni-obuv'),
     (217, 'boxerske-boty', 'Boxerské a zápasnické boty', 'sportovni-obuv'),
+    (7055, 'posilovaci-kolecka', 'Posilovací kolečka', 'fitness-pomucky'),
     # ---------- fitness ----------
     (700, 'fitness', 'Fitness a posilování', None),
     (701, 'cinky-a-kotouce', 'Činky a kotouče', 'fitness'),
@@ -1794,6 +1795,8 @@ _VOLEJBOTY = (r'^(?!.*(ponoz|chranic|kolen|bandaz|rukav|mic|sit(\W|$)|dres|krata
 _BOXBOTY = r'^(?!.*(rukavic|bandaz|helm|tricko|kratas|ponoz|taska)).*(boxersk\w* (boty|obuv)|zapasnick\w* (boty|obuv)|boxing shoes?|wrestling shoes?|hyperko|machomai|(^|\W)inflict|(^|\W)tawa(\W|$)|ringside.*(boty|shoe)|everlast elite)'
 for _parent, _pre, _post in [
     ('volejbal', [('volejbalova-obuv', _VOLEJBOTY)], []),
+    ('fitness-pomucky', [('posilovaci-kolecka', r'^(?!.*(kolobez|brusl|vozik|nahradn)).*(posilovac\w* kolec|kolecko na (cviceni|posilovani|bricho)|ab ?wheel|ab ?roller|bricni kolec)')], []),
+    ('funkcni-trenink', [('posilovaci-kolecka', r'posilovac\w* kolec|ab ?wheel|ab ?roller|kolecko na (cviceni|bricho)')], []),
     ('salova-obuv', [('volejbalova-obuv', _VOLEJBOTY)], []),
     ('tenisky', [('volejbalova-obuv', _VOLEJBOTY), ('boxerske-boty', _BOXBOTY)], []),
     ('treninkova-obuv', [('boxerske-boty', _BOXBOTY)], []),
