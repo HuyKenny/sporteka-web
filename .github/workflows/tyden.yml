@@ -69,6 +69,7 @@ jobs:
           SPT_CRED_SPORTEKA: ${{ secrets.SPT_CRED_SPORTEKA }}
           SPT_CRED_AFFILIATEPORT: ${{ secrets.SPT_CRED_AFFILIATEPORT }}
           SPT_FEEDY_JSON: ${{ secrets.SPT_FEEDY_JSON }}
+          SPT_FEEDY_EXTRA_JSON: ${{ secrets.SPT_FEEDY_EXTRA_JSON }}
           GSC_SA_JSON: ${{ secrets.GSC_SA_JSON }}
         run: python3 -I scripts/verify_no_secrets.py
 
@@ -107,12 +108,14 @@ jobs:
           S1: ${{ secrets.SPT_CRED_SPORTEKA }}
           S2: ${{ secrets.SPT_CRED_AFFILIATEPORT }}
           S3: ${{ secrets.SPT_FEEDY_JSON }}
+          S4: ${{ secrets.SPT_FEEDY_EXTRA_JSON }}
         run: |
           mkdir -p "$SPT_ROOT/credentials" "$SPT_ROOT/reports" data
           umask 077
           printf '%s\n' "$S1" > "$SPT_ROOT/credentials/.sporteka-credentials.env"
           printf '%s\n' "$S2" > "$SPT_ROOT/credentials/.affiliateport-credentials.env"
           printf '%s\n' "$S3" > data/feedy.json
+          if [ -n "$S4" ]; then printf '%s\n' "$S4" > data/feedy-extra.json; fi
       # each source on its own clock (10. 11. in Actions: CJ 2–3 h+, Decathlon 3 min, XML feeds 8 min, Allegro 45 min+); a source that
       # fails or runs out of time keeps its previous files (restored above) and the gate checks every shop has one
       - name: Download feeds — CJ (no new shop after 170 min; the shops left go first next time)
@@ -140,7 +143,7 @@ jobs:
         run: scripts/state.sh push feeds
       - name: Clean up credentials
         if: always()
-        run: rm -rf "$SPT_ROOT/credentials" data/feedy.json
+        run: rm -rf "$SPT_ROOT/credentials" data/feedy.json data/feedy-extra.json
 
   # Tue–Sun: only prices (Kenny 11. 11.). New / gone products, categories and the full CJ + Allegro download stay in the Monday run above.
   daily:
@@ -173,12 +176,14 @@ jobs:
           S1: ${{ secrets.SPT_CRED_SPORTEKA }}
           S2: ${{ secrets.SPT_CRED_AFFILIATEPORT }}
           S3: ${{ secrets.SPT_FEEDY_JSON }}
+          S4: ${{ secrets.SPT_FEEDY_EXTRA_JSON }}
         run: |
           mkdir -p "$SPT_ROOT/credentials" "$SPT_ROOT/reports" data
           umask 077
           printf '%s\n' "$S1" > "$SPT_ROOT/credentials/.sporteka-credentials.env"
           printf '%s\n' "$S2" > "$SPT_ROOT/credentials/.affiliateport-credentials.env"
           printf '%s\n' "$S3" > data/feedy.json
+          if [ -n "$S4" ]; then printf '%s\n' "$S4" > data/feedy-extra.json; fi
       # a failed source keeps its previous file (an older mtime), so only freshly refreshed shops are repriced
       - name: Download feeds — Decathlon
         timeout-minutes: 20
@@ -203,12 +208,12 @@ jobs:
           STATE_KEY: ${{ secrets.STATE_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          rm -f data/feedy.json
+          rm -f data/feedy.json data/feedy-extra.json
           scripts/state.sh push catalog
           scripts/state.sh push feeds
       - name: Clean up credentials
         if: always()
-        run: rm -rf "$SPT_ROOT/credentials" data/feedy.json
+        run: rm -rf "$SPT_ROOT/credentials" data/feedy.json data/feedy-extra.json
 
   # own job = own 6 h limit (10. 11.: download 3 h + build 2.3 h + update did not fit into one job)
   catalog:
@@ -246,12 +251,14 @@ jobs:
           S1: ${{ secrets.SPT_CRED_SPORTEKA }}
           S2: ${{ secrets.SPT_CRED_AFFILIATEPORT }}
           S3: ${{ secrets.SPT_FEEDY_JSON }}
+          S4: ${{ secrets.SPT_FEEDY_EXTRA_JSON }}
         run: |
           mkdir -p "$SPT_ROOT/credentials" "$SPT_ROOT/reports" data
           umask 077
           printf '%s\n' "$S1" > "$SPT_ROOT/credentials/.sporteka-credentials.env"
           printf '%s\n' "$S2" > "$SPT_ROOT/credentials/.affiliateport-credentials.env"
           printf '%s\n' "$S3" > data/feedy.json
+          if [ -n "$S4" ]; then printf '%s\n' "$S4" > data/feedy-extra.json; fi
       - name: Search Console impressions (last 90 days; the old numbers stay when Google fails)
         env:
           GSC_SA_JSON: ${{ secrets.GSC_SA_JSON }}
@@ -278,11 +285,11 @@ jobs:
           STATE_KEY: ${{ secrets.STATE_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          rm -f data/feedy.json
+          rm -f data/feedy.json data/feedy-extra.json
           scripts/state.sh push catalog
       - name: Clean up credentials
         if: always()
-        run: rm -rf "$SPT_ROOT/credentials" data/feedy.json "$RUNNER_TEMP/gsc-sa.json"
+        run: rm -rf "$SPT_ROOT/credentials" data/feedy.json data/feedy-extra.json "$RUNNER_TEMP/gsc-sa.json"
 
   web:
     needs: [scan, data, catalog, daily]
@@ -376,6 +383,7 @@ jobs:
           SPT_CRED_SPORTEKA: ${{ secrets.SPT_CRED_SPORTEKA }}
           SPT_CRED_AFFILIATEPORT: ${{ secrets.SPT_CRED_AFFILIATEPORT }}
           SPT_FEEDY_JSON: ${{ secrets.SPT_FEEDY_JSON }}
+          SPT_FEEDY_EXTRA_JSON: ${{ secrets.SPT_FEEDY_EXTRA_JSON }}
           GSC_SA_JSON: ${{ secrets.GSC_SA_JSON }}
         run: python3 -I scripts/verify_no_secrets.py --out
       - name: IndexNow

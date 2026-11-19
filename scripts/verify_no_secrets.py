@@ -50,7 +50,7 @@ def secret_values():
         for k, v in env_lines(os.environ.get(n, "")):
             if k not in PUBLIC and len(v) >= 10:
                 vals[f"{n}:{k}"] = v
-    for n in ("GSC_SA_JSON", "SPT_FEEDY_JSON"):
+    for n in ("GSC_SA_JSON", "SPT_FEEDY_JSON", "SPT_FEEDY_EXTRA_JSON"):
         raw = os.environ.get(n, "")
         if raw:
             def walk(o, k=""):

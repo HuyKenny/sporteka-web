@@ -12,6 +12,10 @@ data/feedy.json (gitignored; feed URLs of Mergado/shopycrm carry tokens):
                   credentials/.affiliateport-credentials.env (never written to disk elsewhere or logged)
                   dognet[]: {id, name, domain, url, chid}  Dognet partner feeds (Heureka / Google XML, bare product URLs);
                   link = https://go.dognet.com/?chid=<chid>&url=<urlencoded product url> (a feed link that already is a go.dognet.com link is kept)
+                  tradedoubler[]: {id, name, domain, url}  TradeDoubler product API (products.json;page=1;pageSize=..;fid=..?token=..): paged JSON, the
+                  offer's productUrl already is the tracking link (pdt.tradedoubler.com/click?...url(<product url>)), kept as is
+data/feedy-extra.json (gitignored, secret SPT_FEEDY_EXTRA_JSON in Actions): same layout, its lists are appended to data/feedy.json (an id already there is replaced);
+used for feeds added after the main secret was created (the secret cannot be read back to edit it).
 "enabled": false in a feeds[] entry skips that shop (not sport).
 A failed download keeps the previous file (same for a feed that shrank below half of the last run).
 """
@@ -71,9 +75,21 @@ def local(tag):
     return tag.rsplit("}", 1)[-1]
 
 
+_CTRL = bytes(c for c in range(32) if c not in (9, 10, 13))
+
+
+class CleanStream:
+    """File-like wrapper that drops C0 control bytes: one Exisport description holds a stray \\x06 and the whole 90 MB feed fails to parse."""
+    def __init__(self, resp):
+        self.resp = resp
+
+    def read(self, n=-1):
+        return self.resp.read(n).translate(None, _CTRL)
+
+
 def items(resp):
     """Stream (kind, dict) per product: tags without namespace, repeated tags collected into lists."""
-    for _, el in ET.iterparse(resp, events=("end",)):
+    for _, el in ET.iterparse(CleanStream(resp), events=("end",)):
         t = local(el.tag)
         if t not in ("item", "SHOPITEM", "entry"):
             continue
@@ -183,8 +199,153 @@ def run(shop, url, link_of):
     return kept
 
 
-def main():
+TD_WINDOW = 1000   # the API answers offset + pageSize <= 1000 per query, so the feed is cut into price bands of <= 1000 products
+
+
+def td_fetch(page_url, page, size, lo=None, hi=None, q=None):
+    url = re.sub(r"page=\d+", f"page={page}", page_url, count=1)
+    url = re.sub(r"pageSize=\d+", f"pageSize={size}", url, count=1)
+    if lo is not None:
+        band = f";minPrice={lo};maxPrice={hi}"
+        if q:
+            band += ";q=" + quote(q)
+        url = url.replace(";fid=", band + ";fid=", 1) if ";fid=" in url else url.replace(";pageSize=", band + ";pageSize=", 1)
+    last = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=180) as r:
+                return json.load(r)
+        except Exception as e:  # noqa: BLE001
+            last = f"{type(e).__name__}: {str(e)[:80]}"
+            time.sleep(5 * (attempt + 1))
+    raise RuntimeError(last)
+
+
+def td_bands(page_url, lo=0, hi=1_000_000):
+    """Price bands [lo, hi] (CZK, inclusive) that each hold <= TD_WINDOW products; a 1 CZK band with more keeps only its first window."""
+    total = (td_fetch(page_url, 1, 1, lo, hi).get("productHeader") or {}).get("totalHits", 0)
+    if total == 0:
+        return
+    if total <= TD_WINDOW or hi - lo <= 1:
+        yield lo, hi, total
+        return
+    mid = (lo + hi) // 2
+    yield from td_bands(page_url, lo, mid)
+    yield from td_bands(page_url, mid + 1, hi)
+
+
+# text filters (q= is an OR search over name / category) used to cut a price point that holds more than TD_WINDOW products (249, 299, 499 CZK ...)
+TD_TERMS = ["Pánské", "Pánská", "Pánský", "Dámské", "Dámská", "Dámský", "Chlapecké", "Chlapecká", "Dívčí", "Dětské", "Dětská",
+            "tričko", "polo", "kalhoty", "kraťasy", "šortky", "legíny", "mikina", "bunda", "vesta", "kabát", "boty", "ponožky", "čepice", "rukavice", "šála", "nákrčník",
+            "plavky", "podprsenka", "batoh", "taška", "ledvinka", "brýle", "XS", "S", "M", "L", "XL", "XXL", "3XL",
+            "bílé", "černé", "červené", "modré", "zelené", "šedé", "žluté", "růžové", "béžové", "hnědé", "fialové", "oranžové", "tmavě", "světle"]
+
+
+def td_pid(p):
+    o = (p.get("offers") or [{}])[0]
+    return o.get("sourceProductId") or o.get("id")
+
+
+def td_window(page_url, lo, hi, q=None):
+    """All products of one query up to the API window (pages of 500)."""
+    size, page = 500, 1
+    while (page - 1) * size < TD_WINDOW:
+        try:
+            prods = td_fetch(page_url, page, size, lo, hi, q).get("products") or []
+        except RuntimeError:
+            return
+        if not prods:
+            return
+        yield from prods
+        if len(prods) < size:
+            return
+        page += 1
+
+
+def td_records(shop, page_url):
+    """Every product of the TradeDoubler feed: price bands of <= TD_WINDOW products, a saturated price point is swept with text filters."""
+    for lo, hi, total in td_bands(page_url):
+        if total <= TD_WINDOW:
+            yield from td_window(page_url, lo, hi)
+            continue
+        seen = set()
+        for q in [None] + TD_TERMS:
+            for p in td_window(page_url, lo, hi, q):
+                pid = td_pid(p)
+                if pid not in seen:
+                    seen.add(pid)
+                    yield p
+            if len(seen) >= total:
+                break
+        print(f"  {shop['id']}: band {lo}-{hi} CZK holds {total}, got {len(seen)} ({100 * len(seen) // total} %)", file=sys.stderr)
+
+
+def run_td(shop):
+    dest = OUTDIR / f"{shop['id']}.jsonl.gz"
+    prev = sum(1 for _ in gzip.open(dest, "rt", encoding="utf-8")) if dest.exists() else 0
+    tmp = OUTDIR / f"{shop['id']}.tmp"
+    n = kept = 0
+    seen = set()
+    try:
+        with gzip.open(tmp, "wt", encoding="utf-8") as out:
+            for p in td_records(shop, shop["url"]):
+                n += 1
+                offers = p.get("offers") or []
+                if not offers:
+                    continue
+                o = offers[0]
+                if (o.get("availability") or "in stock").lower().replace("_", " ") not in ("in stock", "instock", "preorder", "backorder"):
+                    continue
+                f = {x.get("name"): x.get("value") for x in p.get("fields", [])}
+                hist = sorted(o.get("priceHistory") or [], key=lambda h: h.get("date", 0))
+                if not hist or (hist[-1].get("price") or {}).get("currency") != "CZK":
+                    continue
+                price = price_of(str(hist[-1]["price"].get("value")))[0]
+                prev_price = price_of(f.get("Prevoius_price") or f.get("Previous_price") or "")[0]
+                tracking = o.get("productUrl") or ""
+                m = re.search(r"url\((.+)\)\s*$", tracking)
+                plain = unquote(m.group(1)).split("#")[0] if m else tracking
+                pid = o.get("sourceProductId") or o.get("id")
+                title, img = (p.get("name") or "").strip(), ((p.get("productImage") or {}).get("url") or "")
+                if not (pid and title and tracking and plain and img and price > 0) or pid in seen:
+                    continue
+                seen.add(pid)
+                cats = [c.get("name", "") for c in p.get("categories", [])]
+                path = re.sub(r"\s*[>|/]\s*", " > ", cats[0]).strip() if cats else ""
+                regular, sale = (prev_price, price) if prev_price > price else (price, 0.0)
+                rec = {"g": f.get("mpn") or pid, "d": re.sub(r"<[^>]+>", " ", p.get("description") or "")[:900], "b": p.get("brand") or "", "ean": f.get("gtin", ""),
+                       "mpn": f.get("mpn", ""), "gpc": "", "imgs": [f["additional_image_link"]] if f.get("additional_image_link") else [], "col": f.get("color", ""),
+                       "size": f.get("size", ""), "sex": sex_of(path.split(" > ")[0]), "mat": "", "id": pid, "t": title, "pt": [path], "p": str(regular), "cur": "CZK",
+                       "sp": str(sale) if sale else "", "img": img, "age": "", "url": plain, "go": tracking, "upd": "", "seller": "", "ship": ""}
+                out.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                kept += 1
+    except Exception as e:  # noqa: BLE001 — network / JSON errors: keep the old file
+        tmp.unlink(missing_ok=True)
+        print(f"{shop['id']} {shop['name']}: FAILED ({str(e)[:100]}), keeping the previous file", file=sys.stderr)
+        return prev
+    if kept == 0 or (prev and kept < prev * 0.5):
+        tmp.unlink(missing_ok=True)
+        print(f"{shop['id']} {shop['name']}: {kept} of {n} (previous {prev}) — kept the previous file", file=sys.stderr)
+        return prev
+    tmp.replace(dest)
+    print(f"{shop['id']} {shop['name']}: {n} items, {kept} kept", file=sys.stderr)
+    return kept
+
+
+def load_cfg():
     cfg = json.load(open(APP / "data/feedy.json"))
+    extra = APP / "data/feedy-extra.json"
+    if extra.exists():
+        for k, lst in json.load(open(extra)).items():
+            if not isinstance(lst, list):
+                continue
+            ids = {s["id"] for s in lst}
+            cfg[k] = [s for s in cfg.get(k, []) if s["id"] not in ids] + lst
+    return cfg
+
+
+def main():
+    cfg = load_cfg()
     only = set(a for a in sys.argv[1:] if not a.startswith("-"))
     OUTDIR.mkdir(parents=True, exist_ok=True)
     total = 0
@@ -220,6 +381,10 @@ def main():
             u = u.replace("&amp;", "&")
             return (u, u) if "go.dognet.com" in u else (u, f"https://go.dognet.com/?chid={chid}&url=" + quote(u, safe=""))
         total += run(s, s["url"], link_of)
+    for s in cfg.get("tradedoubler", []):
+        if (only and s["id"] not in only) or (not only and s.get("enabled") is False):
+            continue
+        total += run_td(s)
     print(f"total kept: {total}", file=sys.stderr)
 
 

@@ -828,6 +828,28 @@ def rules():
         ('tenisky', None, R(r', (boty|volnocasova obuv|gumove boty)(,| damske| panske|$)|, boty (damske|panske)(,|$)'), None),
         ('lyzarske-doplnky', None, R(r', (chranic zad|chranic patere|paterak|lyzarske navleky|navleky)(,|$)|(^|\W)(lyzarsk|snowboard|skluzn)\w* (vosk|mast)|vosk\w* (na|pro) (lyz|snowboard)|brusny papir|hrany?.* pilnik|diamantov\w* pilnik'), None),
         ('cyklisticke-helmy', None, R(r'cyklisticka (pilba|prilba)|cyklisticka helma'), None),
+        # --- 19. 11. 2026: Exisport (Dognet) — Heureka "Módní doplňky / Obuv" paths and the "Home > Sporty" tree ---
+        ('mestske-batohy', R(r'batohy, tasky a kabelky > batohy$'), None, None),
+        ('sportovni-tasky', R(r'batohy, tasky a kabelky > (tasky|saccky|sacky na|gymbag)|tenisove tasky|taska na tenis'), None, None),
+        ('tenisky', R(r'obuv > (panske|damske|detske) boty > (panske|damske|detske) (polobotky|kotnikove boty|balerinky)'), None, None),
+        ('sjezdove-lyze', R(r'lyze s vazanim, flat lyze|zavodni lyze'), None, None),
+        ('boxerky', R(r'spodni pradlo > boxerky'), None, None),
+        ('cyklo-dily', R(r'cyklistika > nahradni dily na kola'), None, None),
+        ('sportovni-bryle', R(r'slunecni bryle > polarizacni'), None, None),
+        ('teplaky', R(r'kalhoty, leginy a kratasy > zateplene teplaky'), None, None),
+        ('mikiny', R(r'mikiny a vesty > zateplene mikiny|turisticke mikiny'), None, None),
+        ('leginy', R(r'kalhoty, leginy a kratasy > (jeggins|kompresni)'), None, None),
+        ('trekova-obuv', R(r'turisticka obuv > turisticka celokozena obuv'), None, None),
+        ('sane-a-boby', R(r'sankovani > sanky a boby|zimni radovanky > detske boby a sane'), None, None),
+        ('barefoot-obuv', R(r'sportovni moda > obuv > barefoot obuv'), None, None),
+        ('softshellove-bundy', R(r'turisticke bundy a vesty > softshellove'), None, None),
+        ('silnicni-kola', R(r'kola > silnicni kola'), None, None),
+        ('lyzarske-rukavice', R(r'lyzarske rukavice > lyzarske palcaky'), None, None),
+        ('cyklisticke-ponozky', R(r'cyklisticke ponozky a podkolenky'), None, None),
+        ('skialpove-vazani', R(r'skialp vazani'), None, None),
+        ('padel', R(r'padel > padel rakety'), None, None),
+        ('trekove-hole', R(r'trekingove hole|turisticke hole'), None, None),
+        ('pantofle-a-zabky', R(r'sandaly, flip-flopy a pantofle > pantofle'), None, None),
         ('sportovni-bundy-jaro-podzim', None, R(r', anorak(,|$)'), None),
         ('sportovni-sukne-a-saty', None, R(r', sukne( damska)?(,|$)'), None),
         ('sjezdove-lyze', None, R(r'^\S+ .+ \+ \S+ .*(gw|pr|ca|qc|ac|tcx|jrs|rsw|erc|slr)$'), None),
@@ -1776,6 +1798,7 @@ def categorize(path, title, gpc=''):
 def _categorize(path, title, gpc=''):
     """→ (slug, fashion_flag). fashion_flag = the item is a generic apparel type that needs a sport brand/sport word."""
     p, t, g = fold(path), fold(title), fold(gpc)
+    p = re.sub(r'^home > (?=sporty > )', '', p)   # Exisport's tree root is "Home > Sporty"; EXCLUDE drops the word home (home decor)
     if EXCLUDE.search(p) or EXCLUDE.search(t):
         return None, False
     b = bike_rule(p, t)

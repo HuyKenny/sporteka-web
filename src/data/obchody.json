@@ -553,6 +553,22 @@
    "adIds": [],
    "enabled": true,
    "source": "xml"
+  },
+  {
+   "advertiserId": "dn-exisport",
+   "name": "Exisport.cz",
+   "domain": "exisport.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
+  },
+  {
+   "advertiserId": "td-4fstore",
+   "name": "4F Store",
+   "domain": "4fstore.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
   }
  ]
 }
