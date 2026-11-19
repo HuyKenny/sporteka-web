@@ -569,6 +569,14 @@
    "adIds": [],
    "enabled": true,
    "source": "xml"
+  },
+  {
+   "advertiserId": "dn-bushcraftshop",
+   "name": "BUSHCRAFTshop.cz",
+   "domain": "bushcraftshop.cz",
+   "adIds": [],
+   "enabled": true,
+   "source": "xml"
   }
  ]
 }
