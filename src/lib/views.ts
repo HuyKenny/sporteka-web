@@ -15,7 +15,7 @@ import { isStatic } from './server/env';
 const STATIC_MAX_PAGES = 100;
 const capPages = (n: number) => (isStatic() ? Math.min(n, STATIC_MAX_PAGES) : n);
 import { categoryTitle, descFrom, postTitle, productTitle, rmTitle, robots, searchTitle, termTitle } from './seo';
-import { cislo, decode, stripTags } from './format';
+import { cislo, decode, esc, stripTags } from './format';
 import { validImage } from './img';
 import { productSummary } from './souhrn';
 import { shopName } from './shops';
@@ -66,6 +66,23 @@ export async function facetView(db: D1Database, id: number, page: number, sp: UR
   const merged = new URLSearchParams(fp.qs);
   for (const k of new Set([...sp.keys()])) { merged.delete(k); for (const v of sp.getAll(k)) merged.append(k, v); }
   return categoryView(db, base.id, page, merged, { fp, user: sp });
+}
+
+/** One sentence of facts above a category listing (what Heureka and Zboží show first): products, shops, price range,
+ *  the brands with most models (linked when their page is indexable), products on sale. From the nightly facet cache. */
+function catDataLine(fc: Awaited<ReturnType<typeof facets>>, brands: Awaited<ReturnType<typeof brandList>>): string {
+  if (!fc || fc.n < 10) return '';
+  const shops = fc.s.length;
+  const top = fc.b.map(([id]) => brands.byId.get(id)).filter((b): b is NonNullable<typeof b> => !!b && b.slug !== 'ostatni').slice(0, 3)
+    .map((b) => `<a href="/znacka/${b.slug}/">${esc(decode(b.name))}</a>`);
+  const list = top.length > 1 ? `${top.slice(0, -1).join(', ')} a ${top.at(-1)}` : top[0] ?? '';
+  let s = `Porovnáváme <strong>${cislo(fc.n)} produktů</strong>${shops > 1 ? ` z ${shops} obchodů` : ''}`;
+  // no range when the cheapest item is an accessory (stany: a 6 Kč tent peg next to 110 000 Kč tents)
+  if (fc.lo > 0 && fc.hi > fc.lo && fc.lo * 300 >= fc.hi) s += `, ceny od ${cislo(fc.lo)} do ${cislo(fc.hi)} Kč`;
+  s += '.';
+  if (list) s += ` Nejvíc modelů mají ${top.length > 1 ? 'značky' : 'značka'} ${list}.`;
+  if (fc.d >= 10) s += ` Ve slevě je teď ${cislo(fc.d)} produktů.`;
+  return `<p class="kg-data">${s}</p>`;
 }
 
 export async function categoryView(db: D1Database, catId: number, page: number, sp: URLSearchParams, facet?: { fp: FacetPage; user: URLSearchParams }) {
@@ -130,6 +147,7 @@ export async function categoryView(db: D1Database, catId: number, page: number, 
     meta, cat, crumbs, items, total, page, pages, base, f, qs: toQuery(fp ? parseFilters(facet!.user) : f), kids, kidsTitle, tree, fc, brands, imgs, landings, faq,
     popular: [...lands].sort((x, y) => y.volume - x.volume).slice(0, 12).map((l) => ({ slug: l.slug, h1: l.h1 })),
     guide: page === 1 && !filtered ? cat.guide_html : '',
+    dataLine: page === 1 && !filtered && !fp ? catDataLine(fc, brands) : '',
     guides: page === 1 && !filtered ? guidesFor(chain.map((c) => c.slug)) : [],
     isFiltered: filtered,
   };

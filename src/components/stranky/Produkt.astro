@@ -98,6 +98,7 @@ const updated = v.offers.reduce((m, o) => (o.updated_at > m ? o.updated_at : m),
 				<section class="souhrn" aria-labelledby="h-souhrn">
 					<h2 id="h-souhrn">Shrnutí nabídky</h2>
 					<ul class="obsah">{v.summary.map((s) => <li set:html={s} />)}</ul>
+					<p class="cl__m">Spočítáno z cen, které každý týden načítáme z obchodů (<a href="/jak-srovnavame/">jak srovnáváme</a>).</p>
 				</section>
 			)}
 			<section aria-labelledby="h-popis">

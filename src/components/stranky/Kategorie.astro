@@ -20,7 +20,7 @@ const lcp = picture(v.items[0]?.image, 240);   // the first card photo is the LC
 ---
 <Base title={m.title} description={m.description} canonical={m.canonical} prev={m.prev} next={m.next} robots={m.robots} graph={m.graph} jsonLd={m.jsonLd} shortOrg={m.shortOrg} ogType={m.ogType} pageType="category">
 	{lcp && <link slot="head" rel="preload" as="image" href={lcp.src} imagesrcset={lcp.srcset} fetchpriority="high" />}
-	<Vypis crumbs={v.crumbs} h1={name} icon={catIcon(v.cat.slug, v.tree)} introHtml={first ? v.cat.description_html : undefined} tiles={tiles} tilesTitle={v.kidsTitle}
+	<Vypis crumbs={v.crumbs} h1={name} icon={catIcon(v.cat.slug, v.tree)} introHtml={first ? (v.dataLine ?? '') + v.cat.description_html : undefined} tiles={tiles} tilesTitle={v.kidsTitle}
 		f={v.f} fc={v.fc} brands={v.brands} landings={v.landings} popular={first ? v.popular : []} items={v.items} total={v.total} page={v.page} pages={v.pages} base={v.base} qs={v.qs}
 		empty="V této kategorii teď nejsou žádné produkty.">
 		{(v.guides?.length ?? 0) > 0 && (
@@ -36,10 +36,10 @@ const lcp = picture(v.items[0]?.image, 240);   // the first card photo is the LC
 						<td class="num">{p.min_price > 0 ? 'od ' + cena(p.min_price) : '—'}</td><td><a class="btn btn--g" href={`/${p.slug}/`}>Porovnat ceny</a></td></tr>
 					); })}</tbody>
 				</table></div>
-				<p class="pozn">Ceny načítáme ze sportovních e-shopů a aktualizujeme je každý týden. Pořadí dle oblíbenosti.</p>
+				<p class="pozn">Ceny načítáme ze sportovních e-shopů a aktualizujeme je každý týden. Pořadí dle oblíbenosti (<a href="/jak-srovnavame/">jak srovnáváme</a>).</p>
 			</section>
 		)}
-		{v.guide && <section id="pruvodce" class="sek txt ah-guide" set:html={v.guide} />}
+		{v.guide && <section id="pruvodce" class="sek txt ah-guide"><Fragment set:html={v.guide} /><p class="cl__m">Průvodce píše <a href="/o-nas/">redakce Sporteka.cz</a> podle redakčních zásad; jak počítáme ceny a pořadí, popisuje <a href="/jak-srovnavame/">metodika srovnání</a>.</p></section>}
 		{v.faq.length > 0 && (
 			<section class="sek faq ah-faq">
 				<h2>Často kladené dotazy</h2>

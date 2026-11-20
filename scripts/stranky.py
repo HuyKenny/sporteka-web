@@ -15,6 +15,9 @@ PAGES = [
 <p>Výchozí řazení je podle oblíbenosti: produkty, které nabízí více obchodů a o které je větší zájem, jsou výš. Řadit můžete také podle ceny, slevy nebo novinek. Pořadí si nikdo nemůže zaplatit.</p>
 <h2>Slevy a vývoj ceny</h2>
 <p>Slevu ukazujeme jen tehdy, když ji uvádí sám obchod (původní a akční cena). U produktů sledujeme nejnižší cenu v čase, takže poznáte, jestli je aktuální cena opravdu výhodná.</p>
+<h2>Shrnutí nabídky u produktu</h2>
+<p>Nad popisem od prodejce najdete krátké shrnutí, které píšeme jen z vlastních dat: jak se nejnižší cena pohybovala za posledních 90 dní, kde se cena nachází mezi ostatními produkty stejné kategorie (srovnáváme s nejnižší cenou každého modelu v kategorii a uvádíme medián), jaký je rozdíl mezi nejlevnější a nejdražší nabídkou a které velikosti má skladem jen jeden obchod. Věta se zobrazí jen tehdy, když na ni máme data; když produkt sledujeme krátce, shrnutí je kratší.</p>
+<p>Popis produktu pod shrnutím pochází od prodejce nebo výrobce a označujeme ho jako „Popis od prodejce“. Když se název produktu a parametr (třeba barva) v podkladech obchodu liší, řídíme se názvem.</p>
 <h2>Jak vyděláváme</h2>
 <p>Když přes naše odkazy nakoupíte, obchod nám může zaplatit provizi. Cena se pro vás nemění a provize nemá vliv na to, které nabídky a v jakém pořadí ukazujeme.</p>
 <h2>Kontakt</h2>

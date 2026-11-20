@@ -17,7 +17,7 @@ const g = v.g;
 		<Drobky items={v.crumbs} />
 		<article class="cl pv">
 			<h1>{texturize(g.h1)}</h1>
-			<p class="cl__m">Sporteka.cz · aktualizováno <time datetime={g.updated}>{datum(g.updated)}</time></p>
+			<p class="cl__m"><a href="/o-nas/">Redakce Sporteka.cz</a> · aktualizováno <time datetime={g.updated}>{datum(g.updated)}</time></p>
 			{v.b && (
 				<figure class="pv__f">
 					<img src={v.b.image} srcset={`${v.b.image_card} 640w, ${v.b.image} 1200w`} sizes="(min-width: 900px) 860px, 100vw" alt={v.b.alt} width="1200" height="675" loading="eager" fetchpriority="high" decoding="async" />
