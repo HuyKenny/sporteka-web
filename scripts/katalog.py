@@ -278,6 +278,37 @@ def color_of(v):
     return ''
 
 
+def name_colors(name):
+    """Colours of the tail a product name ends with (", červená", ", černá/bílá"): the label the H1 shows. Only a short
+    comma tail counts — colour words inside a model name (Red Bull, Goldwin, sandály) are not a colour."""
+    if ',' not in name:
+        return []
+    tail = name.rsplit(',', 1)[1].strip()
+    if not tail or len(tail.split()) > 3:
+        return []
+    out = []
+    for part in re.split(r'[/+&]| a ', tail):
+        c = color_of(part)
+        if c and c not in out:
+            out.append(c)
+    return out
+
+
+def name_color(name):
+    cs = name_colors(name)
+    return cs[0] if cs else ''
+
+
+NAME_GENDER = [('Pánské', r'\b(pansk|muzsk)'), ('Dámské', r'\b(damsk|zensk)'), ('Dětské', r'\b(detsk|chlapeck|divci|junior)')]
+
+
+def name_gender(name):
+    """Pánské/Dámské/Dětské when the name says exactly one of them (the H1 must not contradict the parameter table)."""
+    f = K.fold(name)
+    hits = [lab for lab, rx in NAME_GENDER if re.search(rx, f)]
+    return hits[0] if len(hits) == 1 else ''
+
+
 GENDER_LABEL = {'muzi': 'Pánské', 'zeny': 'Dámské', 'deti': 'Dětské', 'unisex': 'Unisex'}
 
 
@@ -756,10 +787,16 @@ def build(env):
         if bid:
             bp_rows.append((bid, created, pid))
         gen = collections.Counter(g['gender'] for g in c if g['gender']).most_common(1)
-        if gen:
-            pp_rows.append((pid, 'pro', GENDER_LABEL[gen[0][0]]))
-        if lead['color']:
-            pp_rows.append((pid, 'barva', lead['color']))
+        ng = name_gender(name)
+        if gen or ng:
+            g_lab = GENDER_LABEL[gen[0][0]] if gen else ''
+            pp_rows.append((pid, 'pro', ng if ng and g_lab != 'Unisex' else g_lab))
+        # the colour the name ends with wins over the feed's colour field (Sportisimo sends the variant group's colour:
+        # "Alpine Pro OFAD …, červená" came with Barva: Černá)
+        ncs = name_colors(name)
+        shown = lead['color'] if not ncs or lead['color'] in ncs else ncs[0]
+        if shown:
+            pp_rows.append((pid, 'barva', shown))
         for sz in dict.fromkeys(x for g in c for x in g['sizes'] if V.filterable(x)):
             pp_rows.append((pid, 'velikost', sz))
         for k_, v_ in dict.fromkeys(PM.params(' '.join(K.fold(g['title']) for g in c), lead['cat'], PM.desc_text(desc))):

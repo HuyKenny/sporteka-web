@@ -2,7 +2,7 @@
 // matching the WordPress/Rank Math output. Templates only render what these return.
 import { renderNow } from './now';
 import {
-  ancestry, brandList, catImages, catTree, cardsByIds, facets, listDiscounted, listPosts, listProducts, loadBrand, loadCategory, loadPost, loadProduct,
+  ancestry, brandList, catImages, catPrices, catTree, hasCatGuide, cardsByIds, facets, listDiscounted, listPosts, listProducts, loadBrand, loadCategory, loadPost, loadProduct,
   postCat, latestPosts, relatedPosts, relatedProducts, searchProducts, siteCache,
   type Card, type Cat, type Offer, type Post, type PostCard,
 } from './db';
@@ -17,6 +17,8 @@ const capPages = (n: number) => (isStatic() ? Math.min(n, STATIC_MAX_PAGES) : n)
 import { categoryTitle, descFrom, postTitle, productTitle, rmTitle, robots, searchTitle, termTitle } from './seo';
 import { cislo, decode, stripTags } from './format';
 import { validImage } from './img';
+import { productSummary } from './souhrn';
+import { shopName } from './shops';
 
 export interface Meta {
   title: string; description: string; canonical?: string; prev?: string; next?: string; robots: string[];
@@ -271,6 +273,24 @@ export async function discountView(db: D1Database, page: number, sp: URLSearchPa
 }
 
 // ---------- product ----------
+/** Meta description from our data: shops, price range, 90-day trend, sizes in stock. */
+function productDesc(name: string, offers: Offer[], history: Array<{ day: string; min_price: number }>, now: number): string {
+  const shops = new Set(offers.map((o) => o.domain)).size;
+  const prices = offers.map((o) => o.price);
+  const min = Math.min(...prices), max = Math.max(...prices);
+  const parts = [shops > 1 ? `${shops} ${shops < 5 ? 'obchody' : 'obchodů'}, ceny ${cislo(min)}–${cislo(max)} Kč` : `cena ${cislo(min)} Kč v obchodě ${shopName(offers[0].domain)}`];
+  const from = new Date(now - 90 * 86400_000).toISOString().slice(0, 10);
+  const h = history.filter((x) => x.day >= from && x.min_price > 0);
+  if (h.length >= 2) {
+    const lo = Math.min(...h.map((x) => x.min_price)), hi = Math.max(...h.map((x) => x.min_price));
+    if (hi - lo >= hi * 0.03) parts.push(min <= lo + 0.5 ? 'nejnižší cena za 3 měsíce' : `za 3 měsíce ${cislo(lo)}–${cislo(hi)} Kč`);
+  }
+  const sizes = new Set<string>();
+  for (const o of offers) { try { for (const s of (o.sizes ? JSON.parse(o.sizes) as string[] : [])) sizes.add(s); } catch { /* none */ } }
+  if (sizes.size) parts.push(`${sizes.size} ${sizes.size === 1 ? 'velikost' : sizes.size < 5 ? 'velikosti' : 'velikostí'} skladem`);
+  return `${name}: ${parts.join(', ')}. Srovnání cen a vývoj ceny.`;
+}
+
 export async function productView(db: D1Database, id: number) {
   const [data, tree] = await Promise.all([loadProduct(db, id), catTree(db)]);
   if (!data) return null;
@@ -281,15 +301,16 @@ export async function productView(db: D1Database, id: number) {
   const primary = cats.find((c) => !c.noindex) ?? cats[0];
   const chain = primary ? ancestry(tree, primary.id) : [];
   const url = abs(`/${p.slug}/`);
-  const title = productTitle(p.name, p.seo_title);
-  // seo_desc = Rank Math description or the raw (untexturized) short description from the migration
-  const prices0 = offers.map((o) => o.price);
-  const description = descFrom(p.seo_desc, p.short_html, { title: name, clamp: true },
-    offers.length ? `${name}: ${new Set(offers.map((o) => o.domain)).size > 1 ? `porovnejte ceny v ${new Set(offers.map((o) => o.domain)).size} obchodech` : 'cena, velikosti skladem a vývoj ceny'}, ceny od ${cislo(Math.min(...prices0))} Kč.` : '');
   // without any offer the page is thin and a Product snippet without offers is invalid → noindex, no Product node
   const noindex = p.noindex === 1 || offers.length === 0;
   const inStock = offers.filter((o) => o.stock !== -1);
   const best: Offer | undefined = (inStock.length ? inStock : offers)[0];
+  // "X od 2 299 Kč" like Heureka/Zboží: the price in the title is what the searcher compares
+  const title = productTitle(p.name, p.seo_title, best?.price);
+  // seo_desc = Rank Math description or the raw (untexturized) short description from the migration
+  // the static render pins renderNow() to the 1st of the month; the price history runs to the catalogue day
+  const dataDay = [new Date(renderNow()).toISOString().slice(0, 10), history.at(-1)?.day ?? '', ...offers.map((o) => (o.updated_at || '').slice(0, 10))].sort().at(-1)!;
+  const description = descFrom(p.seo_desc, p.short_html, { title: name, clamp: true }, offers.length ? productDesc(name, offers, history, Date.parse(dataDay)) : '');
   const prices = offers.map((o) => o.price);
   const stats = { n: offers.length, shops: new Set(offers.map((o) => o.domain)).size, min: prices.length ? Math.min(...prices) : 0, max: prices.length ? Math.max(...prices) : 0 };
   const img = validImage(p.image);
@@ -297,6 +318,10 @@ export async function productView(db: D1Database, id: number) {
   const skip = new Set(['ostatni', 'nezarazene', 'uncategorized']);
   const relCats = catIds.map((cid) => tree.byId.get(cid)).filter((c): c is Cat => !!c && !skip.has(c.slug)).slice(0, 6);
   const related = await relatedProducts(db, primary?.id ?? 0, p.id, p.min_price || 0, 8, p.created_at);
+  const summary = productSummary({
+    name, offers, history, today: dataDay,
+    cat: primary && !primary.noindex ? { name: decode(primary.name), slug: primary.slug, prices: await catPrices(db, primary.id), guide: hasCatGuide(primary.slug) } : null,
+  });
   let gallery: string[] = [];
   try { gallery = p.images ? (JSON.parse(p.images) as string[]).map(validImage).filter(Boolean) : []; } catch { /* no gallery */ }
   const graph: unknown[] = [
@@ -330,7 +355,7 @@ export async function productView(db: D1Database, id: number) {
   };
   // mu-plugin C2: context line links the first category with ≥ 3 products
   const ctxCat = catIds.map((cid) => tree.byId.get(cid)).find((c): c is Cat => !!c && c.count_direct >= 3) ?? null;
-  return { meta, p, name, offers, best, stats, history, brand, primary, crumbs, relCats, related, tree, img, gallery, params, ctxCat };
+  return { meta, p, name, offers, best, stats, history, brand, primary, crumbs, relCats, related, tree, img, gallery, params, ctxCat, summary };
 }
 
 /** Split the product description at the empty Content Egg headings ("Porovnání cen …", "Vývoj ceny …"):

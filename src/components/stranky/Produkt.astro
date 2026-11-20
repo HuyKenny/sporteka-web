@@ -71,7 +71,7 @@ const updated = v.offers.reduce((m, o) => (o.updated_at > m ? o.updated_at : m),
 								</>
 							)}
 							<div class="pb__cta">
-								<a class="btn btn--l" href={bestHref('hlavni')} target="_blank" rel="nofollow sponsored" data-partner={best.domain} data-price={Math.round(best.price)}>Koupit za {cena(best.price)} v {shopName(best.domain)}<Ik id="ven" size={18} /></a>
+								<a class="btn btn--l" href={bestHref('hlavni')} target="_blank" rel="nofollow sponsored" data-partner={best.domain} data-price={Math.round(best.price)}>Koupit za {cena(best.price)} v obchodě {shopName(best.domain)}<Ik id="ven" size={18} /></a>
 								{v.stats.n > 1 && <a class="btn btn--g" href="#ceny">Porovnat všech {cislo(v.stats.n)} nabídek</a>}
 							</div>
 							<ul class="pb__d">
@@ -93,8 +93,15 @@ const updated = v.offers.reduce((m, o) => (o.updated_at > m ? o.updated_at : m),
 		)}
 
 		<div class="pd2">
+			<div>
+			{v.summary.length > 0 && (
+				<section class="souhrn" aria-labelledby="h-souhrn">
+					<h2 id="h-souhrn">Shrnutí nabídky</h2>
+					<ul class="obsah">{v.summary.map((s) => <li set:html={s} />)}</ul>
+				</section>
+			)}
 			<section aria-labelledby="h-popis">
-				<h2 id="h-popis">Popis</h2>
+				<h2 id="h-popis">{d.before.trim() || d.middle.trim() || d.after.trim() ? 'Popis od prodejce' : 'Popis'}</h2>
 				<div class="obsah">
 					<Fragment set:html={d.before} />
 					{best && <Fragment set:html={offersHeading} />}
@@ -103,6 +110,7 @@ const updated = v.offers.reduce((m, o) => (o.updated_at > m ? o.updated_at : m),
 					<Fragment set:html={d.after} />
 				</div>
 			</section>
+			</div>
 			<aside>
 				{v.history.length >= 2 && (
 					<section class="card" aria-labelledby="h-graf">

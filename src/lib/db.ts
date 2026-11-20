@@ -322,3 +322,19 @@ export async function suggestProducts(db: D1Database, query: string): Promise<Ca
   const ids = (await db.prepare('SELECT rowid AS id FROM product_fts WHERE product_fts MATCH ? ORDER BY rank LIMIT 6').bind(match).all<{ id: number }>()).results.map((r) => r.id);
   return cardsByIds(db, ids);
 }
+
+/** Sorted prices of a category's direct products (the product summary: where a price sits in its category). One query per
+ *  category per isolate — the static render keeps the isolate for the whole shard, so ~1 000 queries for 800 k pages. */
+const catPriceMemo = new Map<number, Float64Array>();
+export async function catPrices(db: D1Database, catId: number): Promise<Float64Array | null> {
+  if (!catId) return null;
+  const hit = catPriceMemo.get(catId);
+  if (hit) return hit;
+  const r = await db.prepare('SELECT min_price FROM cat_products WHERE cat_id = ? AND direct = 1 AND min_price > 0').bind(catId).all<{ min_price: number }>();
+  const a = Float64Array.from((r.results ?? []).map((x) => x.min_price)).sort();
+  if (catPriceMemo.size > 2000) catPriceMemo.clear();
+  catPriceMemo.set(catId, a);
+  return a;
+}
+/** A category has a hand-written buying guide (src/texts/kategorie.json) the product summary can link to. */
+export const hasCatGuide = (slug: string) => !!(texts as unknown as Record<string, { guide_html?: string }>)[slug]?.guide_html;

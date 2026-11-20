@@ -39,7 +39,7 @@ const lcp = picture(v.items[0]?.image, 240);   // the first card photo is the LC
 				<p class="pozn">Ceny načítáme ze sportovních e-shopů a aktualizujeme je každý týden. Pořadí dle oblíbenosti.</p>
 			</section>
 		)}
-		{v.guide && <section class="sek txt ah-guide" set:html={v.guide} />}
+		{v.guide && <section id="pruvodce" class="sek txt ah-guide" set:html={v.guide} />}
 		{v.faq.length > 0 && (
 			<section class="sek faq ah-faq">
 				<h2>Často kladené dotazy</h2>

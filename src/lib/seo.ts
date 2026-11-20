@@ -42,10 +42,13 @@ export function rmTitle(tpl: string, name: string): string {
 }
 /** Product title: the WordPress template while it fits in the SERP (≤ 65 characters), else a shorter suffix, else the
  *  name alone (audit 28. 10. 2026: 2 493 product titles were over 70 characters and got cut by Google). */
-export function productTitle(name: string, custom = ''): string {
+export function productTitle(name: string, custom = '', price = 0): string {
   if (custom) return rmVars(custom, { title: decode(name) });
   const n = decode(name);
-  for (const tpl of ['%title% – srovnání cen %sep% %sitename%', '%title% %sep% %sitename%']) {
+  // the price first (Heureka/Zboží show "X od 2 299 Kč"); plain spaces — a title is not typeset
+  const od = price > 0 ? ` od ${Math.round(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} Kč` : '';
+  const tpls = od ? [`%title%${od} %sep% %sitename%`, `%title%${od}`] : [];
+  for (const tpl of [...tpls, '%title% – srovnání cen %sep% %sitename%', '%title% %sep% %sitename%']) {
     const t = rmVars(tpl, { title: n });
     if (t.length <= 65) return t;
   }
