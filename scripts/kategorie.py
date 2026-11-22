@@ -252,6 +252,8 @@ TREE = [
     (7013, 'jednorucni-cinky', 'Jednoruční činky', 'cinky-a-kotouce'),
     (7092, 'ortezy-na-koleno', 'Ortézy a chrániče na koleno', 'bandaze-a-ortezy'),
     (7093, 'ortezy-na-kotnik', 'Ortézy a bandáže na kotník', 'bandaze-a-ortezy'),
+    (7094, 'ortezy-na-zapesti', 'Ortézy a bandáže na zápěstí', 'bandaze-a-ortezy'),
+    (7095, 'ortezy-na-loket', 'Ortézy a bandáže na loket (tenisový loket)', 'bandaze-a-ortezy'),
     (3022, 'cestovni-tasky', 'Cestovní tašky a duffle bagy', 'sportovni-tasky'),
     (1161, 'fotbalove-dresy', 'Fotbalové dresy', 'dresy'),
     (1101, 'boxerky', 'Boxerky a trenky', 'sportovni-spodni-pradlo'),
@@ -1610,6 +1612,8 @@ _ZIP = r'^(?!.*(vest|bund|kalhot|teplak|souprav)).*(na zip|full.?zip|(^|\W)fz(\W
 _KAPUCE = r'^(?!.*(vest|bund|kalhot|teplak|souprav|bez kapuc)).*(s kapuc|kapuci|hood(ie|y)?(\W|$)|hooded|(^|\W)hd(\W|$))'
 _JEDNORUC = r'^(?!.*(stojan|drzak|regal|osa|osy|kotouc|zavazi|kettlebel)).*(jednoruc|dumbbell|(hexagon|neopren|vinyl|chrom|gumov|nakladac|stavitel)\w* cink|cink\w* (hexagon|neopren|vinyl|nakladac|stavitel)|(^|\W)par cinek|(^|\W)\d+ ?x ?\d+ ?kg cink)'
 _KOLENO = r'^(?!.*(kotnik|zapest|loket|ramen|kycl|bederni|zad)).*((ortez|bandaz|navlek|chranic|stabilizator|nakolenik)\w* (na |pro )?(kolen|kolen[ou]|koleno)|kolenn\w* (ortez|bandaz|chranic|navlek)|nakolenik|knee (brace|sleeve|support|pad|guard))'
+_ZAPEST = r'^(?!.*(kolen|kotnik|loket|ramen|kycl|bederni|zad|jezd|kun|koni|rukavic|chranic\w* (na )?(inline|brusl|skate))).*((ortez|bandaz|stabilizator|navlek|fixace|opora|podpora|pas)\w* (na |pro )?zapest|zapestni (ortez|bandaz|opora|pas|chranic|pasek|steh)|wrist (brace|support|wrap|strap|guard)|bandaz\w* na vzpiran)'
+_LOKET = r'^(?!.*(kolen|kotnik|zapest|ramen|kycl|bederni|zad|skate|inline|brusl|longboard|kolobez|bmx)).*((ortez|bandaz|stabilizator|navlek|pas|epicondyl|chranic)\w* (na |pro )?(lokt|loket|loketn)|tenisov\w* loket|loketn\w* (ortez|bandaz|opora)|elbow (brace|support|sleeve|strap)|golfov\w* loket)'
 _KOTNIK = r'^(?!.*(kolen|zapest|loket)).*((ortez|bandaz|stabilizator|navlek|chranic)\w* (na |pro )?(kotnik|hlezn)|kotnikov\w* (ortez|bandaz)|ankle (brace|support|sleeve))'
 _CESTOVNI = r'^(?!.*(ledvin|pres rameno|crossbody|kosmetick|toaletn|organizer)).*(cestovn\w* (tas|vak|batoh)|duffel|duffle|weekender|travel ?bag|(^|\W)base camp duffel|kufr|na kolecka|trolley)'
 _FOTBDRES = r'^(?!.*(cykl|iihf|nhl|nba|nfl|mlb|hokej|basket|(^|\W)tas|(^|\W)vak|batoh|mic|ball|ponoz|stulp|chranic|kratas|short|bund|mikin|teplak|kalhot|cepic|saly|brankar)).*(fotbal\w* dres|dres\w* fotbal|football (jersey|shirt)|(home|away|third) (jersey|shirt|kit|dres)|(domaci|venkovni|hostujic)\w* dres|replica|(^|\W)(ac milan|ac sparta|sk slavia|real madrid|barcelona|manchester|liverpool|arsenal|chelsea|juventus|bayern|psg|inter) )'
@@ -1624,7 +1628,7 @@ for _parent, _rules in {
     'sportovni-vyziva': [('veganske-proteiny', _VEGAN)],
     'mikiny': [('mikiny-na-zip', _ZIP), ('mikiny-s-kapuci', _KAPUCE)],
     'cinky-a-kotouce': [('jednorucni-cinky', _JEDNORUC)],
-    'bandaze-a-ortezy': [('ortezy-na-kotnik', _KOTNIK), ('ortezy-na-koleno', _KOLENO)],
+    'bandaze-a-ortezy': [('ortezy-na-kotnik', _KOTNIK), ('ortezy-na-koleno', _KOLENO), ('ortezy-na-zapesti', _ZAPEST), ('ortezy-na-loket', _LOKET)],
     'chranice-a-helmy': [('ortezy-na-koleno', r'^(?=.*(kolen|knee)).*(chranic|nakolenik|pad|guard)')],
     'volejbal': [('ortezy-na-koleno', r'^(?=.*(kolen|knee)).*(chranic|nakolenik|pad|guard)')],
     'sportovni-tasky': [('cestovni-tasky', _CESTOVNI)],

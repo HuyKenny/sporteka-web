@@ -40,7 +40,16 @@ MEMBRANE = r'(?<![\d.,])(\d{1,2}) ?k(?![a-z0-9])|(?<![\d.,])(\d{1,2})[ .]?000 ?m
 
 # Features people search for (Marketing Miner, 11/2026): helmet visor, photochromic / OTG goggles, bib trousers, gloves vs mittens,
 # skin vs scale cross-country skis, quick-entry snowboard bindings, Boa lacing, thermal-underwear piece.
+# 22. 11. 2026: what Top4running / Sportisimo offer as shoe facets (carbon plate, waterproof membrane, wide toe box, zero drop); demand is small
+# (Ahrefs: 150 / 150 / 20 / 40 searches) — a filter for the visitor, not a landing page
+_SHOE_FEATURES = [
+    ('Karbonová deska', r'carbon|karbon|vaporfly|alphafly|metaspeed|adios pro|endorphin (pro|elite)|cielo x1|rocket x|sc elite|rebellion pro|fast-?r(\W|$)'),
+    ('Nepromokavé (Gore-Tex, membrána)', r'gore.?tex|(^|\W)gtx(\W|$)|waterproof|nepromok|vodotes|vodeodoln|(^|\W)wp(\W|$)|(^|\W)tex(\W|$)'),
+    ('Široká špička', r'(^|\W)(wide|extra wide|2e|4e)(\W|$)|sirok\w* (spick|stih|stopa)|sirsi'),
+    ('Zero drop', r'zero.?drop|(^|\W)altra(\W|$)'),
+]
 FEATURES = {
+    **{c: _SHOE_FEATURES for c in ('silnicni-bezecke-boty', 'trailove-boty', 'vysoke-trekove-boty', 'nizke-trekove-boty', 'treninkova-obuv')},
     'lyzarske-helmy': [('Se štítem', r'stit|visor|shield'), ('MIPS', r'mips|koroyd|wavecel'), ('Audio / Bluetooth', r'bluetooth|audio|reproduktor'), ('S brýlemi v setu', r's bryle|s bryl|\+ bryle|combo')],
     'lyzarske-bryle': [('Fotochromatické', r'fotochrom|photochrom|chromapop|transition|variotint|prizm'), ('Polarizační', r'polariz'), ('OTG (přes dioptrické brýle)', r'(^|\W)otg(\W|$)|pres dioptr|na dioptr'),
                        ('Zrcadlové', r'zrcadl|mirror|revo|iridium'), ('S výměnným sklem', r'vymenn|2 skl|dvoje skl|\+ nahradni'),
@@ -243,6 +252,28 @@ MODELS = [
     ('On Cloudmonster', 'sportovni-obuv', '', r'cloudmonster'),
     ('Hoka Clifton', 'sportovni-obuv', r'hoka', r'clifton'),
     ('Nike Tech Fleece', 'sportovni-obleceni', '', r'tech ?fleece'),
+    # 22. 11. 2026 wave 34 (Ahrefs gap vs Sportvision / Top4running: reports/sporteka/gap/ahrefs-gap-2026-11-22.md)
+    ('Nike Air Max 90', 'tenisky', '', r'air ?max ?90'),
+    ('Nike Air Max 95', 'tenisky', '', r'air ?max ?95'),
+    ('Nike Air Max Plus', 'tenisky', '', r'air ?max ?(plus|tn)(\W|$)'),
+    ('Nike Air Max 97', 'tenisky', '', r'air ?max ?97'),
+    ('Nike Air Max 1', 'tenisky', '', r'air ?max ?1(\W|$)'),
+    ('Nike P-6000', 'tenisky', '', r'(^|\W)p.?6000'),
+    ('Nike V2K Run', 'tenisky', '', r'(^|\W)v2k'),
+    ('Adidas Campus 00s', 'tenisky', r'adidas', r'campus ?00s'),
+    ('New Balance 740', 'tenisky', r'new balance|(^|\W)nb(\W|$)', r'(^|\W)[mwu]?740'),
+    ('New Balance 990', 'tenisky', r'new balance|(^|\W)nb(\W|$)', r'(^|\W)[mwu]?990'),
+    ('Adidas Adizero Evo SL', 'sportovni-obuv', '', r'evo ?sl(\W|$)'),
+    ('Nike Metcon', 'sportovni-obuv', '', r'metcon'),
+    ('Nike Pegasus Trail', 'sportovni-obuv', r'nike', r'pegasus.?trail'),
+    ('Hoka Speedgoat', 'sportovni-obuv', r'hoka', r'speedgoat'),
+    ('Hoka Bondi', 'sportovni-obuv', r'hoka', r'(^|\W)bondi'),
+    ('Hoka Challenger', 'sportovni-obuv', r'hoka', r'challenger'),
+    ('Asics Gel-Nimbus', 'sportovni-obuv', r'asics', r'nimbus'),
+    ('Asics Novablast', 'sportovni-obuv', r'asics', r'novablast'),
+    ('Altra Olympus', 'sportovni-obuv', r'altra', r'olympus'),
+    ('Brooks Ghost', 'sportovni-obuv', r'brooks', r'ghost'),
+    ('Salomon XA Pro 3D', 'sportovni-obuv', r'salomon', r'xa.?pro'),
 ]
 _MODELS = [(n, base, re.compile(b) if b else None, re.compile(m)) for n, base, b, m in MODELS]
 
