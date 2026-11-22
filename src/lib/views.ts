@@ -120,7 +120,9 @@ export async function categoryView(db: D1Database, catId: number, page: number, 
   kids = kids.sort((a, b) => b.count_total - a.count_total);
   const base = fp ? `/${fp.slug}/` : `/${cat.slug}/`;
   const url = abs(pagePath(base, page));
-  const title = categoryTitle(cat.name, cat.seo_title, page, fp || (fc?.lo ?? 0) < 100 ? 0 : fc!.lo);
+  const lowest = fp || (fc?.lo ?? 0) < 100 ? 0 : fc!.lo;
+  const count = fp ? fp.total : cat.count_total;
+  const title = categoryTitle(cat.name, cat.seo_title, page, lowest, count);
   const crumbs: Crumb[] = [{ name: 'Domů', url: '/' }, ...chain.map((c) => ({ name: decode(c.name), url: `/${c.slug}/` })), ...(fp ? [{ name: fp.h1, url: base }] : [])];
   // robots as on WordPress (live snapshot at the migration: thin categories outside the priority list are noindex),
   // plus an emptied category
@@ -128,7 +130,7 @@ export async function categoryView(db: D1Database, catId: number, page: number, 
   let faq: Array<{ q: string; a: string }> = [];
   try { faq = page === 1 && cat.faq_json ? JSON.parse(cat.faq_json) : []; } catch { /* broken JSON = no FAQ */ }
   const meta: Meta = {
-    title, description: descFrom(cat.seo_desc, cat.description_html, { term: decode(cat.name), clamp: true },
+    title, description: descFrom(cat.seo_desc, cat.description_html, { term: decode(cat.name), clamp: true, n: count, from: lowest },
       fc?.n ? `Porovnejte ceny ${cislo(fc.n)} produktů z kategorie ${decode(cat.name)} v ${fc.s.length} ověřených e-shopech.${fc.lo ? ` Ceny od ${cislo(fc.lo)} Kč, velikosti skladem a filtry podle značky.` : ''}` : '', page),
     // filtered / re-sorted listings: noindex, follow and no canonical (the indexable listing is the plain URL)
     ...(noindex || filtered ? {} : { canonical: url }), robots: filtered ? ['noindex', 'follow'] : robots(noindex, cat.seo_robots),

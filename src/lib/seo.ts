@@ -8,7 +8,7 @@ import { decode, stripTags } from './format';
 const SEP = '|';
 const SITE = 'Sporteka';
 
-export interface Vars { title?: string; term?: string; excerpt?: string; page?: number; pages?: number; /** cut a long custom text (product excerpts) */ clamp?: boolean }
+export interface Vars { title?: string; term?: string; excerpt?: string; page?: number; pages?: number; /** products in the listing (%pocet%) */ n?: number; /** cheapest price (%od%) */ from?: number; /** cut a long custom text (product excerpts) */ clamp?: boolean }
 
 function pageSuffix(page = 1, pages = 1): string {
   return page > 1 ? ` - Stránka ${page} z ${pages}` : '';
@@ -25,6 +25,9 @@ function rmVars(tpl: string, v: Vars): string {
     .replace(/%sitename%/g, SITE)
     .replace(/%sep%/g, SEP)
     .replace(/%currentyear%/g, year)
+    // "73 produktů" / "od 1 899 Kč": what Heureka and the specialist shops put into the title; dropped when the number is unknown
+    .replace(/%pocet%/g, v.n && v.n > 0 ? `${v.n} ${v.n === 1 ? 'produkt' : v.n < 5 ? 'produkty' : 'produktů'}` : '')
+    .replace(/%od%/g, v.from && v.from >= 100 ? `od ${String(Math.round(v.from)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0')}\u00a0Kč` : '')
     .replace(/%page%/g, pageSuffix(v.page, v.pages))
     .replace(/%[a-z_]+%/g, '')
     .replace(/\s{2,}/g, ' ')
@@ -56,9 +59,9 @@ export function productTitle(name: string, custom = '', price = 0): string {
 }
 /** Category title: the stored one (WordPress snapshot) when present, else keyword first with the lowest price while it fits in
  *  the SERP (≤ 60 characters), else the shorter forms. */
-export function categoryTitle(name: string, custom: string, page = 1, lowest = 0): string {
+export function categoryTitle(name: string, custom: string, page = 1, lowest = 0, n = 0): string {
   const term = decode(name);
-  if (custom) return paged(rmVars(custom, { term }), page);
+  if (custom) return paged(rmVars(custom, { term, n, from: lowest }), page);
   const forms = [...(lowest > 0 ? ['%term% – srovnání cen od ' + String(lowest).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + '\u00a0Kč %sep% %sitename%'] : []),
     '%term% – srovnání cen a výběr %sep% %sitename%', '%term% – srovnání cen %sep% %sitename%', '%term% %sep% %sitename%'];
   let t = '';
