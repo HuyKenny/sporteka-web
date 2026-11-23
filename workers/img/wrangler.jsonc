@@ -3,7 +3,7 @@
   // Product photo thumbnails (src/index.ts): fetch the shop's photo, resize in WASM, WebP. Stateless, no bindings, nothing stored —
   // only the edge cache and the browser keep the result. The route sporteka.cz/img/* is more specific than the web Worker's.
   "name": "sporteka-img",
-  "main": "./src/index.ts",
+  "main": "./src/r2only.ts",  // Workers Free 23. 11. 2026: R2 or original photo, no WASM (rollback: ./src/index.ts)
   "compatibility_date": "2026-10-01",
   "workers_dev": false,
   "preview_urls": false,
