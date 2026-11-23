@@ -7,7 +7,7 @@
   "compatibility_date": "2026-10-01",
   "workers_dev": false,
   "preview_urls": false,
-  "limits": { "cpu_ms": 10000 },
+  // no "limits.cpu_ms": configurable CPU limits are a Workers Paid feature; on Free every invocation gets 10 ms (r2only.ts needs ~2-6)
   "rules": [{ "type": "CompiledWasm", "globs": ["**/*.wasm"], "fallthrough": true }],
   // secret IMG_SECRET (same value as on the web Worker; scripts/deploy.ts --img sets both)
   // thumbnails computed once, kept 180 days (bucket lifecycle) — Kenny 3. 11.: no repeated CPU for the same image
